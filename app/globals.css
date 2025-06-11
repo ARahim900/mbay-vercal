@@ -25,15 +25,98 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
 
-    /* Custom variables */
-    --primary-custom: #4e4456;
-    --primary-light: #7e708a;
-    --primary-dark: #3b3241;
-    --accent-custom: #6a5acd;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --info: #3b82f6;
-    --error: #ef4444;
+    /* ============================== */
+    /* MUSCAT BAY CUSTOM COLOR SYSTEM */
+    /* ============================== */
+    
+    /* Primary Brand Colors */
+    --muscat-primary: #4E4456;
+    --muscat-primary-light: #7E708A;
+    --muscat-primary-dark: #3B3241;
+    --muscat-primary-50: #F8F7F8;
+    --muscat-primary-100: #F1EEF2;
+    --muscat-primary-200: #E3DCE5;
+    --muscat-primary-300: #D5CAD8;
+    --muscat-primary-400: #B69BB5;
+    --muscat-primary-500: #4E4456;
+    --muscat-primary-600: #463D4D;
+    --muscat-primary-700: #3B3241;
+    --muscat-primary-800: #302833;
+    --muscat-primary-900: #251E26;
+
+    /* Secondary Colors (Teal) */
+    --muscat-secondary: #A8D5E3;
+    --muscat-secondary-light: #C3FBF4;
+    --muscat-secondary-dark: #7BB3C7;
+    --muscat-secondary-50: #F0F9FB;
+    --muscat-secondary-100: #E1F3F7;
+    --muscat-secondary-200: #C3E7EF;
+    --muscat-secondary-300: #A8D5E3;
+    --muscat-secondary-400: #7BB3C7;
+    --muscat-secondary-500: #5491AB;
+    --muscat-secondary-600: #3D6F8F;
+    --muscat-secondary-700: #2A4D73;
+    --muscat-secondary-800: #1A2B57;
+    --muscat-secondary-900: #0D093B;
+
+    /* Accent Colors (Gold) */
+    --muscat-accent: #BFA181;
+    --muscat-accent-light: #F2F0EA;
+    --muscat-accent-dark: #A68B5B;
+    --muscat-accent-50: #FDFCFA;
+    --muscat-accent-100: #F9F7F2;
+    --muscat-accent-200: #F2F0EA;
+    --muscat-accent-300: #E5E0D5;
+    --muscat-accent-400: #D1C7B0;
+    --muscat-accent-500: #BFA181;
+    --muscat-accent-600: #A68B5B;
+    --muscat-accent-700: #8D7540;
+    --muscat-accent-800: #745F28;
+    --muscat-accent-900: #5B4913;
+
+    /* Status Colors */
+    --muscat-success: #10B981;
+    --muscat-success-light: #6EE7B7;
+    --muscat-success-dark: #047857;
+    --muscat-warning: #F59E0B;
+    --muscat-warning-light: #FCD34D;
+    --muscat-warning-dark: #D97706;
+    --muscat-info: #0A1828;
+    --muscat-info-light: #3B82F6;
+    --muscat-info-dark: #1E40AF;
+    --muscat-error: #EF4444;
+    --muscat-error-light: #F87171;
+    --muscat-error-dark: #DC2626;
+
+    /* Extended Brand Colors */
+    --muscat-logo-purple: #5f5168;
+    --muscat-logo-teal: #A8D5E3;
+    --muscat-logo-gold: #BFA181;
+    --muscat-logo-cream: #F2F0EA;
+    --muscat-logo-navy: #0A1828;
+    --muscat-logo-white: #ffffff;
+
+    /* Chart Colors */
+    --chart-color-1: #4E4456;
+    --chart-color-2: #A8D5E3;
+    --chart-color-3: #BFA181;
+    --chart-color-4: #0A1828;
+    --chart-color-5: #5f5168;
+    --chart-color-6: #C3FBF4;
+    --chart-color-7: #F2F0EA;
+    --chart-color-8: #10B981;
+    --chart-color-9: #EF4444;
+    --chart-color-10: #6A5ACD;
+
+    /* Legacy compatibility */
+    --primary-custom: var(--muscat-primary);
+    --primary-light: var(--muscat-primary-light);
+    --primary-dark: var(--muscat-primary-dark);
+    --accent-custom: var(--muscat-accent);
+    --success: var(--muscat-success);
+    --warning: var(--muscat-warning);
+    --info: var(--muscat-info);
+    --error: var(--muscat-error);
   }
 
   .dark {
@@ -56,6 +139,11 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    /* Dark mode Muscat Bay adjustments */
+    --muscat-primary: #7E708A;
+    --muscat-primary-light: #B69BB5;
+    --muscat-primary-dark: #4E4456;
   }
 
   * {
@@ -65,10 +153,17 @@
   body {
     @apply bg-slate-50 dark:bg-slate-900 text-foreground transition-colors duration-300;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   }
 
+  /* Enhanced selection styles with Muscat Bay colors */
   ::selection {
-    background-color: var(--primary-light);
+    background-color: var(--muscat-primary-light);
+    color: white;
+  }
+
+  ::-moz-selection {
+    background-color: var(--muscat-primary-light);
     color: white;
   }
 
@@ -77,7 +172,7 @@
     scroll-behavior: smooth;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar with Muscat Bay styling */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -89,55 +184,150 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--primary-light);
+    background: var(--muscat-primary-light);
     border-radius: 4px;
+    transition: background-color 0.2s ease;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-custom);
+    background: var(--muscat-primary);
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    outline: 2px solid var(--muscat-primary);
+    outline-offset: 2px;
   }
 }
 
 @layer components {
-  .sidebar-transition {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* ============================== */
+  /* MUSCAT BAY COMPONENT STYLES */
+  /* ============================== */
+
+  .muscat-card {
+    @apply bg-white dark:bg-slate-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-100 dark:border-slate-700;
   }
 
-  .card-hover {
-    @apply hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1;
+  .muscat-button-primary {
+    background: linear-gradient(135deg, var(--muscat-primary) 0%, var(--muscat-primary-dark) 100%);
+    @apply text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 border-0;
   }
 
-  .button-primary {
-    background: linear-gradient(135deg, var(--primary-custom) 0%, var(--primary-dark) 100%);
-    @apply text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105;
+  .muscat-button-primary:hover {
+    background: linear-gradient(135deg, var(--muscat-primary-dark) 0%, var(--muscat-primary) 100%);
+    @apply shadow-2xl;
   }
 
-  .button-primary:hover {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-custom) 100%);
-  }
-
-  .button-primary:active {
+  .muscat-button-primary:active {
     @apply scale-95;
   }
 
-  /* Glass morphism effect */
-  .glass {
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+  .muscat-button-secondary {
+    background: linear-gradient(135deg, var(--muscat-secondary) 0%, var(--muscat-secondary-dark) 100%);
+    @apply text-slate-800 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105;
   }
 
-  /* Gradient text */
-  .gradient-text {
-    background: linear-gradient(135deg, var(--primary-custom) 0%, var(--accent-custom) 100%);
+  .muscat-button-accent {
+    background: linear-gradient(135deg, var(--muscat-accent) 0%, var(--muscat-accent-dark) 100%);
+    @apply text-slate-800 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105;
+  }
+
+  .muscat-input {
+    @apply border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg px-4 py-2.5 transition-all duration-200 outline-none;
+    border-color: rgb(203 213 225);
+  }
+
+  .muscat-input:focus {
+    border-color: var(--muscat-primary-light);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--muscat-primary-light) 30%, transparent);
+  }
+
+  .muscat-badge-primary {
+    background-color: var(--muscat-primary-100);
+    color: var(--muscat-primary-800);
+    border-color: var(--muscat-primary-200);
+    @apply px-2 py-1 rounded-full text-xs font-medium border;
+  }
+
+  .muscat-badge-secondary {
+    background-color: var(--muscat-secondary-100);
+    color: var(--muscat-secondary-800);
+    border-color: var(--muscat-secondary-200);
+    @apply px-2 py-1 rounded-full text-xs font-medium border;
+  }
+
+  .muscat-badge-success {
+    background-color: color-mix(in srgb, var(--muscat-success) 10%, white);
+    color: var(--muscat-success-dark);
+    border-color: color-mix(in srgb, var(--muscat-success) 20%, white);
+    @apply px-2 py-1 rounded-full text-xs font-medium border;
+  }
+
+  .muscat-badge-warning {
+    background-color: color-mix(in srgb, var(--muscat-warning) 10%, white);
+    color: var(--muscat-warning-dark);
+    border-color: color-mix(in srgb, var(--muscat-warning) 20%, white);
+    @apply px-2 py-1 rounded-full text-xs font-medium border;
+  }
+
+  .muscat-badge-error {
+    background-color: color-mix(in srgb, var(--muscat-error) 10%, white);
+    color: var(--muscat-error-dark);
+    border-color: color-mix(in srgb, var(--muscat-error) 20%, white);
+    @apply px-2 py-1 rounded-full text-xs font-medium border;
+  }
+
+  /* Glass morphism effect with Muscat Bay colors */
+  .muscat-glass {
+    background: color-mix(in srgb, var(--muscat-primary) 5%, rgba(255, 255, 255, 0.25));
+    backdrop-filter: blur(10px);
+    border: 1px solid color-mix(in srgb, var(--muscat-primary) 10%, rgba(255, 255, 255, 0.18));
+  }
+
+  /* Gradient text with Muscat Bay colors */
+  .muscat-gradient-text {
+    background: linear-gradient(135deg, var(--muscat-primary) 0%, var(--muscat-accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Loading animation */
-  .loading-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  /* Enhanced table styles */
+  .muscat-table {
+    @apply w-full text-sm;
+  }
+
+  .muscat-table th {
+    @apply text-left p-3 font-semibold text-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-slate-300;
+  }
+
+  .muscat-table td {
+    @apply p-3 border-b border-slate-100 dark:border-slate-700;
+  }
+
+  .muscat-table tr:hover {
+    background-color: color-mix(in srgb, var(--muscat-primary) 3%, white);
+    @apply transition-colors duration-200;
+  }
+
+  /* Sidebar transition */
+  .sidebar-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Loading animations */
+  .muscat-loading-pulse {
+    animation: muscatPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes muscatPulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 
   /* Chart animations */
@@ -156,61 +346,113 @@
     }
   }
 
-  /* Table hover effects */
-  .table-row-hover {
-    @apply hover:bg-slate-50 hover:shadow-sm transition-all duration-200;
+  /* Notification badge with Muscat Bay styling */
+  .muscat-notification-badge {
+    background: linear-gradient(135deg, var(--muscat-error) 0%, var(--muscat-error-dark) 100%);
+    @apply absolute -top-1 -right-1 w-5 h-5 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg;
   }
 
   /* Status indicators */
   .status-active {
-    @apply bg-green-100 text-green-800 border border-green-200;
+    background-color: color-mix(in srgb, var(--muscat-success) 10%, white);
+    color: var(--muscat-success-dark);
+    border-color: color-mix(in srgb, var(--muscat-success) 20%, white);
+    @apply border px-2 py-1 rounded-full text-xs font-medium;
   }
 
   .status-inactive {
-    @apply bg-red-100 text-red-800 border border-red-200;
+    background-color: color-mix(in srgb, var(--muscat-error) 10%, white);
+    color: var(--muscat-error-dark);
+    border-color: color-mix(in srgb, var(--muscat-error) 20%, white);
+    @apply border px-2 py-1 rounded-full text-xs font-medium;
   }
 
   .status-warning {
-    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
-  }
-
-  /* Modern input styling */
-  .modern-input {
-    @apply border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg px-4 py-2.5 focus:border-primary-light dark:focus:border-primary-light focus:ring-2 focus:ring-primary-light/30 dark:focus:ring-primary-light/40 transition-all duration-200 outline-none;
+    background-color: color-mix(in srgb, var(--muscat-warning) 10%, white);
+    color: var(--muscat-warning-dark);
+    border-color: color-mix(in srgb, var(--muscat-warning) 20%, white);
+    @apply border px-2 py-1 rounded-full text-xs font-medium;
   }
 
   /* Floating action button */
-  .fab {
-    @apply fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50;
+  .muscat-fab {
+    background: linear-gradient(135deg, var(--muscat-primary) 0%, var(--muscat-accent) 100%);
+    @apply fixed bottom-6 right-6 w-14 h-14 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50 transform hover:scale-110;
   }
 
-  /* Notification badge */
-  .notification-badge {
-    @apply absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold;
+  /* Enhanced focus styles for accessibility */
+  .muscat-focus {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    focus-ring-color: var(--muscat-primary-light);
   }
 
-  /* Table responsive wrapper */
-  .table-responsive-wrapper {
-    @apply overflow-x-auto w-full;
+  /* Responsive table wrapper */
+  .muscat-table-responsive {
+    @apply overflow-x-auto w-full rounded-lg border border-slate-200 dark:border-slate-700;
   }
 
-  /* Consistent card styling for dark mode */
-  .card-base {
-    @apply bg-white dark:bg-slate-800 shadow-lg hover:shadow-xl dark:hover:shadow-slate-700/50 transition-shadow border border-slate-100 dark:border-slate-700/50 rounded-xl;
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounceSubtle 2s ease-in-out infinite;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(10px); 
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0); 
+    }
+  }
+
+  @keyframes bounceSubtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  /* Dark mode card styling */
+  .dark .muscat-card {
+    @apply bg-slate-800 border-slate-700 shadow-slate-900/50;
+  }
+
+  .dark .muscat-card:hover {
+    @apply shadow-slate-700/50;
   }
 }
 
 @media print {
-  .print\:hidden {
+  .print\\:hidden {
     display: none !important;
   }
 
-  .print\:block {
+  .print\\:block {
     display: block !important;
   }
 
   body {
     @apply text-black bg-white;
+  }
+
+  /* Ensure Muscat Bay colors print well */
+  .muscat-button-primary,
+  .muscat-button-secondary,
+  .muscat-button-accent {
+    @apply text-black bg-white border border-black;
   }
 }
 
@@ -226,12 +468,20 @@
   .responsive-text {
     @apply text-sm;
   }
+  
+  .muscat-card {
+    @apply mx-2;
+  }
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .high-contrast {
     @apply border-2 border-black;
+  }
+  
+  .muscat-button-primary {
+    @apply border-2 border-white;
   }
 }
 
@@ -241,5 +491,20 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  
+  .sidebar-transition,
+  .muscat-card,
+  .muscat-button-primary {
+    transition: none !important;
+  }
+}
+
+/* Enhanced accessibility */
+@media (prefers-reduced-transparency: reduce) {
+  .muscat-glass {
+    backdrop-filter: none;
+    background: white;
+    border: 1px solid var(--muscat-primary);
   }
 }
