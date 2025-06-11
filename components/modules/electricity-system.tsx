@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Label, Area } from 'recharts';
-import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff } from 'lucide-react';
+import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, ChevronRight, Award, TrendingDown } from 'lucide-react';
 
 // ===============================
 // DESIGN SYSTEM & CONSTANTS
@@ -8,23 +8,27 @@ import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, 
 
 const OMR_PER_KWH = 0.025;
 
-// Primary Color Scheme - Sophisticated Purple-Gray Palette
+// Enhanced Muscat Bay Color Scheme - Using Tailwind Classes
 const COLORS = {
-  primary: '#4E4456',        // Main brand color - Deep purple-gray
-  primaryLight: '#7E708A',   // Lighter variant for hover states
-  primaryDark: '#3B3241',    // Darker variant for active states
-  accent: '#6A5ACD',         // Accent purple for highlights
-  success: '#10B981',        // Green for positive metrics
-  warning: '#F59E0B',        // Amber for warnings
-  info: '#3B82F6',          // Blue for information
-  error: '#EF4444',         // Red for errors
+  primary: '#4E4456',           // Main brand color
+  primaryLight: '#7E708A',      // Lighter variant
+  primaryDark: '#3B3241',       // Darker variant
+  secondary: '#A8D5E3',         // Soft teal
+  accent: '#BFA181',            // Muted gold
+  success: '#10B981',           // Green
+  warning: '#F59E0B',           // Amber
+  info: '#0A1828',             // Deep navy
+  error: '#EF4444',            // Red
   
-  // Chart colors palette
-  chart: ['#6A5ACD', '#FFA07A', '#20B2AA', '#FF69B4', '#9370DB', '#F08080', '#4682B4', '#32CD32', '#FF6347', '#4169E1']
+  // Chart colors - Muscat Bay themed
+  chart: [
+    '#4E4456', '#A8D5E3', '#BFA181', '#0A1828', '#5f5168', 
+    '#C3FBF4', '#F2F0EA', '#10B981', '#EF4444', '#6A5ACD'
+  ]
 };
 
 // ===============================
-// COMPLETE ELECTRICITY DATA FROM YOUR CSV
+// ELECTRICITY DATA
 // ===============================
 
 const rawDataString = `Name,Type,Meter Account No.,Apr-24,May-24,Jun-24,Jul-24,Aug-24,Sep-24,Oct-24,Nov-24,Dec-24,Jan-25,Feb-25,Mar-25,Apr-26
@@ -88,7 +92,6 @@ CIF Kitchen,CK,MISSING_METER,18900,17800,16700,17234,15890,16700,17800,16742,155
 const extractCategory = (unitName, type) => {
     if (!unitName && !type) return 'Other';
     
-    // Use the type field as primary categorization
     switch(type) {
         case 'PS': return 'Pumping Station';
         case 'LS': return 'Lifting Station';
@@ -107,14 +110,10 @@ const extractCategory = (unitName, type) => {
         case 'BM': return 'Bank Muscat';
         case 'CK': return 'CIF Kitchen';
         default:
-            // Fallback to name-based categorization
             const lowerUnitName = unitName?.toLowerCase() || '';
             if (lowerUnitName.includes('pumping station')) return 'Pumping Station';
             if (lowerUnitName.includes('lifting station')) return 'Lifting Station';
             if (lowerUnitName.includes('irrigation tank')) return 'Irrigation Tank';
-            if (lowerUnitName.includes('actuator db')) return 'Actuator DB';
-            if (lowerUnitName.includes('street light')) return 'Street Light';
-            if (lowerUnitName.includes('apartment')) return 'Apartment';
             return 'Other';
     }
 };
@@ -123,7 +122,7 @@ const parseData = (rawData) => {
   const lines = rawData.split('\n');
   const headerLine = lines[0].split(',').map(h => h.trim());
   const dataLines = lines.slice(1);
-  const monthsHeader = headerLine.slice(3); // Skip Name, Type, Meter Account No.
+  const monthsHeader = headerLine.slice(3);
 
   return dataLines.map((line, index) => {
     const values = line.split(',');
@@ -132,9 +131,9 @@ const parseData = (rawData) => {
     const entry = {
       id: index + 1,
       slNo: index + 1,
-      zone: 'N/A', // Not in this dataset
+      zone: 'N/A',
       type: type,
-      muscatBayNumber: 'N/A', // Not in this dataset
+      muscatBayNumber: 'N/A',
       unitName: unitName,
       category: extractCategory(unitName, type),
       meterAccountNo: values[2]?.trim() || 'N/A',
@@ -159,17 +158,20 @@ const initialElectricityData = parseData(rawDataString);
 const availableMonths = Object.keys(initialElectricityData[0].consumption);
 
 // ===============================
-// SHARED COMPONENTS
+// ENHANCED SHARED COMPONENTS
 // ===============================
 
 const SummaryCard = ({ title, value, icon, unit, trend, trendColor, iconBgColor, isLoading }) => {
   const IconComponent = icon;
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-100">
+    <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-100 group">
       <div className="flex justify-between items-start mb-3">
-        <h3 className="text-slate-500 font-semibold text-md">{title}</h3>
-        <div className={`p-3 rounded-full text-white shadow-md`} style={{backgroundColor: iconBgColor || COLORS.primary }}>
-          <IconComponent size={22} />
+        <h3 className="text-slate-500 font-semibold text-sm">{title}</h3>
+        <div 
+          className="p-3 rounded-full text-white shadow-md group-hover:scale-110 transition-transform duration-200" 
+          style={{backgroundColor: iconBgColor || COLORS.primary }}
+        >
+          <IconComponent size={20} />
         </div>
       </div>
       {isLoading ? (
@@ -189,8 +191,8 @@ const SummaryCard = ({ title, value, icon, unit, trend, trendColor, iconBgColor,
   );
 };
 
-const ChartWrapper = ({ title, children, subtitle, actions }) => (
-  <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-slate-100">
+const ChartWrapper = ({ title, children, subtitle, actions, className = "" }) => (
+  <div className={`bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-slate-100 ${className}`}>
     <div className="flex justify-between items-start mb-4">
       <div>
         <h3 className="text-xl font-semibold text-slate-700">{title}</h3>
@@ -214,8 +216,7 @@ const StyledSelect = ({ label, value, onChange, options, id, icon: Icon, disable
                   value={value} 
                   onChange={onChange} 
                   disabled={disabled}
-                  className="appearance-none w-full p-2.5 pr-10 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:outline-none bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed" 
-                  style={{ '--tw-ring-color': COLORS.primaryLight, borderColor: 'rgb(203 213 225 / 1)', ringColor: COLORS.primaryLight }} 
+                  className="appearance-none w-full p-2.5 pr-10 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-light focus:border-primary-light focus:outline-none bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
                 >
                     {options.map(option => ( <option key={option.value} value={option.value}>{option.label}</option> ))}
                 </select>
@@ -230,7 +231,7 @@ const StyledSelect = ({ label, value, onChange, options, id, icon: Icon, disable
 const LoadingSpinner = ({ size = 24 }) => (
   <div className="flex justify-center items-center">
     <div 
-      className="animate-spin rounded-full border-4 border-slate-200 border-t-primary" 
+      className="animate-spin rounded-full border-4 border-slate-200"
       style={{
         width: size,
         height: size,
@@ -240,27 +241,241 @@ const LoadingSpinner = ({ size = 24 }) => (
   </div>
 );
 
+// Enhanced Top Consumers Table Component
+const TopConsumersTable = ({ data, selectedMonth }) => {
+  const [expandedRow, setExpandedRow] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8; // Reduced for better UI
+
+  const paginatedData = data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+
+  const getRankBadgeColor = (index) => {
+    if (index === 0) return 'bg-yellow-500 text-white'; // Gold
+    if (index === 1) return 'bg-gray-400 text-white';   // Silver
+    if (index === 2) return 'bg-orange-600 text-white'; // Bronze
+    return 'bg-slate-400 text-white';
+  };
+
+  const getCategoryColor = (category) => {
+    const colors = {
+      'Pumping Station': 'bg-blue-100 text-blue-800',
+      'Lifting Station': 'bg-green-100 text-green-800', 
+      'Apartment': 'bg-purple-100 text-purple-800',
+      'Street Light': 'bg-yellow-100 text-yellow-800',
+      'Beachwell': 'bg-cyan-100 text-cyan-800',
+      'Central Park': 'bg-emerald-100 text-emerald-800',
+      'CIF Kitchen': 'bg-orange-100 text-orange-800',
+      'Security Building': 'bg-red-100 text-red-800',
+      'Village Square': 'bg-indigo-100 text-indigo-800',
+    };
+    return colors[category] || 'bg-gray-100 text-gray-800';
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
+      <div className="p-6 border-b border-slate-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-semibold text-slate-700 flex items-center gap-2">
+              <Award className="text-yellow-500" size={24} />
+              Top Electricity Consumers
+            </h3>
+            <p className="text-sm text-slate-500 mt-1">
+              Highest consumption for {selectedMonth === "All Months" ? "overall period" : selectedMonth}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <TrendingUp size={16} />
+            <span>{data.length} total units</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Responsive Table Container */}
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-full">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="text-left p-4 font-semibold text-slate-700 min-w-[80px]">Rank</th>
+              <th className="text-left p-4 font-semibold text-slate-700 min-w-[200px]">Unit Name</th>
+              <th className="text-left p-4 font-semibold text-slate-700 min-w-[120px]">Category</th>
+              <th className="text-right p-4 font-semibold text-slate-700 min-w-[120px]">Consumption</th>
+              <th className="text-right p-4 font-semibold text-slate-700 min-w-[100px]">Est. Cost</th>
+              <th className="text-center p-4 font-semibold text-slate-700 min-w-[80px]">Details</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {paginatedData.map((consumer, index) => {
+              const actualIndex = (currentPage - 1) * itemsPerPage + index;
+              const isExpanded = expandedRow === actualIndex;
+              
+              return (
+                <React.Fragment key={actualIndex}>
+                  <tr className="hover:bg-slate-50 transition-colors group">
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${getRankBadgeColor(actualIndex)}`}>
+                          {actualIndex + 1}
+                        </span>
+                        {actualIndex < 3 && <Award size={16} className="text-yellow-500" />}
+                      </div>
+                    </td>
+                    
+                    <td className="p-4">
+                      <div className="font-medium text-slate-800 group-hover:text-primary transition-colors">
+                        {consumer.name}
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        ID: {actualIndex + 1}
+                      </div>
+                    </td>
+                    
+                    <td className="p-4">
+                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(consumer.category)}`}>
+                        {consumer.category}
+                      </span>
+                    </td>
+                    
+                    <td className="p-4 text-right">
+                      <div className="font-semibold text-slate-800">
+                        {consumer.consumption.toLocaleString()} <span className="text-xs text-slate-500">kWh</span>
+                      </div>
+                      {actualIndex > 0 && (
+                        <div className="text-xs text-slate-500">
+                          {((consumer.consumption / data[0].consumption) * 100).toFixed(1)}% of top
+                        </div>
+                      )}
+                    </td>
+                    
+                    <td className="p-4 text-right">
+                      <div className="font-medium text-slate-700">
+                        {(consumer.consumption * OMR_PER_KWH).toFixed(2)} <span className="text-xs text-slate-500">OMR</span>
+                      </div>
+                    </td>
+                    
+                    <td className="p-4 text-center">
+                      <button
+                        onClick={() => setExpandedRow(isExpanded ? null : actualIndex)}
+                        className="p-1 rounded-full hover:bg-slate-200 transition-colors text-slate-600 hover:text-primary"
+                        title={isExpanded ? "Hide details" : "Show details"}
+                      >
+                        <ChevronRight 
+                          size={16} 
+                          className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} 
+                        />
+                      </button>
+                    </td>
+                  </tr>
+                  
+                  {/* Expanded Row Details */}
+                  {isExpanded && (
+                    <tr className="bg-slate-50">
+                      <td colSpan="6" className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="bg-white p-3 rounded-lg border">
+                            <div className="text-xs text-slate-500 uppercase tracking-wide">Monthly Trend</div>
+                            <div className="text-sm font-medium text-slate-800 mt-1">
+                              {selectedMonth !== "All Months" ? "See all data view" : "Varies by month"}
+                            </div>
+                          </div>
+                          
+                          <div className="bg-white p-3 rounded-lg border">
+                            <div className="text-xs text-slate-500 uppercase tracking-wide">Efficiency</div>
+                            <div className="text-sm font-medium text-slate-800 mt-1">
+                              {consumer.consumption > 1000 ? "High consumer" : 
+                               consumer.consumption > 500 ? "Medium consumer" : "Low consumer"}
+                            </div>
+                          </div>
+                          
+                          <div className="bg-white p-3 rounded-lg border">
+                            <div className="text-xs text-slate-500 uppercase tracking-wide">Rank Status</div>
+                            <div className="text-sm font-medium text-slate-800 mt-1">
+                              {actualIndex === 0 ? "🥇 Highest" :
+                               actualIndex === 1 ? "🥈 Second" :
+                               actualIndex === 2 ? "🥉 Third" : `#${actualIndex + 1}`}
+                            </div>
+                          </div>
+                          
+                          <div className="bg-white p-3 rounded-lg border">
+                            <div className="text-xs text-slate-500 uppercase tracking-wide">Performance</div>
+                            <div className="text-sm font-medium text-slate-800 mt-1">
+                              {consumer.consumption > data[data.length - 1].consumption * 10 ? "🔴 Monitor" : "✅ Normal"}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Enhanced Pagination */}
+      {totalPages > 1 && (
+        <div className="p-4 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-slate-600">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, data.length)} of {data.length} consumers
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                      currentPage === page 
+                        ? 'bg-primary text-white' 
+                        : 'border border-slate-300 hover:bg-white'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ===============================
-// MAIN ELECTRICITY SYSTEM MODULE - NAMED EXPORT
+// MAIN ELECTRICITY SYSTEM MODULE
 // ===============================
 
 export const ElectricitySystemModule = ({ isDarkMode }) => {
   const [activeSubSection, setActiveSubSection] = useState('Dashboard');
   const [selectedMonth, setSelectedMonth] = useState("All Months"); 
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [selectedUnitId, setSelectedUnitId] = useState(initialElectricityData.length > 0 ? initialElectricityData[0].id.toString() : "");
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
   const distinctCategories = useMemo(() => 
     [...new Set(initialElectricityData.map(d => d.category))].sort(), 
-  []);
-  
-  const distinctUnitsForDropdown = useMemo(() => 
-    initialElectricityData.map(d => ({ value: d.id.toString(), label: `${d.unitName} (${d.meterAccountNo})`})).sort((a,b) => a.label.localeCompare(b.label)),
   []);
 
   const filteredElectricityData = useMemo(() => {
@@ -298,7 +513,12 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
 
   const topConsumersChartData = useMemo(() => {
     const dataToUse = kpiAndTableData;
-    return dataToUse.slice().sort((a, b) => b.totalConsumption - a.totalConsumption).filter(d => d.totalConsumption > 0).slice(0, 10).map(d => ({ name: d.unitName, consumption: d.totalConsumption, category: d.category, monthlyDataFull: initialElectricityData.find(item => item.id === d.id)?.consumption || {} }));
+    return dataToUse.slice().sort((a, b) => b.totalConsumption - a.totalConsumption).filter(d => d.totalConsumption > 0).slice(0, 15).map(d => ({ 
+      name: d.unitName, 
+      consumption: d.totalConsumption, 
+      category: d.category, 
+      monthlyDataFull: initialElectricityData.find(item => item.id === d.id)?.consumption || {} 
+    }));
   }, [kpiAndTableData]);
 
   const handleAiAnalysis = async () => {
@@ -307,30 +527,30 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
     setAiAnalysisResult("");
     
     setTimeout(() => {
-      setAiAnalysisResult(`AI Analysis Results for ${selectedMonth === "All Months" ? "All Months" : selectedMonth}:
+      setAiAnalysisResult(`🧠 AI Analysis Results for ${selectedMonth === "All Months" ? "All Months" : selectedMonth}:
 
-• INFRASTRUCTURE ANALYSIS:
-  - All 4 Pumping Stations are operational and showing consumption data
-  - Pumping Station 01 shows highest consumption (${initialElectricityData.find(item => item.unitName === 'Pumping Station 01')?.totalConsumption.toLocaleString()} kWh total)
-  - Pumping Station 05 shows significant load (${initialElectricityData.find(item => item.unitName === 'Pumping Station 05')?.totalConsumption.toLocaleString()} kWh total)
-  - Beachwell shows major consumption variations - investigate for optimization
+🔋 INFRASTRUCTURE ANALYSIS:
+• All 4 Pumping Stations operational with consumption data
+• Pumping Station 01 shows highest consumption (${initialElectricityData.find(item => item.unitName === 'Pumping Station 01')?.totalConsumption.toLocaleString()} kWh total)
+• Beachwell shows major consumption variations - investigate for optimization
+• Critical infrastructure accounts for ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} components
 
-• CATEGORY BREAKDOWN:
-  - ${distinctCategories.length} categories identified: ${distinctCategories.join(', ')}
-  - Apartments represent residential load across ${kpiAndTableData.filter(d => d.category === 'Apartment').length} units
-  - Infrastructure systems account for ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} critical components
+📊 CONSUMPTION BREAKDOWN:
+• Total System: ${totalConsumptionKWh.toLocaleString()} kWh
+• Estimated Cost: ${totalCostOMR.toLocaleString()} OMR
+• Average per Unit: ${averageConsumptionPerUnit.toFixed(0)} kWh
+• Active Meters: ${activeMeters}/${kpiAndTableData.length}
 
-• CONSUMPTION INSIGHTS:
-  - Total system consumption: ${totalConsumptionKWh.toLocaleString()} kWh
-  - Estimated cost: ${totalCostOMR.toLocaleString()} OMR
-  - Average per unit: ${averageConsumptionPerUnit.toFixed(0)} kWh
-  - Active meters: ${activeMeters} out of ${kpiAndTableData.length} total
+🏗️ CATEGORY INSIGHTS:
+• ${distinctCategories.length} categories identified
+• Apartments: ${kpiAndTableData.filter(d => d.category === 'Apartment').length} residential units
+• Infrastructure: ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} critical systems
 
-• KEY RECOMMENDATIONS:
-  - Monitor Beachwell consumption patterns for efficiency opportunities
-  - Implement load balancing across pumping stations
-  - Track residential vs infrastructure consumption ratios
-  - Consider smart metering for better monitoring`);
+💡 KEY RECOMMENDATIONS:
+• Monitor Beachwell consumption patterns for efficiency
+• Implement load balancing across pumping stations  
+• Track residential vs infrastructure consumption ratios
+• Consider smart metering for enhanced monitoring`);
       setIsAiLoading(false);
     }, 2000);
   };
@@ -353,12 +573,13 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                       <button 
                         key={tab.id} 
                         onClick={() => setActiveSubSection(tab.id)} 
-                        className={`px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all duration-200 ease-in-out transform hover:scale-105`} 
-                        style={{ backgroundColor: isActive ? COLORS.primary : 'transparent', color: isActive ? 'white' : COLORS.primaryDark, }} 
-                        onMouseOver={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = COLORS.primaryLight; if(!isActive) e.currentTarget.style.color = 'white';}} 
-                        onMouseOut={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = 'transparent'; if(!isActive) e.currentTarget.style.color = COLORS.primaryDark;}}
+                        className={`px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
+                          isActive 
+                            ? 'bg-primary text-white shadow-md' 
+                            : 'text-primary hover:bg-primary-light hover:text-white'
+                        }`}
                       > 
-                        <tab.icon size={18} style={{ color: isActive ? 'white' : COLORS.primary }}/> 
+                        <tab.icon size={18} className={isActive ? 'text-white' : 'text-primary'} /> 
                         <span>{tab.name}</span> 
                       </button> 
                     );
@@ -374,7 +595,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
     const categoryOptions = [{ value: "All Categories", label: "All Categories" }, ...distinctCategories.map(c => ({ value: c, label: c }))];
     
     return (
-        <div className="bg-white shadow p-4 rounded-lg mb-6 print:hidden sticky top-[110px] md:top-[88px] z-10 border border-slate-200">
+        <div className="bg-white shadow-md p-4 rounded-xl mb-6 print:hidden sticky top-[110px] md:top-[88px] z-10 border border-slate-200">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
                 <StyledSelect 
                   id="monthFilter" 
@@ -394,10 +615,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                 />
                 <button 
                   onClick={() => { setSelectedMonth("All Months"); setSelectedCategory("All Categories"); }} 
-                  className="text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 h-[46px] w-full lg:w-auto hover:shadow-lg" 
-                  style={{ backgroundColor: COLORS.primaryDark }} 
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = COLORS.primary} 
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = COLORS.primaryDark}
+                  className="bg-primary-dark hover:bg-primary text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 h-[46px] w-full lg:w-auto hover:shadow-lg"
                 > 
                   <Filter size={16}/> 
                   <span>Reset Filters</span> 
@@ -408,7 +626,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <ElectricitySubNav />
       
       {activeSubSection === 'Dashboard' && <FilterBar />}
@@ -418,22 +636,51 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
           <div className="mb-6"> 
             <button 
               onClick={handleAiAnalysis} 
-              className="flex items-center justify-center space-x-2 text-white py-2.5 px-5 rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all w-full sm:w-auto" 
-              style={{ backgroundColor: COLORS.primary }} 
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = COLORS.primaryDark} 
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = COLORS.primary} 
+              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary-dark text-white py-2.5 px-5 rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all w-full sm:w-auto group"
               disabled={isAiLoading}
             > 
-              <Sparkles size={18} /> 
+              <Sparkles size={18} className="group-hover:animate-pulse" /> 
               <span>{isAiLoading ? 'Analyzing...' : '✨ Analyze Consumption with AI'}</span> 
             </button> 
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <SummaryCard title="Total Consumption" value={totalConsumptionKWh.toLocaleString(undefined, {maximumFractionDigits:0})} unit="kWh" icon={Zap} trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} trendColor={"text-slate-500 font-medium"} iconBgColor={COLORS.primary} />
-            <SummaryCard title="Total Est. Cost" value={totalCostOMR.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} unit="OMR" icon={DollarSign} trend="Based on selection" trendColor="text-slate-500 font-medium" iconBgColor={COLORS.success} />
-            <SummaryCard title="Avg. Consumption/Unit" value={averageConsumptionPerUnit.toLocaleString(undefined, {maximumFractionDigits:0})} unit="kWh" icon={BarChart2} trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} trendColor={"text-slate-500 font-medium"} iconBgColor={COLORS.warning} />
-            <SummaryCard title="Active Meters" value={activeMeters} unit="units" icon={Users2} trend="In selection" trendColor="text-slate-500 font-medium" iconBgColor={COLORS.info} />
+            <SummaryCard 
+              title="Total Consumption" 
+              value={totalConsumptionKWh.toLocaleString(undefined, {maximumFractionDigits:0})} 
+              unit="kWh" 
+              icon={Zap} 
+              trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
+              trendColor="text-slate-500 font-medium" 
+              iconBgColor={COLORS.primary} 
+            />
+            <SummaryCard 
+              title="Total Est. Cost" 
+              value={totalCostOMR.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} 
+              unit="OMR" 
+              icon={DollarSign} 
+              trend="Based on selection" 
+              trendColor="text-slate-500 font-medium" 
+              iconBgColor={COLORS.success} 
+            />
+            <SummaryCard 
+              title="Avg. Consumption/Unit" 
+              value={averageConsumptionPerUnit.toLocaleString(undefined, {maximumFractionDigits:0})} 
+              unit="kWh" 
+              icon={BarChart2} 
+              trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
+              trendColor="text-slate-500 font-medium" 
+              iconBgColor={COLORS.accent} 
+            />
+            <SummaryCard 
+              title="Active Meters" 
+              value={activeMeters} 
+              unit="units" 
+              icon={Users2} 
+              trend="In selection" 
+              trendColor="text-slate-500 font-medium" 
+              iconBgColor={COLORS.secondary} 
+            />
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -450,10 +697,27 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" /> 
                     <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} /> 
                     <YAxis tick={{ fontSize: 12, fill: '#64748b' }} /> 
-                    <Tooltip contentStyle={{backgroundColor: 'white', borderRadius: '8px', borderColor: '#e2e8f0'}} itemStyle={{color: '#334155'}} labelStyle={{color: '#0f172a', fontWeight: 'bold'}}/> 
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'white', 
+                        borderRadius: '8px', 
+                        borderColor: '#e2e8f0',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                      }} 
+                      itemStyle={{color: '#334155'}} 
+                      labelStyle={{color: '#0f172a', fontWeight: 'bold'}}
+                    /> 
                     <Legend wrapperStyle={{fontSize: "12px", paddingTop: '10px'}}/> 
                     <Area type="monotone" dataKey="total" stroke={COLORS.primary} fillOpacity={1} fill="url(#colorTotal)" /> 
-                    <Line type="monotone" dataKey="total" stroke={COLORS.primary} strokeWidth={3} activeDot={{ r: 7, strokeWidth: 2, fill: COLORS.primary }} dot={{r:4, fill: COLORS.primary}} name="Total kWh" /> 
+                    <Line 
+                      type="monotone" 
+                      dataKey="total" 
+                      stroke={COLORS.primary} 
+                      strokeWidth={3} 
+                      activeDot={{ r: 7, strokeWidth: 2, fill: COLORS.primary }} 
+                      dot={{r:4, fill: COLORS.primary}} 
+                      name="Total kWh" 
+                    /> 
                   </LineChart> 
                 </ResponsiveContainer> 
               </ChartWrapper> 
@@ -462,14 +726,46 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
               <ChartWrapper title="Consumption by Category" subtitle={`For ${selectedMonth}`}> 
                 <ResponsiveContainer width="100%" height="100%"> 
                   <PieChart> 
-                    <Pie data={consumptionByTypeChartData} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={60} outerRadius={90} fill="#8884d8" paddingAngle={2} cornerRadius={5}> 
+                    <Pie 
+                      data={consumptionByTypeChartData} 
+                      dataKey="value" 
+                      nameKey="name" 
+                      cx="50%" 
+                      cy="45%" 
+                      innerRadius={60} 
+                      outerRadius={90} 
+                      paddingAngle={2} 
+                      cornerRadius={5}
+                    > 
                       {consumptionByTypeChartData.map((entry, index) => ( 
-                        <Cell key={`cell-${index}`} fill={COLORS.chart[index % COLORS.chart.length]} className="focus:outline-none hover:opacity-80 transition-opacity" stroke="none"/> 
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={COLORS.chart[index % COLORS.chart.length]} 
+                          className="focus:outline-none hover:opacity-80 transition-opacity" 
+                          stroke="none"
+                        /> 
                       ))} 
-                      <Label value={`${consumptionByTypeChartData.reduce((sum, item) => sum + item.value, 0).toLocaleString(undefined, {maximumFractionDigits:0})}`} position="centerBottom" dy={-5} className="text-2xl font-bold fill-slate-700"/> 
-                      <Label value="Total kWh" position="centerTop" dy={10} className="text-xs fill-slate-500"/> 
+                      <Label 
+                        value={`${consumptionByTypeChartData.reduce((sum, item) => sum + item.value, 0).toLocaleString(undefined, {maximumFractionDigits:0})}`} 
+                        position="centerBottom" 
+                        dy={-5} 
+                        className="text-2xl font-bold fill-slate-700"
+                      /> 
+                      <Label 
+                        value="Total kWh" 
+                        position="centerTop" 
+                        dy={10} 
+                        className="text-xs fill-slate-500"
+                      /> 
                     </Pie> 
-                    <Tooltip contentStyle={{backgroundColor: 'white', borderRadius: '8px', borderColor: '#e2e8f0'}}/> 
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'white', 
+                        borderRadius: '8px', 
+                        borderColor: '#e2e8f0',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                      }}
+                    /> 
                     <Legend verticalAlign="bottom" wrapperStyle={{paddingTop: '15px'}}/> 
                   </PieChart> 
                 </ResponsiveContainer> 
@@ -477,51 +773,20 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
             </div>
           </div>
 
-          {/* Top Consumers Table */}
-          <ChartWrapper title="Top Electricity Consumers" subtitle={`Highest consumption for ${selectedMonth === "All Months" ? "overall period" : selectedMonth}`}>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="text-left p-3 font-semibold text-slate-700">Rank</th>
-                    <th className="text-left p-3 font-semibold text-slate-700">Unit Name</th>
-                    <th className="text-left p-3 font-semibold text-slate-700">Category</th>
-                    <th className="text-right p-3 font-semibold text-slate-700">Consumption (kWh)</th>
-                    <th className="text-right p-3 font-semibold text-slate-700">Est. Cost (OMR)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topConsumersChartData.map((consumer, index) => (
-                    <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="p-3">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
-                          index < 3 ? 'bg-yellow-500' : 'bg-slate-400'
-                        }`}>
-                          {index + 1}
-                        </span>
-                      </td>
-                      <td className="p-3 font-medium text-slate-800">{consumer.name}</td>
-                      <td className="p-3 text-slate-600">{consumer.category}</td>
-                      <td className="p-3 text-right font-semibold text-slate-800">{consumer.consumption.toLocaleString()}</td>
-                      <td className="p-3 text-right text-slate-600">{(consumer.consumption * OMR_PER_KWH).toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </ChartWrapper>
+          {/* Enhanced Top Consumers Table - Fixed Overflow Issue */}
+          <TopConsumersTable data={topConsumersChartData} selectedMonth={selectedMonth} />
 
-          {/* Category Summary Table */}
+          {/* Category Summary */}
           <ChartWrapper title="Category Summary" subtitle={`Consumption breakdown by category for ${selectedMonth === "All Months" ? "all data" : selectedMonth}`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-auto">
               {distinctCategories.map((category, index) => {
                 const categoryData = kpiAndTableData.filter(item => item.category === category);
                 const totalCategoryConsumption = categoryData.reduce((acc, curr) => acc + curr.totalConsumption, 0);
                 const categoryCount = categoryData.length;
                 
                 return (
-                  <div key={category} className="bg-slate-50 p-4 rounded-lg border">
-                    <h4 className="font-semibold text-slate-700 mb-2">{category}</h4>
+                  <div key={category} className="bg-slate-50 p-4 rounded-lg border hover:shadow-md transition-shadow">
+                    <h4 className="font-semibold text-slate-700 mb-2 truncate">{category}</h4>
                     <div className="space-y-1">
                       <p className="text-sm text-slate-600">Units: {categoryCount}</p>
                       <p className="text-lg font-bold text-slate-800">{totalCategoryConsumption.toLocaleString()} kWh</p>
@@ -535,12 +800,13 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
         </>
       )}
 
+      {/* Unit Details Section - Enhanced */}
       {activeSubSection === 'UnitDetails' && (
         <div className="space-y-6">
-          <div className="bg-white shadow p-4 rounded-lg border border-slate-200">
+          <div className="bg-white shadow-lg p-6 rounded-xl border border-slate-200">
             <h3 className="text-xl font-semibold text-slate-700 mb-4">All Electricity Units</h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm min-w-full">
                 <thead className="bg-slate-50">
                   <tr>
                     <th className="text-left p-3 font-semibold text-slate-700">ID</th>
@@ -552,9 +818,9 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                     <th className="text-right p-3 font-semibold text-slate-700">Est. Cost (OMR)</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {kpiAndTableData.map((item) => (
-                    <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
+                    <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-3 text-slate-600">{item.id}</td>
                       <td className="p-3 font-medium text-slate-800">{item.unitName}</td>
                       <td className="p-3 text-slate-600">{item.type}</td>
@@ -581,41 +847,56 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
         </div>
       )}
 
-      {/* AI Analysis Modal */}
+      {/* Enhanced AI Analysis Modal */}
       {isAiModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"> 
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto"> 
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in"> 
+          <div className="bg-white p-6 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"> 
             <div className="flex justify-between items-center mb-4"> 
-              <h3 className="text-xl font-semibold" style={{color: COLORS.primary}}>✨ AI Consumption Analysis</h3> 
-              <button onClick={() => setIsAiModalOpen(false)} className="p-1 rounded-full hover:bg-slate-200"> 
+              <h3 className="text-xl font-semibold text-primary flex items-center gap-2">
+                <Sparkles className="text-primary" size={24} />
+                AI Consumption Analysis
+              </h3> 
+              <button 
+                onClick={() => setIsAiModalOpen(false)} 
+                className="p-2 rounded-full hover:bg-slate-100 transition-colors"
+              > 
                 <X size={20} className="text-slate-600"/> 
               </button> 
             </div> 
+            
             {isAiLoading ? ( 
               <div className="text-center py-8"> 
-                <Sparkles size={48} className="mx-auto animate-pulse" style={{color: COLORS.primaryLight}} /> 
-                <p className="mt-2 text-slate-600">AI is analyzing data, please wait...</p> 
+                <div className="flex justify-center items-center space-x-3 mb-4">
+                  <Sparkles size={48} className="animate-pulse text-primary" /> 
+                  <Zap size={48} className="animate-bounce text-secondary" />
+                </div>
+                <p className="mt-2 text-slate-600">AI is analyzing electricity consumption data...</p> 
+                <p className="text-sm text-slate-500 mt-1">Please wait while we process your request</p>
               </div> 
             ) : ( 
               <div className="text-sm text-slate-700 space-y-3 whitespace-pre-wrap"> 
                 {aiAnalysisResult ? ( 
-                  aiAnalysisResult.split('\n').map((line, index) => ( 
-                    <p key={index}>{line.startsWith('• ') || line.startsWith('- ') ? `• ${line.substring(2)}` : line}</p> 
-                  )) 
+                  aiAnalysisResult.split('\n').map((line, index) => {
+                    if (line.startsWith('🧠') || line.startsWith('🔋') || line.startsWith('📊') || line.startsWith('🏗️') || line.startsWith('💡')) {
+                      return <h4 key={index} className="font-bold text-lg mt-4 mb-2 text-primary">{line}</h4>;
+                    }
+                    if (line.startsWith('•')) {
+                      return <p key={index} className="ml-4 text-slate-700">{line}</p>;
+                    }
+                    return <p key={index} className="text-slate-700">{line}</p>;
+                  })
                 ) : ( 
                   <p>No analysis available or an error occurred.</p> 
                 )} 
               </div> 
             )} 
+            
             <div className="mt-6 text-right"> 
               <button 
                 onClick={() => setIsAiModalOpen(false)} 
-                className="text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors" 
-                style={{ backgroundColor: COLORS.primary }} 
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = COLORS.primaryDark} 
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = COLORS.primary}
+                className="bg-primary hover:bg-primary-dark text-white py-2 px-6 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg"
               > 
-                Close 
+                Close Analysis
               </button> 
             </div> 
           </div> 
