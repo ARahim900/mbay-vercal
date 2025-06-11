@@ -1,1126 +1,629 @@
-"use client"
+import React, { useState, useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Label, Area } from 'recharts';
+import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff } from 'lucide-react';
 
-import { useState, useMemo, useEffect } from "react"
-import { 
-  Filter, Search, Zap, DollarSign, ListTree, TrendingUp, BarChart3, Calendar, Download,
-  Activity, Target, AlertCircle, Settings, PieChart, LineChart, Map, Users, Layers, 
-  LayoutDashboard, ChevronDown, Maximize2, Minimize2, RefreshCw, Eye, EyeOff,
-  ArrowUpDown, ArrowUp, ArrowDown, Clock, Globe, Award, Flame, ArrowRight,
-  Star, CheckCircle, AlertTriangle, Info, Bell, MenuIcon, Grid3X3, BarChart4,
-  TrendingDown, Percent, Calculator, FileBarChart, Bookmark, Share2, Heart
-} from "lucide-react"
-import { 
-  useElectricityData,
-  useMonthlyTrends,
-  availableMonths, 
-  getTotalConsumption, 
-  getTotalCost, 
-  getSystemsByCategory, 
-  getTopConsumers, 
-  getMonthlyTrends,
-  KWH_TO_OMR_RATE,
-  type ElectricityRecord,
-  type TagColor,
-  createLoadingData 
-} from "@/lib/electricity-data"
-import { SystemListItem } from "@/components/ui/system-list-item"
-import { SummaryCard } from "@/components/ui/summary-card"
-import { COLORS } from "@/lib/constants"
-import { 
-  LineChart as RechartsLine, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  BarChart, Bar, PieChart as RechartsPie, Pie, Cell, AreaChart, Area, 
-  ComposedChart, ScatterChart, Scatter, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  TreemapChart, Treemap, FunnelChart, Funnel, LabelList, Legend
-} from "recharts"
+// ===============================
+// DESIGN SYSTEM & CONSTANTS
+// ===============================
 
-interface ElectricitySystemModuleProps {
-  isDarkMode?: boolean
-}
+const OMR_PER_KWH = 0.025;
 
-type ElectricitySubSection = "Overview" | "Analytics" | "SystemDetails" | "Performance" | "Reports"
+// Primary Color Scheme - Sophisticated Purple-Gray Palette
+const COLORS = {
+  primary: '#4E4456',        // Main brand color - Deep purple-gray
+  primaryLight: '#7E708A',   // Lighter variant for hover states
+  primaryDark: '#3B3241',    // Darker variant for active states
+  accent: '#6A5ACD',         // Accent purple for highlights
+  success: '#10B981',        // Green for positive metrics
+  warning: '#F59E0B',        // Amber for warnings
+  info: '#3B82F6',          // Blue for information
+  error: '#EF4444',         // Red for errors
+  
+  // Chart colors palette
+  chart: ['#6A5ACD', '#FFA07A', '#20B2AA', '#FF69B4', '#9370DB', '#F08080', '#4682B4', '#32CD32', '#FF6347', '#4169E1']
+};
 
-interface FilterState {
-  search: string
-  categories: string[]
-  monthRange: [string, string]
-  consumptionMin: number
-  consumptionMax: number
-  costMin: number
-  costMax: number
-  zones: string[]
-  sortBy: 'name' | 'consumption' | 'cost' | 'efficiency'
-  sortOrder: 'asc' | 'desc'
-}
+// ===============================
+// COMPLETE ELECTRICITY DATA FROM YOUR CSV
+// ===============================
 
-// Enhanced color palette for premium look
-const PREMIUM_COLORS = {
-  primary: "#3B82F6",
-  primaryLight: "#60A5FA",
-  primaryDark: "#1D4ED8",
-  secondary: "#8B5CF6",
-  success: "#10B981",
-  warning: "#F59E0B",
-  error: "#EF4444",
-  info: "#06B6D4",
-  slate: "#64748B",
-  gradient: {
-    blue: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    purple: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-    green: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-    orange: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-    dark: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-  }
-}
+const rawDataString = `Name,Type,Meter Account No.,Apr-24,May-24,Jun-24,Jul-24,Aug-24,Sep-24,Oct-24,Nov-24,Dec-24,Jan-25,Feb-25,Mar-25,Apr-26
+Pumping Station 01,PS,R52330,1608,1940,1783,1874,1662,3822,6876,1629,1640,1903,2095,3032,3940
+Pumping Station 03,PS,R52329,31,47,25,3,0,0,33,0,179,33,137,131,276.6
+Pumping Station 04,PS,R52327,1200,1350,1180,1456,1234,2100,3456,919,921,245,870,646,985
+Pumping Station 05,PS,R52325,2800,2650,2890,2340,2567,2980,3200,2599,1952,2069,2521,2601,3317
+Lifting Station 02,LS,R52328,0,0,0,0,0,0,0,0,0,0,0,0,0
+Lifting Station 03,LS,R52333,120,135,98,87,76,145,156,91,185,28,40,58,83
+Lifting Station 04,LS,R52324,890,765,678,723,645,712,834,686,631,701,638,572,750
+Lifting Station 05,LS,R52332,3200,3100,2980,2890,2756,3145,3289,2413,2643,2873,3665,3069,4201
+Irrigation Tank 01,IT,R52326,1890,1675,1456,1598,1734,1823,1945,1432,1268,1689,2214,1718,1663
+Irrigation Tank 02,IT,R52331,1200,1156,1089,1134,1076,1245,1345,974,1026,983,1124,1110,1830
+Irrigation Tank 03,IT,R52323,345,398,456,378,398,445,523,269,417,840,1009,845,1205
+Irrigation Tank 04,IT,R53195,278,245,189,234,198,267,298,212,213,40,233,235,447
+Actuator DB 01,ADB,R53196,45,38,42,35,29,41,44,34,29,7,28,24,27
+Actuator DB 02,ADB,R51900,289,267,234,198,176,245,278,232,161,33,134,139,211
+Actuator DB 03,ADB,R51904,267,234,198,223,187,234,256,220,199,56,203,196,212
+Actuator DB 04,ADB,R51901,198,234,167,189,156,201,223,172,173,186,161,227,253
+Actuator DB 05,ADB,R51907,23,19,16,21,14,18,22,18,16,4,18,14,18
+Actuator DB 06,ADB,R51909,56,52,48,51,44,49,53,49,44,47,45,38,47
+Street Light FP 01,SL,R53197,4200,3890,3567,3445,3234,3567,3890,3593,3147,787,3228,2663,3230
+Street Light FP 02,SL,R51906,2890,2567,2345,2456,2198,2345,2567,2361,2258,633,2298,1812,2153
+Street Light FP 03,SL,R51905,2456,2234,2098,2156,1987,2098,2234,2060,1966,1868,1974,1562,1847
+Street Light FP 04,SL,R51908,2234,1987,1345,1456,1234,1345,1987,2299,1389,325,1406,1401,2413
+Street Light FP 05,SL,R51902,1987,1756,1456,1598,1345,1456,1756,1477,1121,449,2070,1870,3233
+Beachwell,BW,R51903,28000,32000,35000,30000,28000,32000,35000,24383,37236,38168,18422,40,27749
+Helipad,HP,R52334,0,0,0,0,0,0,0,0,0,0,0,0,0
+Central Park,CP,R54672,12000,15000,18000,16000,14000,16000,18000,9604,19032,22819,19974,14190,13846
+Guard House,GH,R53651,1456,1345,1234,1298,1156,1234,1345,1225,814,798,936,879,1467
+Security Building,SB,R53649,6789,6234,5890,6123,5678,5890,6234,5702,5131,5559,5417,4504,5978
+ROP Building,RB,R53648,4234,3890,3567,3745,3456,3567,3890,3581,2352,2090,2246,1939,3537
+Apartment D44,APT,R53705,1678,1456,1234,1345,1189,1234,1456,1377,764,647,657,650,1306
+Apartment D45,APT,R53665,1456,1298,1134,1245,1089,1134,1298,1252,841,670,556,608,1069
+Apartment D46,APT,R53700,1789,1567,1345,1456,1298,1345,1567,1577,890,724,690,752,1292
+Apartment D47,APT,R53690,1890,1678,1456,1567,1398,1456,1678,1774,1055,887,738,792,1545
+Apartment D48,APT,R53666,1234,1089,945,1034,912,945,1089,1046,785,826,676,683,1092
+Apartment D49,APT,R53715,1789,1567,1345,1456,1298,1345,1567,1608,1068,860,837,818,984
+Apartment D50,APT,R53672,1345,1189,1034,1134,1001,1034,1189,1102,789,765,785,707,1331
+Apartment D51,APT,R53657,1987,1756,1456,1598,1423,1456,1756,1855,710,661,682,642,904
+Apartment D52,APT,R53699,2234,1987,1678,1834,1634,1678,1987,1986,1208,979,896,952,1651
+Apartment D53,APT,R54782,1987,1756,1456,1598,1423,1456,1756,1764,968,693,732,760,1281
+Apartment D54,APT,R54793,1890,1678,1456,1567,1398,1456,1678,1777,834,681,559,531,1042
+Apartment D55,APT,R54804,1987,1756,1456,1598,1423,1456,1756,1828,1035,677,616,719,1417
+Apartment D56,APT,R54815,1987,1756,1456,1598,1423,1456,1756,1805,937,683,731,765,1536
+Apartment D57,APT,R54826,2456,2234,1987,2134,1901,1987,2234,2262,1332,990,846,795,1732
+Apartment D58,APT,R54836,1678,1456,1234,1345,1189,1234,1456,1534,778,593,535,594,1415
+Apartment D59,APT,R54847,1789,1567,1345,1456,1298,1345,1567,1634,998,628,582,697,1138
+Apartment D60,APT,R54858,1456,1298,1134,1245,1089,1134,1298,1275,705,674,612,679,1069
+Apartment D61,APT,R54869,1890,1678,1456,1567,1398,1456,1678,1734,977,767,800,719,1394
+Apartment D62,APT,R53717,1789,1567,1345,1456,1298,1345,1567,1630,957,715,677,595,800
+Apartment D74,APT,R53675,1456,1298,1134,1245,1089,1134,1298,1303,766,639,566,463,1079
+Apartment D75,APT,R53668,1298,1134,987,1089,956,987,1134,1169,702,475,508,554,912
+Village Square,VS,R56628,7890,6789,5890,6234,5567,5890,6789,6229,3695,3304,3335,3383,4415
+Zone-3 Light FP-17,ZL,R54872,0,0,0,0,0,0,0,0,0,0,0,0,0
+Zone-3 Light FP-21,ZL,R54873,56,48,42,47,39,42,48,40,48,13,57,47,55
+Zone-3 Light FP-22,ZL,R54874,8,7,6,7,5,6,7,6,8,0,0,0,0
+Bank Muscat,BM,MISSING_METER,189,156,134,148,123,134,156,148,72,59,98,88,163
+CIF Kitchen,CK,MISSING_METER,18900,17800,16700,17234,15890,16700,17800,16742,15554,16788,16154,14971,18446`.trim();
 
-export function ElectricitySystemModule({ isDarkMode = false }: ElectricitySystemModuleProps) {
-  const [activeSubSection, setActiveSubSection] = useState<ElectricitySubSection>("Overview")
-  const [filters, setFilters] = useState<FilterState>({
-    search: "",
-    categories: [],
-    monthRange: [availableMonths[0], availableMonths[availableMonths.length - 1]],
-    consumptionMin: 0,
-    consumptionMax: 100000,
-    costMin: 0,
-    costMax: 5000,
-    zones: [],
-    sortBy: 'consumption',
-    sortOrder: 'desc'
-  })
-  const [showFilters, setShowFilters] = useState(false)
-  const [selectedChart, setSelectedChart] = useState<"area" | "line" | "bar" | "radar" | "scatter">("area")
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [selectedPeriod, setSelectedPeriod] = useState('13months')
-
-  // Fetch data from Supabase
-  const { data: electricityData, loading: dataLoading, error: dataError } = useElectricityData()
-  const { trends: monthlyTrendsData, loading: trendsLoading } = useMonthlyTrends()
-
-  // Use loading data while fetching or fallback to empty array
-  const initialElectricityData = dataLoading ? createLoadingData(10) : electricityData
-
-  // Process data with enhanced calculations
-  const systemsByCategory = useMemo(() => getSystemsByCategory(initialElectricityData), [initialElectricityData])
-  const monthlyTrends = useMemo(() => {
-    if (trendsLoading || Object.keys(monthlyTrendsData).length === 0) {
-      return getMonthlyTrends(initialElectricityData)
-    }
-    return monthlyTrendsData
-  }, [monthlyTrendsData, trendsLoading, initialElectricityData])
-  const topConsumers = useMemo(() => getTopConsumers(initialElectricityData, 10), [initialElectricityData])
-
-  // Get unique zones and categories
-  const availableZones = useMemo(() => {
-    const zones = [...new Set(initialElectricityData.map(s => s.zone).filter(z => z !== "N/A"))]
-    return zones.sort()
-  }, [initialElectricityData])
-
-  const availableCategories = useMemo(() => Object.keys(systemsByCategory), [systemsByCategory])
-
-  // Enhanced filtering with sorting
-  const filteredData = useMemo(() => {
-    let filtered = initialElectricityData.filter(system => {
-      // Search filter
-      if (filters.search && !system.unitName.toLowerCase().includes(filters.search.toLowerCase()) &&
-          !system.meterType.toLowerCase().includes(filters.search.toLowerCase()) &&
-          !system.meterAccountNo.toLowerCase().includes(filters.search.toLowerCase())) {
-        return false
-      }
-
-      // Category filter
-      if (filters.categories.length > 0 && !filters.categories.includes(system.category)) {
-        return false
-      }
-
-      // Zone filter
-      if (filters.zones.length > 0 && !filters.zones.includes(system.zone)) {
-        return false
-      }
-
-      // Consumption range filter
-      if (system.totalConsumption < filters.consumptionMin || system.totalConsumption > filters.consumptionMax) {
-        return false
-      }
-
-      // Cost range filter
-      if (system.totalCost < filters.costMin || system.totalCost > filters.costMax) {
-        return false
-      }
-
-      return true
-    })
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      let aVal, bVal
-      switch (filters.sortBy) {
-        case 'name':
-          aVal = a.unitName.toLowerCase()
-          bVal = b.unitName.toLowerCase()
-          break
-        case 'consumption':
-          aVal = a.totalConsumption
-          bVal = b.totalConsumption
-          break
-        case 'cost':
-          aVal = a.totalCost
-          bVal = b.totalCost
-          break
-        case 'efficiency':
-          aVal = a.totalConsumption > 0 ? a.totalCost / a.totalConsumption : 0
-          bVal = b.totalConsumption > 0 ? b.totalCost / b.totalConsumption : 0
-          break
+const extractCategory = (unitName, type) => {
+    if (!unitName && !type) return 'Other';
+    
+    // Use the type field as primary categorization
+    switch(type) {
+        case 'PS': return 'Pumping Station';
+        case 'LS': return 'Lifting Station';
+        case 'IT': return 'Irrigation Tank';
+        case 'ADB': return 'Actuator DB';
+        case 'SL': return 'Street Light';
+        case 'BW': return 'Beachwell';
+        case 'HP': return 'Helipad';
+        case 'CP': return 'Central Park';
+        case 'GH': return 'Guard House';
+        case 'SB': return 'Security Building';
+        case 'RB': return 'ROP Building';
+        case 'APT': return 'Apartment';
+        case 'VS': return 'Village Square';
+        case 'ZL': return 'Zone Light';
+        case 'BM': return 'Bank Muscat';
+        case 'CK': return 'CIF Kitchen';
         default:
-          aVal = a.totalConsumption
-          bVal = b.totalConsumption
-      }
-
-      if (filters.sortOrder === 'asc') {
-        return aVal > bVal ? 1 : -1
-      } else {
-        return aVal < bVal ? 1 : -1
-      }
-    })
-
-    return filtered
-  }, [filters, initialElectricityData])
-
-  // Enhanced KPI calculations with trends
-  const kpiData = useMemo(() => {
-    const filteredConsumption = filteredData.reduce((sum, s) => sum + s.totalConsumption, 0)
-    const filteredCost = filteredData.reduce((sum, s) => sum + s.totalCost, 0)
-    const averageConsumption = filteredData.length > 0 ? filteredConsumption / filteredData.length : 0
-    const efficiency = filteredConsumption > 0 ? (filteredCost / filteredConsumption) * 1000 : 0
-
-    // Calculate trends (mock calculation for demo)
-    const growthRate = 3.2 // Mock growth rate
-    const efficiencyTrend = -1.5 // Mock efficiency improvement
-    const costTrend = 2.8 // Mock cost trend
-
-    return {
-      totalSystems: filteredData.length,
-      totalConsumption: filteredConsumption,
-      totalCost: filteredCost,
-      averageConsumption,
-      efficiency,
-      activeMonths: availableMonths.length,
-      growthRate,
-      efficiencyTrend,
-      costTrend,
-      peakHour: "14:00", // Mock peak hour
-      carbonFootprint: filteredConsumption * 0.42, // Mock carbon calculation
-      sustainability: 78 // Mock sustainability score
+            // Fallback to name-based categorization
+            const lowerUnitName = unitName?.toLowerCase() || '';
+            if (lowerUnitName.includes('pumping station')) return 'Pumping Station';
+            if (lowerUnitName.includes('lifting station')) return 'Lifting Station';
+            if (lowerUnitName.includes('irrigation tank')) return 'Irrigation Tank';
+            if (lowerUnitName.includes('actuator db')) return 'Actuator DB';
+            if (lowerUnitName.includes('street light')) return 'Street Light';
+            if (lowerUnitName.includes('apartment')) return 'Apartment';
+            return 'Other';
     }
-  }, [filteredData])
+};
 
-  // Enhanced chart data with advanced metrics
-  const chartData = useMemo(() => {
-    const startIdx = availableMonths.indexOf(filters.monthRange[0])
-    const endIdx = availableMonths.indexOf(filters.monthRange[1])
-    const selectedMonths = availableMonths.slice(startIdx, endIdx + 1)
+const parseData = (rawData) => {
+  const lines = rawData.split('\n');
+  const headerLine = lines[0].split(',').map(h => h.trim());
+  const dataLines = lines.slice(1);
+  const monthsHeader = headerLine.slice(3); // Skip Name, Type, Meter Account No.
 
-    const monthlyData = selectedMonths.map((month, index) => {
-      const monthConsumption = filteredData.reduce((sum, system) => {
-        return sum + (system.consumption[month] || 0)
-      }, 0)
-      
-      const prevConsumption = index > 0 ? selectedMonths[index - 1] : null
-      const prevMonthConsumption = prevConsumption ? filteredData.reduce((sum, system) => {
-        return sum + (system.consumption[prevConsumption] || 0)
-      }, 0) : monthConsumption
-
-      const trend = prevMonthConsumption > 0 ? ((monthConsumption - prevMonthConsumption) / prevMonthConsumption) * 100 : 0
-      
-      return {
-        month,
-        consumption: monthConsumption,
-        cost: monthConsumption * KWH_TO_OMR_RATE,
-        systems: filteredData.filter(s => (s.consumption[month] || 0) > 0).length,
-        efficiency: monthConsumption > 0 ? (monthConsumption * KWH_TO_OMR_RATE / monthConsumption) * 1000 : 0,
-        trend: Math.round(trend * 100) / 100,
-        carbonFootprint: monthConsumption * 0.42
+  return dataLines.map((line, index) => {
+    const values = line.split(',');
+    const unitName = values[0]?.trim() || 'N/A';
+    const type = values[1]?.trim() || 'N/A';
+    const entry = {
+      id: index + 1,
+      slNo: index + 1,
+      zone: 'N/A', // Not in this dataset
+      type: type,
+      muscatBayNumber: 'N/A', // Not in this dataset
+      unitName: unitName,
+      category: extractCategory(unitName, type),
+      meterAccountNo: values[2]?.trim() || 'N/A',
+      consumption: {},
+      totalConsumption: 0, 
+    };
+    
+    let currentOverallTotal = 0;
+    monthsHeader.forEach((month, i) => {
+      const consumptionValue = parseFloat(values[3 + i]);
+      entry.consumption[month] = isNaN(consumptionValue) ? 0 : consumptionValue;
+      if (!isNaN(consumptionValue)) {
+        currentOverallTotal += consumptionValue;
       }
-    })
+    });
+    entry.totalConsumption = parseFloat(currentOverallTotal.toFixed(2));
+    return entry;
+  });
+};
 
-    return monthlyData
-  }, [filteredData, filters.monthRange])
+const initialElectricityData = parseData(rawDataString);
+const availableMonths = Object.keys(initialElectricityData[0].consumption);
 
-  // Enhanced category data with advanced metrics
-  const categoryData = useMemo(() => {
-    return Object.entries(systemsByCategory)
-      .map(([category, systems]) => {
-        const categoryFiltered = systems.filter(s => filteredData.some(f => f.id === s.id))
-        const consumption = categoryFiltered.reduce((sum, s) => sum + s.totalConsumption, 0)
-        const cost = consumption * KWH_TO_OMR_RATE
-        
-        return {
-          category,
-          consumption,
-          cost,
-          systems: categoryFiltered.length,
-          efficiency: consumption > 0 ? cost / consumption * 1000 : 0,
-          avgConsumption: categoryFiltered.length > 0 ? consumption / categoryFiltered.length : 0,
-          percentage: (consumption / kpiData.totalConsumption) * 100,
-          carbonFootprint: consumption * 0.42,
-          sustainabilityScore: Math.random() * 20 + 60 // Mock sustainability score
-        }
-      })
-      .filter(d => d.consumption > 0)
-      .sort((a, b) => b.consumption - a.consumption)
-  }, [systemsByCategory, filteredData, kpiData.totalConsumption])
+// ===============================
+// SHARED COMPONENTS
+// ===============================
 
-  // Enhanced performance data
-  const performanceData = useMemo(() => {
-    if (categoryData.length === 0) return []
-    
-    const maxConsumption = Math.max(...categoryData.map(d => d.consumption))
-    const maxCost = Math.max(...categoryData.map(d => d.cost))
-    const maxSystems = Math.max(...categoryData.map(d => d.systems))
-    
-    return categoryData.slice(0, 6).map(d => ({
-      category: d.category.substring(0, 12) + (d.category.length > 12 ? '...' : ''),
-      consumption: (d.consumption / maxConsumption * 100),
-      cost: (d.cost / maxCost * 100),
-      systems: (d.systems / maxSystems * 100),
-      efficiency: Math.min(d.efficiency, 100),
-      sustainability: d.sustainabilityScore
-    }))
-  }, [categoryData])
-
-  const chartColors = [
-    PREMIUM_COLORS.primary, PREMIUM_COLORS.success, PREMIUM_COLORS.warning, 
-    PREMIUM_COLORS.error, PREMIUM_COLORS.info, PREMIUM_COLORS.secondary
-  ]
-
-  // Enhanced filter handlers
-  const handleCategoryFilter = (category: string) => {
-    setFilters(prev => ({
-      ...prev,
-      categories: prev.categories.includes(category)
-        ? prev.categories.filter(c => c !== category)
-        : [...prev.categories, category]
-    }))
-  }
-
-  const handleZoneFilter = (zone: string) => {
-    setFilters(prev => ({
-      ...prev,
-      zones: prev.zones.includes(zone)
-        ? prev.zones.filter(z => z !== zone)
-        : [...prev.zones, zone]
-    }))
-  }
-
-  const clearFilters = () => {
-    setFilters({
-      search: "",
-      categories: [],
-      monthRange: [availableMonths[0], availableMonths[availableMonths.length - 1]],
-      consumptionMin: 0,
-      consumptionMax: 100000,
-      costMin: 0,
-      costMax: 5000,
-      zones: [],
-      sortBy: 'consumption',
-      sortOrder: 'desc'
-    })
-  }
-
-  const handleRefresh = async () => {
-    setRefreshing(true)
-    // Simulate refresh
-    setTimeout(() => setRefreshing(false), 2000)
-  }
-
-  const handleExport = () => {
-    // Mock export functionality
-    console.log('Exporting data...')
-  }
-
-  // Error state with enhanced design
-  if (dataError && !dataLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center">
-              <AlertCircle className="text-white" size={40} />
-            </div>
-            <h1 className="text-3xl font-bold text-slate-800 mb-2">Connection Error</h1>
-            <p className="text-slate-600 text-lg">
-              Unable to load electricity data. Please check your connection and try again.
-            </p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-xl border border-red-200 p-8 text-center">
-            <button 
-              onClick={handleRefresh}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105"
-            >
-              Try Again
-            </button>
-          </div>
+const SummaryCard = ({ title, value, icon, unit, trend, trendColor, iconBgColor, isLoading }) => {
+  const IconComponent = icon;
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-100">
+      <div className="flex justify-between items-start mb-3">
+        <h3 className="text-slate-500 font-semibold text-md">{title}</h3>
+        <div className={`p-3 rounded-full text-white shadow-md`} style={{backgroundColor: iconBgColor || COLORS.primary }}>
+          <IconComponent size={22} />
         </div>
       </div>
-    )
-  }
+      {isLoading ? (
+        <div className="animate-pulse">
+          <div className="h-8 bg-slate-200 rounded w-24 mb-2"></div>
+          <div className="h-4 bg-slate-200 rounded w-16"></div>
+        </div>
+      ) : (
+        <>
+          <p className="text-2xl sm:text-3xl font-bold text-slate-800 mb-1.5">
+            {value} <span className="text-base font-medium text-slate-500">{unit}</span>
+          </p>
+          {trend && <p className={`text-xs sm:text-sm font-medium ${trendColor}`}>{trend}</p>}
+        </>
+      )}
+    </div>
+  );
+};
 
-  // Premium sub-navigation
+const ChartWrapper = ({ title, children, subtitle, actions }) => (
+  <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-slate-100">
+    <div className="flex justify-between items-start mb-4">
+      <div>
+        <h3 className="text-xl font-semibold text-slate-700">{title}</h3>
+        {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
+      </div>
+      {actions && <div className="flex space-x-2">{actions}</div>}
+    </div>
+    <div className="mt-4" style={{ height: '350px' }}>
+      {children}
+    </div>
+  </div>
+);
+
+const StyledSelect = ({ label, value, onChange, options, id, icon: Icon, disabled }) => {
+    return (
+        <div>
+            <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+            <div className="relative">
+                <select 
+                  id={id} 
+                  value={value} 
+                  onChange={onChange} 
+                  disabled={disabled}
+                  className="appearance-none w-full p-2.5 pr-10 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:outline-none bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed" 
+                  style={{ '--tw-ring-color': COLORS.primaryLight, borderColor: 'rgb(203 213 225 / 1)', ringColor: COLORS.primaryLight }} 
+                >
+                    {options.map(option => ( <option key={option.value} value={option.value}>{option.label}</option> ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                    {Icon ? <Icon size={16} /> : <ChevronDown size={16} />}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const LoadingSpinner = ({ size = 24 }) => (
+  <div className="flex justify-center items-center">
+    <div 
+      className="animate-spin rounded-full border-4 border-slate-200 border-t-primary" 
+      style={{
+        width: size,
+        height: size,
+        borderTopColor: COLORS.primary
+      }}
+    ></div>
+  </div>
+);
+
+// ===============================
+// MAIN ELECTRICITY SYSTEM MODULE
+// ===============================
+
+const ElectricitySystemModule = ({ isDarkMode }) => {
+  const [activeSubSection, setActiveSubSection] = useState('Dashboard');
+  const [selectedMonth, setSelectedMonth] = useState("All Months"); 
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedUnitId, setSelectedUnitId] = useState(initialElectricityData.length > 0 ? initialElectricityData[0].id.toString() : "");
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiAnalysisResult, setAiAnalysisResult] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const distinctCategories = useMemo(() => 
+    [...new Set(initialElectricityData.map(d => d.category))].sort(), 
+  []);
+  
+  const distinctUnitsForDropdown = useMemo(() => 
+    initialElectricityData.map(d => ({ value: d.id.toString(), label: `${d.unitName} (${d.meterAccountNo})`})).sort((a,b) => a.label.localeCompare(b.label)),
+  []);
+
+  const filteredElectricityData = useMemo(() => {
+    return initialElectricityData.filter(item => {
+      const categoryMatch = selectedCategory === "All Categories" || item.category === selectedCategory;
+      return categoryMatch; 
+    });
+  }, [selectedCategory]);
+
+  const kpiAndTableData = useMemo(() => {
+    if (selectedMonth === "All Months") {
+        return filteredElectricityData.map(item => ({ ...item, }));
+    }
+    return filteredElectricityData.map(item => ({ ...item, totalConsumption: item.consumption[selectedMonth] || 0, }));
+  }, [filteredElectricityData, selectedMonth]);
+
+  const totalConsumptionKWh = useMemo(() => kpiAndTableData.reduce((acc, curr) => acc + curr.totalConsumption, 0), [kpiAndTableData]);
+  const totalCostOMR = useMemo(() => totalConsumptionKWh * OMR_PER_KWH, [totalConsumptionKWh]);
+  const averageConsumptionPerUnit = useMemo(() => kpiAndTableData.length > 0 ? totalConsumptionKWh / kpiAndTableData.length : 0, [totalConsumptionKWh, kpiAndTableData]);
+  const activeMeters = useMemo(() => kpiAndTableData.filter(d => d.meterAccountNo !== 'N/A' && d.meterAccountNo !== 'MISSING_METER' && d.totalConsumption > 0).length, [kpiAndTableData]);
+
+  const monthlyTrendForAllMonths = useMemo(() => {
+    return availableMonths.map(month => {
+      const total = filteredElectricityData.reduce((acc, curr) => acc + (curr.consumption[month] || 0), 0);
+      return { name: month.replace('-24', '').replace('-25', ''), total: parseFloat(total.toFixed(2)) };
+    });
+  }, [filteredElectricityData]);
+
+  const consumptionByTypeChartData = useMemo(() => {
+    const dataToUse = kpiAndTableData; 
+    const typeData = {};
+    dataToUse.forEach(d => { typeData[d.category] = (typeData[d.category] || 0) + d.totalConsumption; });
+    return Object.entries(typeData).map(([name, value]) => ({ name, value: parseFloat(value.toFixed(2)) })).filter(item => item.value > 0).sort((a,b) => b.value - a.value);
+  }, [kpiAndTableData]);
+
+  const topConsumersChartData = useMemo(() => {
+    const dataToUse = kpiAndTableData;
+    return dataToUse.slice().sort((a, b) => b.totalConsumption - a.totalConsumption).filter(d => d.totalConsumption > 0).slice(0, 10).map(d => ({ name: d.unitName, consumption: d.totalConsumption, category: d.category, monthlyDataFull: initialElectricityData.find(item => item.id === d.id)?.consumption || {} }));
+  }, [kpiAndTableData]);
+
+  const handleAiAnalysis = async () => {
+    setIsAiModalOpen(true);
+    setIsAiLoading(true);
+    setAiAnalysisResult("");
+    
+    setTimeout(() => {
+      setAiAnalysisResult(`AI Analysis Results for ${selectedMonth === "All Months" ? "All Months" : selectedMonth}:
+
+• INFRASTRUCTURE ANALYSIS:
+  - All 4 Pumping Stations are operational and showing consumption data
+  - Pumping Station 01 shows highest consumption (${initialElectricityData.find(item => item.unitName === 'Pumping Station 01')?.totalConsumption.toLocaleString()} kWh total)
+  - Pumping Station 05 shows significant load (${initialElectricityData.find(item => item.unitName === 'Pumping Station 05')?.totalConsumption.toLocaleString()} kWh total)
+  - Beachwell shows major consumption variations - investigate for optimization
+
+• CATEGORY BREAKDOWN:
+  - ${distinctCategories.length} categories identified: ${distinctCategories.join(', ')}
+  - Apartments represent residential load across ${kpiAndTableData.filter(d => d.category === 'Apartment').length} units
+  - Infrastructure systems account for ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} critical components
+
+• CONSUMPTION INSIGHTS:
+  - Total system consumption: ${totalConsumptionKWh.toLocaleString()} kWh
+  - Estimated cost: ${totalCostOMR.toLocaleString()} OMR
+  - Average per unit: ${averageConsumptionPerUnit.toFixed(0)} kWh
+  - Active meters: ${activeMeters} out of ${kpiAndTableData.length} total
+
+• KEY RECOMMENDATIONS:
+  - Monitor Beachwell consumption patterns for efficiency opportunities
+  - Implement load balancing across pumping stations
+  - Track residential vs infrastructure consumption ratios
+  - Consider smart metering for better monitoring`);
+      setIsAiLoading(false);
+    }, 2000);
+  };
+
+  // Sub-navigation for electricity module
   const ElectricitySubNav = () => {
     const subSections = [
-      { name: "Overview", id: "Overview", icon: LayoutDashboard, color: PREMIUM_COLORS.primary },
-      { name: "Analytics", id: "Analytics", icon: BarChart3, color: PREMIUM_COLORS.secondary },
-      { name: "System Details", id: "SystemDetails", icon: ListTree, color: PREMIUM_COLORS.success },
-      { name: "Performance", id: "Performance", icon: Target, color: PREMIUM_COLORS.warning },
-      { name: "Reports", id: "Reports", icon: FileBarChart, color: PREMIUM_COLORS.info }
-    ]
-
+        { name: 'Dashboard', id: 'Dashboard', icon: LayoutDashboard },
+        { name: 'Performance', id: 'Performance', icon: TrendingUp },
+        { name: 'Analytics', id: 'Analytics', icon: BarChart2 },
+        { name: 'Unit Details', id: 'UnitDetails', icon: List },
+    ];
+    
     return (
-      <div className="mb-8 print:hidden">
-        <div className="bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl p-2 inline-flex space-x-2 border border-white/20">
-          {subSections.map((tab) => {
-            const isActive = activeSubSection === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveSubSection(tab.id as ElectricitySubSection)}
-                className={`px-6 py-3 rounded-xl text-sm font-semibold flex items-center space-x-3 transition-all duration-300 ease-out transform ${
-                  isActive 
-                    ? "text-white shadow-lg scale-105" 
-                    : "text-slate-600 hover:text-slate-800 hover:bg-white/50"
-                }`}
-                style={{ 
-                  background: isActive ? `linear-gradient(135deg, ${tab.color}, ${tab.color}90)` : "transparent" 
-                }}
-              >
-                <tab.icon size={20} />
-                <span>{tab.name}</span>
-                {isActive && (
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                )}
-              </button>
-            )
-          })}
+        <div className="mb-6 print:hidden flex justify-center">
+            <div className="bg-white shadow-md rounded-full p-1.5 inline-flex space-x-1 border border-slate-200">
+                {subSections.map((tab) => {
+                    const isActive = activeSubSection === tab.id;
+                    return ( 
+                      <button 
+                        key={tab.id} 
+                        onClick={() => setActiveSubSection(tab.id)} 
+                        className={`px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all duration-200 ease-in-out transform hover:scale-105`} 
+                        style={{ backgroundColor: isActive ? COLORS.primary : 'transparent', color: isActive ? 'white' : COLORS.primaryDark, }} 
+                        onMouseOver={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = COLORS.primaryLight; if(!isActive) e.currentTarget.style.color = 'white';}} 
+                        onMouseOut={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = 'transparent'; if(!isActive) e.currentTarget.style.color = COLORS.primaryDark;}}
+                      > 
+                        <tab.icon size={18} style={{ color: isActive ? 'white' : COLORS.primary }}/> 
+                        <span>{tab.name}</span> 
+                      </button> 
+                    );
+                })}
+            </div>
         </div>
-      </div>
-    )
-  }
+    );
+  };
 
-  // Premium Overview Section
-  const renderOverview = () => (
-    <div className="space-y-8">
-      {/* Hero KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <Zap className="w-8 h-8" />
-              <span className="text-blue-200 text-sm font-medium">Total Consumption</span>
+  // Filter Bar
+  const FilterBar = () => {
+    const monthOptions = [{ value: "All Months", label: "All Months" }, ...availableMonths.map(m => ({ value: m, label: m }))];
+    const categoryOptions = [{ value: "All Categories", label: "All Categories" }, ...distinctCategories.map(c => ({ value: c, label: c }))];
+    
+    return (
+        <div className="bg-white shadow p-4 rounded-lg mb-6 print:hidden sticky top-[110px] md:top-[88px] z-10 border border-slate-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+                <StyledSelect 
+                  id="monthFilter" 
+                  label="Filter by Month" 
+                  value={selectedMonth} 
+                  onChange={(e) => setSelectedMonth(e.target.value)} 
+                  options={monthOptions} 
+                  icon={CalendarDays}
+                />
+                <StyledSelect 
+                  id="categoryFilter" 
+                  label="Filter by Unit Category" 
+                  value={selectedCategory} 
+                  onChange={(e) => setSelectedCategory(e.target.value)} 
+                  options={categoryOptions} 
+                  icon={List}
+                />
+                <button 
+                  onClick={() => { setSelectedMonth("All Months"); setSelectedCategory("All Categories"); }} 
+                  className="text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 h-[46px] w-full lg:w-auto hover:shadow-lg" 
+                  style={{ backgroundColor: COLORS.primaryDark }} 
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = COLORS.primary} 
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = COLORS.primaryDark}
+                > 
+                  <Filter size={16}/> 
+                  <span>Reset Filters</span> 
+                </button>
             </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-bold">
-                {dataLoading ? "..." : kpiData.totalConsumption.toLocaleString()}
-                <span className="text-xl ml-1">kWh</span>
-              </div>
-              <div className="flex items-center text-blue-200 text-sm">
-                <TrendingUp className="w-4 h-4 mr-1" />
-                +{kpiData.growthRate}% vs last period
-              </div>
-            </div>
-          </div>
         </div>
-
-        <div className="relative overflow-hidden bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <DollarSign className="w-8 h-8" />
-              <span className="text-green-200 text-sm font-medium">Total Cost</span>
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-bold">
-                {dataLoading ? "..." : kpiData.totalCost.toLocaleString(undefined, {maximumFractionDigits: 0})}
-                <span className="text-xl ml-1">OMR</span>
-              </div>
-              <div className="flex items-center text-green-200 text-sm">
-                <TrendingUp className="w-4 h-4 mr-1" />
-                +{kpiData.costTrend}% vs last period
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative overflow-hidden bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <Activity className="w-8 h-8" />
-              <span className="text-purple-200 text-sm font-medium">Efficiency</span>
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-bold">
-                {dataLoading ? "..." : kpiData.efficiency.toFixed(2)}
-                <span className="text-xl ml-1">OMR/MWh</span>
-              </div>
-              <div className="flex items-center text-purple-200 text-sm">
-                <TrendingDown className="w-4 h-4 mr-1" />
-                {Math.abs(kpiData.efficiencyTrend)}% improvement
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <Target className="w-8 h-8" />
-              <span className="text-orange-200 text-sm font-medium">Active Systems</span>
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-bold">
-                {dataLoading ? "..." : kpiData.totalSystems}
-                <span className="text-xl ml-1">units</span>
-              </div>
-              <div className="flex items-center text-orange-200 text-sm">
-                <CheckCircle className="w-4 h-4 mr-1" />
-                {((kpiData.totalSystems / initialElectricityData.length) * 100).toFixed(1)}% operational
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Enhanced Quick Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-800">Sustainability</h3>
-            <Globe className="w-6 h-6 text-green-500" />
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Carbon Footprint</span>
-              <span className="font-semibold">{(kpiData.carbonFootprint / 1000).toFixed(1)}t CO₂</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Sustainability Score</span>
-              <div className="flex items-center">
-                <div className="w-20 h-2 bg-slate-200 rounded-full mr-2">
-                  <div 
-                    className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full" 
-                    style={{ width: `${kpiData.sustainability}%` }}
-                  />
-                </div>
-                <span className="font-semibold text-green-600">{kpiData.sustainability}%</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Peak Hour</span>
-              <span className="font-semibold">{kpiData.peakHour}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-800">Top Performers</h3>
-            <Award className="w-6 h-6 text-yellow-500" />
-          </div>
-          <div className="space-y-3">
-            {topConsumers.slice(0, 3).map((system, index) => (
-              <div key={system.id} className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white`}
-                     style={{ backgroundColor: chartColors[index] }}>
-                  {index + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-slate-800 truncate">{system.unitName}</p>
-                  <p className="text-sm text-slate-500">{system.totalConsumption.toLocaleString()} kWh</p>
-                </div>
-                <Star className="w-4 h-4 text-yellow-500" />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-800">System Health</h3>
-            <Heart className="w-6 h-6 text-red-500" />
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Operational Systems</span>
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
-                <span className="font-semibold text-green-600">{kpiData.totalSystems}</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Average Efficiency</span>
-              <span className="font-semibold">{kpiData.efficiency.toFixed(2)} OMR/MWh</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">System Uptime</span>
-              <span className="font-semibold text-green-600">99.8%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Enhanced Consumption Trends Chart */}
-      <div className="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-xl font-bold text-slate-800">Consumption Trends</h3>
-            <p className="text-slate-600">Monthly electricity usage patterns</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <select
-              value={selectedChart}
-              onChange={(e) => setSelectedChart(e.target.value as any)}
-              className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium"
-            >
-              <option value="area">Area Chart</option>
-              <option value="line">Line Chart</option>
-              <option value="bar">Bar Chart</option>
-              <option value="scatter">Scatter Plot</option>
-            </select>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
-            >
-              <RefreshCw className={`w-5 h-5 text-slate-600 ${refreshing ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        </div>
-        
-        <ResponsiveContainer width="100%" height={400}>
-          {selectedChart === "area" ? (
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={PREMIUM_COLORS.primary} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={PREMIUM_COLORS.primary} stopOpacity={0.1}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-              <YAxis stroke="#64748b" fontSize={12} />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "12px",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
-                }}
-                formatter={(value: any) => [value.toLocaleString(), "Consumption (kWh)"]}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="consumption" 
-                stroke={PREMIUM_COLORS.primary} 
-                fill="url(#colorTrend)"
-                strokeWidth={3}
-              />
-            </AreaChart>
-          ) : selectedChart === "line" ? (
-            <RechartsLine data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-              <YAxis stroke="#64748b" fontSize={12} />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "12px",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
-                }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="consumption" 
-                stroke={PREMIUM_COLORS.primary} 
-                strokeWidth={4}
-                dot={{ fill: PREMIUM_COLORS.primary, strokeWidth: 2, r: 6 }}
-              />
-            </RechartsLine>
-          ) : selectedChart === "bar" ? (
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-              <YAxis stroke="#64748b" fontSize={12} />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "12px",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
-                }}
-              />
-              <Bar dataKey="consumption" fill={PREMIUM_COLORS.success} radius={[8, 8, 0, 0]} />
-            </BarChart>
-          ) : (
-            <ScatterChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="consumption" stroke="#64748b" fontSize={12} />
-              <YAxis dataKey="cost" stroke="#64748b" fontSize={12} />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "12px",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
-                }}
-              />
-              <Scatter dataKey="cost" fill={PREMIUM_COLORS.secondary} />
-            </ScatterChart>
-          )}
-        </ResponsiveContainer>
-      </div>
-
-      {/* Category Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-          <h3 className="text-xl font-bold text-slate-800 mb-6">Category Distribution</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <RechartsPie>
-              <Pie
-                data={categoryData.slice(0, 6)}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={120}
-                paddingAngle={5}
-                dataKey="consumption"
-                label={({ category, percentage }) => `${category}: ${percentage.toFixed(1)}%`}
-              >
-                {categoryData.slice(0, 6).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value: any) => [`${value.toLocaleString()} kWh`, "Consumption"]} />
-            </RechartsPie>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-          <h3 className="text-xl font-bold text-slate-800 mb-6">Performance Radar</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <RadarChart data={performanceData}>
-              <PolarGrid />
-              <PolarAngleAxis dataKey="category" />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} />
-              <Radar 
-                name="Consumption" 
-                dataKey="consumption" 
-                stroke={PREMIUM_COLORS.primary} 
-                fill={PREMIUM_COLORS.primary} 
-                fillOpacity={0.3} 
-              />
-              <Radar 
-                name="Sustainability" 
-                dataKey="sustainability" 
-                stroke={PREMIUM_COLORS.success} 
-                fill={PREMIUM_COLORS.success} 
-                fillOpacity={0.3} 
-              />
-              <Tooltip />
-              <Legend />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-    </div>
-  )
-
-  // Render other sections (Analytics, SystemDetails, Performance, Reports) with enhanced designs
-  const renderAnalytics = () => (
-    <div className="space-y-6">
-      {/* Advanced Analytics Content */}
-      <div className="text-center p-12 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl">
-        <BarChart3 className="w-16 h-16 mx-auto mb-4 text-blue-500" />
-        <h3 className="text-2xl font-bold text-slate-800 mb-2">Advanced Analytics</h3>
-        <p className="text-slate-600">Detailed consumption analysis and forecasting tools coming soon.</p>
-      </div>
-    </div>
-  )
-
-  const renderSystemDetails = () => (
-    <div className="space-y-6">
-      {/* Enhanced System Details with improved layout */}
-      <div className="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div>
-            <h3 className="text-xl font-bold text-slate-800">
-              Electricity Systems ({filteredData.length} of {initialElectricityData.length})
-            </h3>
-            <p className="text-slate-600">Manage and monitor all electricity systems</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <Grid3X3 className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <ListTree className="w-5 h-5" />
-              </button>
-            </div>
-            <select
-              value={filters.sortBy}
-              onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
-              className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium"
-            >
-              <option value="consumption">Sort by Consumption</option>
-              <option value="cost">Sort by Cost</option>
-              <option value="name">Sort by Name</option>
-              <option value="efficiency">Sort by Efficiency</option>
-            </select>
-          </div>
-        </div>
-        
-        {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredData.map((system) => (
-              <div key={system.id} className="bg-slate-50 rounded-xl p-4 border border-slate-200 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-slate-800 truncate">{system.unitName}</h4>
-                    <p className="text-sm text-slate-600">{system.category}</p>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium`}
-                        style={{ 
-                          backgroundColor: `${chartColors[availableCategories.indexOf(system.category) % chartColors.length]}20`,
-                          color: chartColors[availableCategories.indexOf(system.category) % chartColors.length]
-                        }}>
-                    {system.meterType}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Consumption</span>
-                    <span className="font-semibold">{system.totalConsumption.toLocaleString()} kWh</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Cost</span>
-                    <span className="font-semibold">{system.totalCost.toFixed(2)} OMR</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Account</span>
-                    <span className="text-sm font-medium">{system.meterAccountNo}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {filteredData.map((system) => (
-              <SystemListItem
-                key={system.id}
-                id={system.id}
-                name={system.unitName}
-                meterType={system.meterType}
-                category={system.category}
-                value={system.totalConsumption}
-                tag={system.category}
-                tagColor={system.tagColor}
-                unit="kWh"
-                accountNo={system.meterAccountNo !== "N/A" ? system.meterAccountNo : undefined}
-              />
-            ))}
-          </div>
-        )}
-        
-        {filteredData.length === 0 && (
-          <div className="text-center py-12">
-            <Search className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-            <h3 className="text-lg font-semibold text-slate-600 mb-2">No systems found</h3>
-            <p className="text-slate-500 mb-4">Try adjusting your filters or search criteria</p>
-            <button 
-              onClick={clearFilters}
-              className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
-            >
-              Clear all filters
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-
-  const renderPerformance = () => (
-    <div className="space-y-6">
-      {/* Performance Content */}
-      <div className="text-center p-12 bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl">
-        <Target className="w-16 h-16 mx-auto mb-4 text-green-500" />
-        <h3 className="text-2xl font-bold text-slate-800 mb-2">Performance Analytics</h3>
-        <p className="text-slate-600">Detailed performance metrics and optimization insights.</p>
-      </div>
-    </div>
-  )
-
-  const renderReports = () => (
-    <div className="space-y-6">
-      {/* Reports Content */}
-      <div className="text-center p-12 bg-gradient-to-br from-purple-50 to-violet-100 rounded-2xl">
-        <FileBarChart className="w-16 h-16 mx-auto mb-4 text-purple-500" />
-        <h3 className="text-2xl font-bold text-slate-800 mb-2">Reports & Export</h3>
-        <p className="text-slate-600">Generate comprehensive reports and export data for analysis.</p>
-      </div>
-    </div>
-  )
+    );
+  };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
-      <div className="p-6 max-w-[1600px] mx-auto">
-        {/* Enhanced Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center">
-              <Zap className="w-7 h-7 text-white" />
+    <div className="space-y-6">
+      <ElectricitySubNav />
+      
+      {activeSubSection === 'Dashboard' && <FilterBar />}
+      
+      {activeSubSection === 'Dashboard' && (
+        <>
+          <div className="mb-6"> 
+            <button 
+              onClick={handleAiAnalysis} 
+              className="flex items-center justify-center space-x-2 text-white py-2.5 px-5 rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all w-full sm:w-auto" 
+              style={{ backgroundColor: COLORS.primary }} 
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = COLORS.primaryDark} 
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = COLORS.primary} 
+              disabled={isAiLoading}
+            > 
+              <Sparkles size={18} /> 
+              <span>{isAiLoading ? 'Analyzing...' : '✨ Analyze Consumption with AI'}</span> 
+            </button> 
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <SummaryCard title="Total Consumption" value={totalConsumptionKWh.toLocaleString(undefined, {maximumFractionDigits:0})} unit="kWh" icon={Zap} trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} trendColor={"text-slate-500 font-medium"} iconBgColor={COLORS.primary} />
+            <SummaryCard title="Total Est. Cost" value={totalCostOMR.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} unit="OMR" icon={DollarSign} trend="Based on selection" trendColor="text-slate-500 font-medium" iconBgColor={COLORS.success} />
+            <SummaryCard title="Avg. Consumption/Unit" value={averageConsumptionPerUnit.toLocaleString(undefined, {maximumFractionDigits:0})} unit="kWh" icon={BarChart2} trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} trendColor={"text-slate-500 font-medium"} iconBgColor={COLORS.warning} />
+            <SummaryCard title="Active Meters" value={activeMeters} unit="units" icon={Users2} trend="In selection" trendColor="text-slate-500 font-medium" iconBgColor={COLORS.info} />
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3"> 
+              <ChartWrapper title="Consumption Trend (All Months)" subtitle={`For category: ${selectedCategory}`}> 
+                <ResponsiveContainer width="100%" height="100%"> 
+                  <LineChart data={monthlyTrendForAllMonths} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}> 
+                    <defs> 
+                      <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1"> 
+                        <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/> 
+                        <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/> 
+                      </linearGradient> 
+                    </defs> 
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" /> 
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} /> 
+                    <YAxis tick={{ fontSize: 12, fill: '#64748b' }} /> 
+                    <Tooltip contentStyle={{backgroundColor: 'white', borderRadius: '8px', borderColor: '#e2e8f0'}} itemStyle={{color: '#334155'}} labelStyle={{color: '#0f172a', fontWeight: 'bold'}}/> 
+                    <Legend wrapperStyle={{fontSize: "12px", paddingTop: '10px'}}/> 
+                    <Area type="monotone" dataKey="total" stroke={COLORS.primary} fillOpacity={1} fill="url(#colorTotal)" /> 
+                    <Line type="monotone" dataKey="total" stroke={COLORS.primary} strokeWidth={3} activeDot={{ r: 7, strokeWidth: 2, fill: COLORS.primary }} dot={{r:4, fill: COLORS.primary}} name="Total kWh" /> 
+                  </LineChart> 
+                </ResponsiveContainer> 
+              </ChartWrapper> 
             </div>
-            <div className="text-left">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                Electricity System Analytics
-                {dataLoading && <span className="text-blue-600 ml-2">(Loading...)</span>}
-              </h1>
-              <p className="text-slate-600 font-medium">
-                Comprehensive electricity consumption monitoring & analysis dashboard
-              </p>
+            <div className="lg:col-span-2"> 
+              <ChartWrapper title="Consumption by Category" subtitle={`For ${selectedMonth}`}> 
+                <ResponsiveContainer width="100%" height="100%"> 
+                  <PieChart> 
+                    <Pie data={consumptionByTypeChartData} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={60} outerRadius={90} fill="#8884d8" paddingAngle={2} cornerRadius={5}> 
+                      {consumptionByTypeChartData.map((entry, index) => ( 
+                        <Cell key={`cell-${index}`} fill={COLORS.chart[index % COLORS.chart.length]} className="focus:outline-none hover:opacity-80 transition-opacity" stroke="none"/> 
+                      ))} 
+                      <Label value={`${consumptionByTypeChartData.reduce((sum, item) => sum + item.value, 0).toLocaleString(undefined, {maximumFractionDigits:0})}`} position="centerBottom" dy={-5} className="text-2xl font-bold fill-slate-700"/> 
+                      <Label value="Total kWh" position="centerTop" dy={10} className="text-xs fill-slate-500"/> 
+                    </Pie> 
+                    <Tooltip contentStyle={{backgroundColor: 'white', borderRadius: '8px', borderColor: '#e2e8f0'}}/> 
+                    <Legend verticalAlign="bottom" wrapperStyle={{paddingTop: '15px'}}/> 
+                  </PieChart> 
+                </ResponsiveContainer> 
+              </ChartWrapper> 
             </div>
           </div>
-        </div>
 
-        {/* Premium Sub-navigation */}
-        <div className="flex justify-center mb-8">
-          <ElectricitySubNav />
-        </div>
-
-        {/* Enhanced Action Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-200 ${
-              showFilters 
-                ? 'bg-blue-600 text-white shadow-lg' 
-                : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300 hover:text-blue-600'
-            }`}
-          >
-            <Filter size={18} />
-            <span>Advanced Filters</span>
-            {filters.categories.length > 0 || filters.zones.length > 0 || filters.search && (
-              <div className="w-2 h-2 bg-red-500 rounded-full" />
-            )}
-          </button>
-          
-          <button 
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold flex items-center space-x-2 hover:border-green-300 hover:text-green-600 transition-all duration-200"
-          >
-            <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
-            <span>Refresh</span>
-          </button>
-          
-          <button 
-            onClick={handleExport}
-            className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold flex items-center space-x-2 hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg"
-          >
-            <Download size={18} />
-            <span>Export Data</span>
-          </button>
-
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold flex items-center space-x-2 hover:border-purple-300 hover:text-purple-600 transition-all duration-200"
-          >
-            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-            <span>{isFullscreen ? 'Exit' : 'Fullscreen'}</span>
-          </button>
-        </div>
-
-        {/* Enhanced Filters Panel */}
-        {showFilters && (
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6 mb-8">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Advanced Filters & Search</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-              {/* Enhanced Search */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Search Systems</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search by name, type, or account..."
-                    value={filters.search}
-                    onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white/50 backdrop-blur text-slate-800 placeholder-slate-500 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
-                  />
-                </div>
-              </div>
-
-              {/* Month Range */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Analysis Period</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <select
-                    value={filters.monthRange[0]}
-                    onChange={(e) => setFilters(prev => ({ ...prev, monthRange: [e.target.value, prev.monthRange[1]] }))}
-                    className="px-3 py-3 rounded-xl border border-slate-200 bg-white/50 backdrop-blur text-slate-700 focus:border-blue-400 transition-all duration-200"
-                  >
-                    {availableMonths.map(month => (
-                      <option key={month} value={month}>{month}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={filters.monthRange[1]}
-                    onChange={(e) => setFilters(prev => ({ ...prev, monthRange: [prev.monthRange[0], e.target.value] }))}
-                    className="px-3 py-3 rounded-xl border border-slate-200 bg-white/50 backdrop-blur text-slate-700 focus:border-blue-400 transition-all duration-200"
-                  >
-                    {availableMonths.map(month => (
-                      <option key={month} value={month}>{month}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Consumption Range */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Consumption Range (kWh)</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={filters.consumptionMin}
-                    onChange={(e) => setFilters(prev => ({ ...prev, consumptionMin: parseInt(e.target.value) || 0 }))}
-                    className="px-3 py-3 rounded-xl border border-slate-200 bg-white/50 backdrop-blur text-slate-700 focus:border-blue-400 transition-all duration-200"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={filters.consumptionMax}
-                    onChange={(e) => setFilters(prev => ({ ...prev, consumptionMax: parseInt(e.target.value) || 100000 }))}
-                    className="px-3 py-3 rounded-xl border border-slate-200 bg-white/50 backdrop-blur text-slate-700 focus:border-blue-400 transition-all duration-200"
-                  />
-                </div>
-              </div>
-
-              {/* Sort Options */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Sort & Order</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <select
-                    value={filters.sortBy}
-                    onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
-                    className="px-3 py-3 rounded-xl border border-slate-200 bg-white/50 backdrop-blur text-slate-700 focus:border-blue-400 transition-all duration-200"
-                  >
-                    <option value="consumption">Consumption</option>
-                    <option value="cost">Cost</option>
-                    <option value="name">Name</option>
-                    <option value="efficiency">Efficiency</option>
-                  </select>
-                  <button
-                    onClick={() => setFilters(prev => ({ 
-                      ...prev, 
-                      sortOrder: prev.sortOrder === 'asc' ? 'desc' : 'asc' 
-                    }))}
-                    className="px-3 py-3 rounded-xl border border-slate-200 bg-white/50 backdrop-blur text-slate-700 hover:bg-white transition-all duration-200 flex items-center justify-center"
-                  >
-                    {filters.sortOrder === 'asc' ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Category Filters */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-700 mb-3">System Categories</label>
-              <div className="flex flex-wrap gap-2">
-                {availableCategories.map((category, index) => (
-                  <button
-                    key={category}
-                    onClick={() => handleCategoryFilter(category)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200 ${
-                      filters.categories.includes(category)
-                        ? "text-white border-transparent shadow-lg"
-                        : "bg-white/50 text-slate-700 border-slate-200 hover:border-blue-300"
-                    }`}
-                    style={{
-                      background: filters.categories.includes(category) 
-                        ? `linear-gradient(135deg, ${chartColors[index % chartColors.length]}, ${chartColors[index % chartColors.length]}90)`
-                        : undefined
-                    }}
-                  >
-                    {category}
-                    {systemsByCategory[category] && (
-                      <span className="ml-2 opacity-70">({systemsByCategory[category].length})</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Zone Filters */}
-            {availableZones.length > 0 && (
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-slate-700 mb-3">System Zones</label>
-                <div className="flex flex-wrap gap-2">
-                  {availableZones.map(zone => (
-                    <button
-                      key={zone}
-                      onClick={() => handleZoneFilter(zone)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200 ${
-                        filters.zones.includes(zone)
-                          ? "bg-gradient-to-r from-green-500 to-green-600 text-white border-transparent shadow-lg"
-                          : "bg-white/50 text-slate-700 border-slate-200 hover:border-green-300"
-                      }`}
-                    >
-                      {zone}
-                    </button>
+          {/* Top Consumers Table */}
+          <ChartWrapper title="Top Electricity Consumers" subtitle={`Highest consumption for ${selectedMonth === "All Months" ? "overall period" : selectedMonth}`}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="text-left p-3 font-semibold text-slate-700">Rank</th>
+                    <th className="text-left p-3 font-semibold text-slate-700">Unit Name</th>
+                    <th className="text-left p-3 font-semibold text-slate-700">Category</th>
+                    <th className="text-right p-3 font-semibold text-slate-700">Consumption (kWh)</th>
+                    <th className="text-right p-3 font-semibold text-slate-700">Est. Cost (OMR)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topConsumersChartData.map((consumer, index) => (
+                    <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="p-3">
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
+                          index < 3 ? 'bg-yellow-500' : 'bg-slate-400'
+                        }`}>
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td className="p-3 font-medium text-slate-800">{consumer.name}</td>
+                      <td className="p-3 text-slate-600">{consumer.category}</td>
+                      <td className="p-3 text-right font-semibold text-slate-800">{consumer.consumption.toLocaleString()}</td>
+                      <td className="p-3 text-right text-slate-600">{(consumer.consumption * OMR_PER_KWH).toFixed(2)}</td>
+                    </tr>
                   ))}
-                </div>
-              </div>
-            )}
+                </tbody>
+              </table>
+            </div>
+          </ChartWrapper>
 
-            {/* Filter Actions */}
-            <div className="flex justify-between items-center pt-4 border-t border-slate-200">
-              <div className="text-sm text-slate-600">
-                Showing {filteredData.length} of {initialElectricityData.length} systems
-              </div>
-              <button
-                onClick={clearFilters}
-                className="px-6 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-xl font-medium transition-colors duration-200"
-              >
-                Clear All Filters
-              </button>
+          {/* Category Summary Table */}
+          <ChartWrapper title="Category Summary" subtitle={`Consumption breakdown by category for ${selectedMonth === "All Months" ? "all data" : selectedMonth}`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {distinctCategories.map((category, index) => {
+                const categoryData = kpiAndTableData.filter(item => item.category === category);
+                const totalCategoryConsumption = categoryData.reduce((acc, curr) => acc + curr.totalConsumption, 0);
+                const categoryCount = categoryData.length;
+                
+                return (
+                  <div key={category} className="bg-slate-50 p-4 rounded-lg border">
+                    <h4 className="font-semibold text-slate-700 mb-2">{category}</h4>
+                    <div className="space-y-1">
+                      <p className="text-sm text-slate-600">Units: {categoryCount}</p>
+                      <p className="text-lg font-bold text-slate-800">{totalCategoryConsumption.toLocaleString()} kWh</p>
+                      <p className="text-xs text-slate-500">Avg: {categoryCount > 0 ? (totalCategoryConsumption / categoryCount).toFixed(0) : 0} kWh/unit</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </ChartWrapper>
+        </>
+      )}
+
+      {activeSubSection === 'UnitDetails' && (
+        <div className="space-y-6">
+          <div className="bg-white shadow p-4 rounded-lg border border-slate-200">
+            <h3 className="text-xl font-semibold text-slate-700 mb-4">All Electricity Units</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="text-left p-3 font-semibold text-slate-700">ID</th>
+                    <th className="text-left p-3 font-semibold text-slate-700">Unit Name</th>
+                    <th className="text-left p-3 font-semibold text-slate-700">Type</th>
+                    <th className="text-left p-3 font-semibold text-slate-700">Category</th>
+                    <th className="text-left p-3 font-semibold text-slate-700">Meter Account</th>
+                    <th className="text-right p-3 font-semibold text-slate-700">Total Consumption (kWh)</th>
+                    <th className="text-right p-3 font-semibold text-slate-700">Est. Cost (OMR)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiAndTableData.map((item) => (
+                    <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="p-3 text-slate-600">{item.id}</td>
+                      <td className="p-3 font-medium text-slate-800">{item.unitName}</td>
+                      <td className="p-3 text-slate-600">{item.type}</td>
+                      <td className="p-3">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          item.category === 'Pumping Station' ? 'bg-blue-100 text-blue-800' :
+                          item.category === 'Lifting Station' ? 'bg-green-100 text-green-800' :
+                          item.category === 'Apartment' ? 'bg-purple-100 text-purple-800' :
+                          item.category === 'Street Light' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {item.category}
+                        </span>
+                      </td>
+                      <td className="p-3 text-slate-600">{item.meterAccountNo}</td>
+                      <td className="p-3 text-right font-semibold text-slate-800">{item.totalConsumption.toLocaleString()}</td>
+                      <td className="p-3 text-right text-slate-600">{(item.totalConsumption * OMR_PER_KWH).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        )}
-
-        {/* Main Content with smooth transitions */}
-        <div className="transition-all duration-500 ease-in-out">
-          {activeSubSection === "Overview" && renderOverview()}
-          {activeSubSection === "Analytics" && renderAnalytics()}
-          {activeSubSection === "SystemDetails" && renderSystemDetails()}
-          {activeSubSection === "Performance" && renderPerformance()}
-          {activeSubSection === "Reports" && renderReports()}
         </div>
-      </div>
+      )}
+
+      {/* AI Analysis Modal */}
+      {isAiModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"> 
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto"> 
+            <div className="flex justify-between items-center mb-4"> 
+              <h3 className="text-xl font-semibold" style={{color: COLORS.primary}}>✨ AI Consumption Analysis</h3> 
+              <button onClick={() => setIsAiModalOpen(false)} className="p-1 rounded-full hover:bg-slate-200"> 
+                <X size={20} className="text-slate-600"/> 
+              </button> 
+            </div> 
+            {isAiLoading ? ( 
+              <div className="text-center py-8"> 
+                <Sparkles size={48} className="mx-auto animate-pulse" style={{color: COLORS.primaryLight}} /> 
+                <p className="mt-2 text-slate-600">AI is analyzing data, please wait...</p> 
+              </div> 
+            ) : ( 
+              <div className="text-sm text-slate-700 space-y-3 whitespace-pre-wrap"> 
+                {aiAnalysisResult ? ( 
+                  aiAnalysisResult.split('\n').map((line, index) => ( 
+                    <p key={index}>{line.startsWith('• ') || line.startsWith('- ') ? `• ${line.substring(2)}` : line}</p> 
+                  )) 
+                ) : ( 
+                  <p>No analysis available or an error occurred.</p> 
+                )} 
+              </div> 
+            )} 
+            <div className="mt-6 text-right"> 
+              <button 
+                onClick={() => setIsAiModalOpen(false)} 
+                className="text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors" 
+                style={{ backgroundColor: COLORS.primary }} 
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = COLORS.primaryDark} 
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = COLORS.primary}
+              > 
+                Close 
+              </button> 
+            </div> 
+          </div> 
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
+
+// Export the component
+export default ElectricitySystemModule;
