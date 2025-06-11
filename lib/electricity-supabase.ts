@@ -45,7 +45,7 @@ export interface ElectricityRecord {
 
 export type TagColor = ElectricityRecord["tagColor"]
 
-// Safe mapping function with error handling
+// Enhanced mapping function with better error handling
 const mapDatabaseToElectricityRecord = (
   row: any,
   index: number
@@ -94,30 +94,30 @@ const mapDatabaseToElectricityRecord = (
       averageMonthlyConsumption: parseFloat(averageMonthlyConsumption.toFixed(2))
     }
   } catch (error) {
-    console.error('Error mapping database row:', error)
+    console.error('Error mapping database row:', error, { row })
     // Return a safe fallback record
-    return createFallbackRecord(index)
+    return createFallbackRecord(index, row)
   }
 }
 
-// Create a safe fallback record
-const createFallbackRecord = (index: number): ElectricityRecord => ({
-  id: index + 1,
+// Create a safe fallback record with available data
+const createFallbackRecord = (index: number, row?: any): ElectricityRecord => ({
+  id: row?.id || index + 1,
   slNo: index + 1,
-  unitName: `System ${index + 1}`,
-  meterType: 'Unknown',
-  meterAccountNo: 'N/A',
+  unitName: row?.name || `System ${index + 1}`,
+  meterType: row?.type || 'Unknown',
+  meterAccountNo: row?.meter_account_no || 'N/A',
   category: 'Other',
   tagColor: 'slate',
   zone: 'N/A',
   muscatBayNumber: 'N/A',
   consumption: {},
-  totalConsumption: 0,
-  totalCost: 0,
+  totalConsumption: parseFloat(row?.total_kwh) || 0,
+  totalCost: parseFloat(row?.total_cost_omr) || 0,
   averageMonthlyConsumption: 0
 })
 
-// Category and color extraction logic
+// Enhanced category and color extraction logic with better PS detection
 const extractCategoryAndColor = (
   unitName: string,
   meterType: string,
@@ -137,75 +137,67 @@ const extractCategoryAndColor = (
       zone = "Zone 3"
     }
 
-    switch (lowerMeterType) {
-      case "ps":
-        category = "Pumping Station"
-        tagColor = "blue"
-        break
-      case "ls":
-        category = "Lifting Station"
-        tagColor = "blue"
-        break
-      case "irr":
-        category = "Irrigation Tank"
+    // Enhanced detection for pump stations
+    if (lowerMeterType === "ps" || lowerUnitName.includes("pumping station")) {
+      category = "Pumping Station"
+      tagColor = "blue"
+    } else if (lowerMeterType === "ls" || lowerUnitName.includes("lifting station")) {
+      category = "Lifting Station"
+      tagColor = "blue"
+    } else if (lowerMeterType === "irr" || lowerUnitName.includes("irrigation")) {
+      category = "Irrigation Tank"
+      tagColor = "green"
+    } else if (lowerMeterType === "db" || lowerUnitName.includes("actuator")) {
+      category = "Actuator DB"
+      tagColor = "orange"
+    } else if (lowerMeterType === "street light" || lowerUnitName.includes("street light")) {
+      category = "Street Light"
+      tagColor = "yellow"
+    } else if (lowerMeterType === "fp-landscape lights z3" || lowerUnitName.includes("landscape light")) {
+      category = "Landscape Light"
+      tagColor = "green"
+      zone = "Zone 3"
+    } else if (lowerMeterType === "d_building") {
+      if (lowerUnitName.includes("central park")) {
+        category = "Central Park"
         tagColor = "green"
-        break
-      case "db":
-        category = "Actuator DB"
+      } else if (
+        lowerUnitName.includes("guard house") ||
+        lowerUnitName.includes("security building") ||
+        lowerUnitName.includes("rop building")
+      ) {
+        category = "Ancillary Building"
         tagColor = "orange"
-        break
-      case "street light":
-        category = "Street Light"
-        tagColor = "yellow"
-        break
-      case "fp-landscape lights z3":
-        category = "Landscape Light"
-        tagColor = "green"
-        zone = "Zone 3"
-        break
-      case "d_building":
-        if (lowerUnitName.includes("central park")) {
-          category = "Central Park"
-          tagColor = "green"
-        } else if (
-          lowerUnitName.includes("guard house") ||
-          lowerUnitName.includes("security building") ||
-          lowerUnitName.includes("rop building")
-        ) {
-          category = "Ancillary Building"
-          tagColor = "orange"
-        } else if (lowerUnitName.includes("village square")) {
-          category = "Village Square"
-          tagColor = "purple"
-        } else if (lowerUnitName.includes("beachwell")) {
-          category = "Beachwell"
-          tagColor = "blue"
-        } else if (lowerUnitName.includes("helipad")) {
-          category = "Helipad"
-          tagColor = "slate"
-        } else if (lowerUnitName.startsWith("d building")) {
-          category = "D Building"
-          tagColor = "slate"
-        } else {
-          category = "Building"
-          tagColor = "slate"
-        }
-        break
-      case "retail":
-        if (lowerUnitName.includes("bank muscat")) {
-          category = "Commercial (Bank)"
-          tagColor = "purple"
-        } else if (lowerUnitName.includes("cif kitchen")) {
-          category = "Commercial (Kitchen)"
-          tagColor = "red"
-        } else {
-          category = "Retail"
-          tagColor = "purple"
-        }
-        break
-      default:
-        category = "Other"
+      } else if (lowerUnitName.includes("village square")) {
+        category = "Village Square"
+        tagColor = "purple"
+      } else if (lowerUnitName.includes("beachwell")) {
+        category = "Beachwell"
+        tagColor = "blue"
+      } else if (lowerUnitName.includes("helipad")) {
+        category = "Helipad"
         tagColor = "slate"
+      } else if (lowerUnitName.startsWith("d building")) {
+        category = "D Building"
+        tagColor = "slate"
+      } else {
+        category = "Building"
+        tagColor = "slate"
+      }
+    } else if (lowerMeterType === "retail" || lowerUnitName.includes("retail")) {
+      if (lowerUnitName.includes("bank muscat")) {
+        category = "Commercial (Bank)"
+        tagColor = "purple"
+      } else if (lowerUnitName.includes("cif kitchen")) {
+        category = "Commercial (Kitchen)"
+        tagColor = "red"
+      } else {
+        category = "Retail"
+        tagColor = "purple"
+      }
+    } else {
+      category = "Other"
+      tagColor = "slate"
     }
   } catch (error) {
     console.error('Error extracting category and color:', error)
@@ -217,134 +209,171 @@ const extractCategoryAndColor = (
   return { category, tagColor, zone }
 }
 
-// Enhanced mock data for when Supabase is not configured
+// Enhanced mock data including all 4 pump stations
 const getMockElectricityData = (): ElectricityRecord[] => {
   return [
     {
       id: 1,
       slNo: 1,
-      unitName: "Demo Pumping Station 01",
-      meterType: "ps",
-      meterAccountNo: "DEMO001",
+      unitName: "Pumping Station 01",
+      meterType: "PS",
+      meterAccountNo: "R52330",
       category: "Pumping Station",
       tagColor: "blue",
       zone: "Zone 1",
       muscatBayNumber: "N/A",
       consumption: {
-        'Apr-24': 1500, 'May-24': 1600, 'Jun-24': 1700, 'Jul-24': 1800,
-        'Aug-24': 1900, 'Sep-24': 1950, 'Oct-24': 2000, 'Nov-24': 2100,
-        'Dec-24': 2200, 'Jan-25': 2300, 'Feb-25': 2400, 'Mar-25': 2500, 'Apr-26': 2600
+        'Apr-24': 1608, 'May-24': 1940, 'Jun-24': 1783, 'Jul-24': 1874,
+        'Aug-24': 1662, 'Sep-24': 3822, 'Oct-24': 6876, 'Nov-24': 1629,
+        'Dec-24': 1640, 'Jan-25': 1903, 'Feb-25': 2095, 'Mar-25': 3032, 'Apr-26': 3940
       },
-      totalConsumption: 24650,
-      totalCost: 616.25,
-      averageMonthlyConsumption: 1896.15
+      totalConsumption: 32804,
+      totalCost: 820.10,
+      averageMonthlyConsumption: 2523.38
     },
     {
       id: 2,
       slNo: 2,
-      unitName: "Demo Central Park",
-      meterType: "d_building",
-      meterAccountNo: "DEMO002",
+      unitName: "Pumping Station 03",
+      meterType: "PS",
+      meterAccountNo: "R52329",
+      category: "Pumping Station",
+      tagColor: "blue",
+      zone: "Zone 1",
+      muscatBayNumber: "N/A",
+      consumption: {
+        'Apr-24': 31, 'May-24': 47, 'Jun-24': 25, 'Jul-24': 3,
+        'Aug-24': 0, 'Sep-24': 0, 'Oct-24': 33, 'Nov-24': 0,
+        'Dec-24': 179, 'Jan-25': 33, 'Feb-25': 137, 'Mar-25': 131, 'Apr-26': 276.6
+      },
+      totalConsumption: 895.6,
+      totalCost: 22.39,
+      averageMonthlyConsumption: 112.0
+    },
+    {
+      id: 3,
+      slNo: 3,
+      unitName: "Pumping Station 04",
+      meterType: "PS",
+      meterAccountNo: "R52327",
+      category: "Pumping Station",
+      tagColor: "blue",
+      zone: "Zone 1",
+      muscatBayNumber: "N/A",
+      consumption: {
+        'Apr-24': 830, 'May-24': 818, 'Jun-24': 720, 'Jul-24': 731,
+        'Aug-24': 857, 'Sep-24': 1176, 'Oct-24': 445, 'Nov-24': 919,
+        'Dec-24': 921, 'Jan-25': 245, 'Feb-25': 870, 'Mar-25': 646, 'Apr-26': 984.9
+      },
+      totalConsumption: 10162.9,
+      totalCost: 254.07,
+      averageMonthlyConsumption: 781.76
+    },
+    {
+      id: 4,
+      slNo: 4,
+      unitName: "Pumping Station 05",
+      meterType: "PS",
+      meterAccountNo: "R52325",
+      category: "Pumping Station",
+      tagColor: "blue",
+      zone: "Zone 1",
+      muscatBayNumber: "N/A",
+      consumption: {
+        'Apr-24': 1774, 'May-24': 2216, 'Jun-24': 2011, 'Jul-24': 2059,
+        'Aug-24': 2229, 'Sep-24': 5217, 'Oct-24': 2483, 'Nov-24': 2599,
+        'Dec-24': 1952, 'Jan-25': 2069, 'Feb-25': 2521, 'Mar-25': 2601, 'Apr-26': 3317
+      },
+      totalConsumption: 33048,
+      totalCost: 826.20,
+      averageMonthlyConsumption: 2542.15
+    },
+    {
+      id: 5,
+      slNo: 5,
+      unitName: "Central Park",
+      meterType: "D_Building",
+      meterAccountNo: "R54672",
       category: "Central Park",
       tagColor: "green",
       zone: "Main",
       muscatBayNumber: "N/A",
       consumption: {
-        'Apr-24': 8000, 'May-24': 8500, 'Jun-24': 9000, 'Jul-24': 9500,
-        'Aug-24': 10000, 'Sep-24': 10500, 'Oct-24': 11000, 'Nov-24': 11500,
-        'Dec-24': 12000, 'Jan-25': 12500, 'Feb-25': 13000, 'Mar-25': 13500, 'Apr-26': 14000
+        'Apr-24': 12208, 'May-24': 21845, 'Jun-24': 29438, 'Jul-24': 28186,
+        'Aug-24': 21995, 'Sep-24': 20202, 'Oct-24': 14900, 'Nov-24': 9604,
+        'Dec-24': 19032, 'Jan-25': 22819, 'Feb-25': 19974, 'Mar-25': 14190, 'Apr-26': 13846
       },
-      totalConsumption: 143000,
-      totalCost: 3575.00,
-      averageMonthlyConsumption: 11000.00
+      totalConsumption: 248239,
+      totalCost: 6205.98,
+      averageMonthlyConsumption: 19095.31
     },
     {
-      id: 3,
-      slNo: 3,
-      unitName: "Demo Irrigation Tank",
-      meterType: "irr",
-      meterAccountNo: "DEMO003",
-      category: "Irrigation Tank",
-      tagColor: "green",
-      zone: "Zone 2",
-      muscatBayNumber: "N/A",
-      consumption: {
-        'Apr-24': 1200, 'May-24': 1300, 'Jun-24': 1400, 'Jul-24': 1500,
-        'Aug-24': 1600, 'Sep-24': 1650, 'Oct-24': 1700, 'Nov-24': 1800,
-        'Dec-24': 1900, 'Jan-25': 2000, 'Feb-25': 2100, 'Mar-25': 2200, 'Apr-26': 2300
-      },
-      totalConsumption: 21650,
-      totalCost: 541.25,
-      averageMonthlyConsumption: 1665.38
-    },
-    {
-      id: 4,
-      slNo: 4,
-      unitName: "Demo Street Light FP 01",
-      meterType: "street light",
-      meterAccountNo: "DEMO004",
-      category: "Street Light",
-      tagColor: "yellow",
-      zone: "Zone 1",
-      muscatBayNumber: "N/A",
-      consumption: {
-        'Apr-24': 800, 'May-24': 850, 'Jun-24': 900, 'Jul-24': 950,
-        'Aug-24': 1000, 'Sep-24': 1050, 'Oct-24': 1100, 'Nov-24': 1150,
-        'Dec-24': 1200, 'Jan-25': 1250, 'Feb-25': 1300, 'Mar-25': 1350, 'Apr-26': 1400
-      },
-      totalConsumption: 13350,
-      totalCost: 333.75,
-      averageMonthlyConsumption: 1026.92
-    },
-    {
-      id: 5,
-      slNo: 5,
-      unitName: "Demo Beachwell",
-      meterType: "d_building",
-      meterAccountNo: "DEMO005",
+      id: 6,
+      slNo: 6,
+      unitName: "Beachwell",
+      meterType: "D_Building",
+      meterAccountNo: "R51903",
       category: "Beachwell",
       tagColor: "blue",
       zone: "Main",
       muscatBayNumber: "N/A",
       consumption: {
-        'Apr-24': 15000, 'May-24': 16000, 'Jun-24': 17000, 'Jul-24': 18000,
-        'Aug-24': 19000, 'Sep-24': 20000, 'Oct-24': 21000, 'Nov-24': 22000,
-        'Dec-24': 23000, 'Jan-25': 24000, 'Feb-25': 25000, 'Mar-25': 26000, 'Apr-26': 27000
+        'Apr-24': 16908, 'May-24': 46, 'Jun-24': 19332, 'Jul-24': 23170,
+        'Aug-24': 42241, 'Sep-24': 15223, 'Oct-24': 25370, 'Nov-24': 24383,
+        'Dec-24': 37236, 'Jan-25': 38168, 'Feb-25': 18422, 'Mar-25': 40, 'Apr-26': 27749
       },
-      totalConsumption: 273000,
-      totalCost: 6825.00,
-      averageMonthlyConsumption: 21000.00
+      totalConsumption: 288288,
+      totalCost: 7207.20,
+      averageMonthlyConsumption: 22176.00
     }
   ]
 }
 
-// Data fetching functions with enhanced error handling
+// Enhanced data fetching with better error handling and logging
 export const fetchElectricityData = async (): Promise<ElectricityRecord[]> => {
-  // Always use mock data if not properly configured or during build
+  // Check if we're in a server environment or Supabase is not configured
   if (!isSupabaseConfigured() || typeof window === 'undefined') {
-    console.log('Using mock electricity data (Supabase not configured or server-side)')
+    console.log('🔄 Using mock electricity data (Supabase not configured or server-side)')
     return getMockElectricityData()
   }
 
   try {
-    const { data, error } = await supabase
+    console.log('🔄 Fetching electricity data from Supabase...')
+    
+    const { data, error, count } = await supabase
       .from('electricity_consumption')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('total_kwh', { ascending: false })
 
     if (error) {
-      console.error('Error fetching electricity data:', error)
+      console.error('❌ Supabase fetch error:', error)
+      console.log('🔄 Falling back to mock data due to error')
       return getMockElectricityData()
     }
 
     if (!data || data.length === 0) {
-      console.log('No electricity data found, using mock data')
+      console.log('⚠️ No electricity data found in database, using mock data')
       return getMockElectricityData()
     }
 
-    return data.map((row, index) => mapDatabaseToElectricityRecord(row, index))
+    console.log(`✅ Successfully fetched ${data.length} electricity records from Supabase`)
+    
+    // Log pump stations specifically for debugging
+    const pumpStations = data.filter(row => row.type === 'PS')
+    console.log(`🔍 Found ${pumpStations.length} pump stations:`, 
+      pumpStations.map(ps => `${ps.name} (${ps.meter_account_no})`))
+
+    const mappedData = data.map((row, index) => mapDatabaseToElectricityRecord(row, index))
+    
+    // Verify pump station mapping
+    const mappedPumpStations = mappedData.filter(record => record.category === 'Pumping Station')
+    console.log(`✅ Mapped ${mappedPumpStations.length} pump stations successfully`)
+
+    return mappedData
+
   } catch (error) {
-    console.error('Failed to fetch electricity data:', error)
+    console.error('❌ Failed to fetch electricity data:', error)
+    console.log('🔄 Using mock data due to exception')
     return getMockElectricityData()
   }
 }
@@ -352,13 +381,13 @@ export const fetchElectricityData = async (): Promise<ElectricityRecord[]> => {
 export const fetchMonthlyTrends = async (): Promise<{ [month: string]: number }> => {
   // Default mock trends
   const mockTrends: { [month: string]: number } = {
-    'Apr-24': 40500, 'May-24': 42100, 'Jun-24': 43700, 'Jul-24': 45300,
-    'Aug-24': 46900, 'Sep-24': 48450, 'Oct-24': 50000, 'Nov-24': 51600,
-    'Dec-24': 53200, 'Jan-25': 54800, 'Feb-25': 56400, 'Mar-25': 58000, 'Apr-26': 59600
+    'Apr-24': 76910, 'May-24': 82533, 'Jun-24': 87850, 'Jul-24': 92488,
+    'Aug-24': 97389, 'Sep-24': 103755, 'Oct-24': 87543, 'Nov-24': 85678,
+    'Dec-24': 89234, 'Jan-25': 94567, 'Feb-25': 89876, 'Mar-25': 78654, 'Apr-26': 86432
   }
 
   if (!isSupabaseConfigured() || typeof window === 'undefined') {
-    console.log('Using mock monthly trends (Supabase not configured or server-side)')
+    console.log('🔄 Using mock monthly trends (Supabase not configured or server-side)')
     return mockTrends
   }
 
@@ -369,11 +398,12 @@ export const fetchMonthlyTrends = async (): Promise<{ [month: string]: number }>
       .order('month_order')
 
     if (error) {
-      console.error('Error fetching monthly trends:', error)
+      console.error('❌ Error fetching monthly trends:', error)
       return mockTrends
     }
 
     if (!data || data.length === 0) {
+      console.log('⚠️ No monthly trends data found, using mock data')
       return mockTrends
     }
 
@@ -386,25 +416,77 @@ export const fetchMonthlyTrends = async (): Promise<{ [month: string]: number }>
           monthlyTotals[monthKey] = parseFloat(row.total_consumption_kwh) || 0
         }
       } catch (error) {
-        console.error('Error processing monthly trend row:', error)
+        console.error('❌ Error processing monthly trend row:', error)
       }
     })
 
     return Object.keys(monthlyTotals).length > 0 ? monthlyTotals : mockTrends
   } catch (error) {
-    console.error('Failed to fetch monthly trends:', error)
+    console.error('❌ Failed to fetch monthly trends:', error)
     return mockTrends
   }
 }
 
-// Additional safe data fetching functions
+// Enhanced diagnostic function for pump station filtering
+export const diagnosePumpStationFiltering = async (): Promise<{
+  totalRecords: number;
+  pumpStations: any[];
+  filteringTest: any[];
+  success: boolean;
+}> => {
+  try {
+    console.log('🔍 Diagnosing pump station filtering...')
+    
+    // Fetch all data
+    const allData = await fetchElectricityData()
+    
+    // Filter pump stations using the same logic as the UI
+    const pumpStations = allData.filter(record => {
+      const isPS = record.meterType === 'PS' || 
+                   record.category === 'Pumping Station' ||
+                   record.unitName.toLowerCase().includes('pumping station')
+      
+      console.log(`🔍 Checking ${record.unitName}: type=${record.meterType}, category=${record.category}, isPS=${isPS}`)
+      return isPS
+    })
+
+    console.log(`✅ Found ${pumpStations.length} pump stations after filtering:`)
+    pumpStations.forEach((ps, index) => {
+      console.log(`   ${index + 1}. ${ps.unitName} (${ps.meterAccountNo}) - ${ps.totalConsumption} kWh`)
+    })
+
+    return {
+      totalRecords: allData.length,
+      pumpStations,
+      filteringTest: pumpStations.map(ps => ({
+        name: ps.unitName,
+        type: ps.meterType,
+        category: ps.category,
+        account: ps.meterAccountNo,
+        consumption: ps.totalConsumption
+      })),
+      success: pumpStations.length === 4
+    }
+
+  } catch (error) {
+    console.error('❌ Pump station diagnosis failed:', error)
+    return {
+      totalRecords: 0,
+      pumpStations: [],
+      filteringTest: [],
+      success: false
+    }
+  }
+}
+
+// Additional safe data fetching functions (enhanced)
 export const fetchTypesSummary = async (): Promise<Array<{ type: string; total_kwh: number; count: number }>> => {
   const mockTypesSummary = [
-    { type: 'Pumping Station', total_kwh: 24650, count: 1 },
-    { type: 'Central Park', total_kwh: 143000, count: 1 },
-    { type: 'Irrigation Tank', total_kwh: 21650, count: 1 },
-    { type: 'Street Light', total_kwh: 13350, count: 1 },
-    { type: 'Beachwell', total_kwh: 273000, count: 1 }
+    { type: 'PS', total_kwh: 76910, count: 4 },
+    { type: 'D_Building', total_kwh: 536527, count: 2 },
+    { type: 'LS', total_kwh: 21650, count: 1 },
+    { type: 'IRR', total_kwh: 15350, count: 1 },
+    { type: 'Street Light', total_kwh: 13350, count: 1 }
   ]
 
   if (!isSupabaseConfigured() || typeof window === 'undefined') {
@@ -418,12 +500,13 @@ export const fetchTypesSummary = async (): Promise<Array<{ type: string; total_k
       .order('total_kwh', { ascending: false })
 
     if (error || !data) {
+      console.log('⚠️ Using mock types summary')
       return mockTypesSummary
     }
 
     return data
   } catch (error) {
-    console.error('Failed to fetch types summary:', error)
+    console.error('❌ Failed to fetch types summary:', error)
     return mockTypesSummary
   }
 }
@@ -445,26 +528,30 @@ export const fetchHighConsumers = async (limit: number = 10): Promise<any[]> => 
 
     return data
   } catch (error) {
-    console.error('Failed to fetch high consumers:', error)
+    console.error('❌ Failed to fetch high consumers:', error)
     return getMockElectricityData().slice(0, limit)
   }
 }
 
-// Utility functions for backward compatibility
+// Utility functions for backward compatibility (enhanced)
 export const getTotalConsumption = (data: ElectricityRecord[]): number => {
   try {
-    return data.reduce((sum, record) => sum + (record.totalConsumption || 0), 0)
+    const total = data.reduce((sum, record) => sum + (record.totalConsumption || 0), 0)
+    console.log(`📊 Total consumption calculated: ${total.toLocaleString()} kWh from ${data.length} systems`)
+    return total
   } catch (error) {
-    console.error('Error calculating total consumption:', error)
+    console.error('❌ Error calculating total consumption:', error)
     return 0
   }
 }
 
 export const getTotalCost = (data: ElectricityRecord[]): number => {
   try {
-    return data.reduce((sum, record) => sum + (record.totalCost || 0), 0)
+    const total = data.reduce((sum, record) => sum + (record.totalCost || 0), 0)
+    console.log(`💰 Total cost calculated: ${total.toFixed(2)} OMR`)
+    return total
   } catch (error) {
-    console.error('Error calculating total cost:', error)
+    console.error('❌ Error calculating total cost:', error)
     return 0
   }
 }
@@ -479,20 +566,32 @@ export const getSystemsByCategory = (data: ElectricityRecord[]): { [category: st
       }
       categories[category].push(record)
     })
+    
+    // Log pump stations specifically
+    if (categories['Pumping Station']) {
+      console.log(`🚰 Pump Stations grouped: ${categories['Pumping Station'].length} systems`)
+      categories['Pumping Station'].forEach((ps, idx) => {
+        console.log(`   ${idx + 1}. ${ps.unitName} (${ps.meterAccountNo})`)
+      })
+    }
+    
     return categories
   } catch (error) {
-    console.error('Error grouping systems by category:', error)
+    console.error('❌ Error grouping systems by category:', error)
     return {}
   }
 }
 
 export const getTopConsumers = (data: ElectricityRecord[], limit: number = 10): ElectricityRecord[] => {
   try {
-    return [...data]
+    const sorted = [...data]
       .sort((a, b) => (b.totalConsumption || 0) - (a.totalConsumption || 0))
       .slice(0, limit)
+    
+    console.log(`🏆 Top ${limit} consumers calculated`)
+    return sorted
   } catch (error) {
-    console.error('Error getting top consumers:', error)
+    console.error('❌ Error getting top consumers:', error)
     return []
   }
 }
@@ -510,9 +609,10 @@ export const getMonthlyTrends = (data: ElectricityRecord[]): { [month: string]: 
       }, 0)
     })
     
+    console.log(`📈 Monthly trends calculated for ${availableMonths.length} months`)
     return monthlyTotals
   } catch (error) {
-    console.error('Error calculating monthly trends:', error)
+    console.error('❌ Error calculating monthly trends:', error)
     return {}
   }
 }
