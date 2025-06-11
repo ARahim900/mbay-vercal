@@ -241,10 +241,10 @@ const LoadingSpinner = ({ size = 24 }) => (
 );
 
 // ===============================
-// MAIN ELECTRICITY SYSTEM MODULE
+// MAIN ELECTRICITY SYSTEM MODULE - NAMED EXPORT
 // ===============================
 
-const ElectricitySystemModule = ({ isDarkMode }) => {
+export const ElectricitySystemModule = ({ isDarkMode }) => {
   const [activeSubSection, setActiveSubSection] = useState('Dashboard');
   const [selectedMonth, setSelectedMonth] = useState("All Months"); 
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -624,6 +624,3 @@ const ElectricitySystemModule = ({ isDarkMode }) => {
     </div>
   );
 };
-
-// Export the component
-export default ElectricitySystemModule;
