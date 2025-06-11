@@ -1,6 +1,6 @@
 "use client"
 
-import { Zap, Droplets, Combine, UserCheck, Power, Menu, Settings } from "lucide-react"
+import { Zap, Droplets, Combine, UserCheck, Power, Menu, Settings, Activity } from "lucide-react"
 import { COLORS } from "@/lib/constants"
 
 interface SidebarProps {
@@ -23,6 +23,7 @@ export function Sidebar({
     { name: "Water Analysis", icon: Droplets, sectionId: "WaterAnalysis" },
     { name: "STP Plant", icon: Combine, sectionId: "STPPlant" },
     { name: "Contractor Tracker", icon: UserCheck, sectionId: "ContractorTracker" },
+    { name: "System Diagnostics", icon: Activity, sectionId: "ElectricityDiagnostics" },
   ]
 
   return (
@@ -61,6 +62,12 @@ export function Sidebar({
           >
             <section.icon size={22} className="group-hover:scale-110 transition-transform text-white flex-shrink-0" />
             {!isCollapsed && <span className="font-medium">{section.name}</span>}
+            {/* Add indicator for diagnostics */}
+            {section.sectionId === "ElectricityDiagnostics" && !isCollapsed && (
+              <span className="ml-auto px-2 py-0.5 text-xs bg-orange-500 text-white rounded-full">
+                DIAG
+              </span>
+            )}
           </button>
         ))}
       </nav>
