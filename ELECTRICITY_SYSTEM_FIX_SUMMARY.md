@@ -54,21 +54,21 @@ Your electricity system database contains **4 pump stations** but the filtering 
 
 ### **Step 1: Dependencies Check**
 All required dependencies are already in your `package.json`:
-```json
+\`\`\`json
 {
   "@supabase/supabase-js": "latest",
   "class-variance-authority": "^0.7.1", 
   "@radix-ui/react-slot": "1.1.1",
   "lucide-react": "^0.454.0"
 }
-```
+\`\`\`
 
 ### **Step 2: Environment Variables**
 Ensure your `.env.local` file contains:
-```env
+\`\`\`env
 NEXT_PUBLIC_SUPABASE_URL=https://hkmazjdexunxsnogadhb.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
-```
+\`\`\`
 
 ### **Step 3: Deploy & Test**
 1. **Deploy the code** to your hosting platform
@@ -79,7 +79,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 ## 📁 **Files Added/Modified**
 
 ### **New Files:**
-```
+\`\`\`
 lib/electricity-data-migration.ts          # Complete data migration system
 components/modules/electricity-diagnostics.tsx  # Diagnostic tool
 components/ui/badge.tsx                     # Status badges
@@ -87,14 +87,14 @@ components/ui/alert.tsx                     # Alert system
 components/ui/card.tsx                      # Card components
 components/ui/button.tsx                    # Button components
 PUMP_STATION_FIX_GUIDE.md                  # Step-by-step fix guide
-```
+\`\`\`
 
 ### **Updated Files:**
-```
+\`\`\`
 lib/electricity-supabase.ts                # Enhanced filtering logic
 components/layout/sidebar.tsx               # Added diagnostics navigation
 components/operations-dashboard.tsx         # Added diagnostics module
-```
+\`\`\`
 
 ## 🎯 **Expected Results After Fix**
 

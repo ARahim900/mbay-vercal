@@ -28,44 +28,44 @@ I've implemented a comprehensive fix with:
 
 ### **Step 2: Check Supabase Connection**
 
-```typescript
+\`\`\`typescript
 // 1. Click "Check Connection" button
 // 2. Verify all status indicators are green:
 //    ✅ Connected: Connected
 //    ✅ URL: Configured  
 //    ✅ API Key: Configured
 //    ✅ Client Type: Real Supabase Client
-```
+\`\`\`
 
 ### **Step 3: Migrate Complete Data**
 
-```typescript
+\`\`\`typescript
 // 1. Click "Migrate Data to Supabase" button
 // 2. This will:
 //    - Clear existing data
 //    - Import all 56+ electricity systems
 //    - Ensure all 4 pump stations are included
 //    - Calculate totals and costs automatically
-```
+\`\`\`
 
 ### **Step 4: Run System Diagnostics**
 
-```typescript
+\`\`\`typescript
 // 1. Click "Run Diagnostics" button
 // 2. Expected results:
 //    - Total Records: 56+
 //    - Pump Stations: 4/4
 //    - System Health: ✅ HEALTHY
-```
+\`\`\`
 
 ### **Step 5: Test Filtering Logic**
 
-```typescript
+\`\`\`typescript
 // 1. Click "Test Filtering" button
 // 2. Expected results:
 //    - Pump Stations Detected: 4
 //    - All pump stations listed with correct data
-```
+\`\`\`
 
 ### **Step 6: Verify in Main Module**
 
@@ -79,18 +79,18 @@ I've implemented a comprehensive fix with:
 
 ### **Enhanced Detection Logic**
 
-```typescript
+\`\`\`typescript
 // The new filtering logic detects pump stations using multiple criteria:
 const isPumpStation = (record) => {
   return record.meterType === 'PS' || 
          record.category === 'Pumping Station' ||
          record.unitName.toLowerCase().includes('pumping station')
 }
-```
+\`\`\`
 
 ### **Database Schema**
 
-```sql
+\`\`\`sql
 -- Your electricity_consumption table structure:
 CREATE TABLE electricity_consumption (
   id SERIAL PRIMARY KEY,
@@ -105,7 +105,7 @@ CREATE TABLE electricity_consumption (
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 );
-```
+\`\`\`
 
 ### **Expected Data After Migration**
 
@@ -141,39 +141,39 @@ CREATE TABLE electricity_consumption (
 ### **If Pump Stations Still Not Showing:**
 
 1. **Check Environment Variables**
-   ```bash
+   \`\`\`bash
    # Verify .env.local contains:
    NEXT_PUBLIC_SUPABASE_URL=https://hkmazjdexunxsnogadhb.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
-   ```
+   \`\`\`
 
 2. **Clear Browser Cache**
-   ```typescript
+   \`\`\`typescript
    // In developer tools:
    localStorage.clear()
    sessionStorage.clear()
    // Then refresh the page
-   ```
+   \`\`\`
 
 3. **Re-run Migration**
-   ```typescript
+   \`\`\`typescript
    // In diagnostics tool:
    1. Click "Migrate Data to Supabase" again
    2. Wait for success message
    3. Click "Run Full System Check"
-   ```
+   \`\`\`
 
 4. **Check Browser Console**
-   ```typescript
+   \`\`\`typescript
    // Look for console messages like:
    "✅ Found 4 pump stations"
    "🚰 Pump Stations grouped: 4 systems"
    "📊 Total consumption calculated: 1,582,665.52 kWh"
-   ```
+   \`\`\`
 
 ### **Manual Database Verification**
 
-```sql
+\`\`\`sql
 -- Direct Supabase query to verify data:
 SELECT name, type, meter_account_no, total_kwh 
 FROM electricity_consumption 
@@ -181,7 +181,7 @@ WHERE type = 'PS'
 ORDER BY name;
 
 -- Should return 4 rows
-```
+\`\`\`
 
 ## 📊 **Performance Monitoring**
 
