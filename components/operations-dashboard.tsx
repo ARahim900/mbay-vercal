@@ -7,6 +7,7 @@ import { ElectricitySystemModule } from "./modules/electricity-system"
 import WaterLossAnalysis from "./modules/water-analysis"
 import { STPPlantModule } from "./modules/stp-plant"
 import { ContractorTrackerModule } from "./modules/contractor-tracker"
+import { ElectricityDiagnostics } from "./modules/electricity-diagnostics"
 import { Columns, Loader2 } from "lucide-react"
 import { COLORS } from "@/lib/constants"
 
@@ -48,6 +49,8 @@ export function OperationsDashboard() {
         return <STPPlantModule />
       case "ContractorTracker":
         return <ContractorTrackerModule />
+      case "ElectricityDiagnostics":
+        return <ElectricityDiagnostics />
       default:
         return (
           <div className="flex-1 p-8 space-y-8">
