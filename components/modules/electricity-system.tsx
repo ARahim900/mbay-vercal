@@ -2,11 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Label, Area } from 'recharts';
 import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, ChevronRight, Award, TrendingDown, Star, Crown, Medal } from 'lucide-react';
 
+// Import the electricity data hooks and utilities
+import { useElectricityData, useMonthlyTrends, availableMonths, KWH_TO_OMR_RATE } from '@/lib/electricity-data';
+
 // ===============================
 // DESIGN SYSTEM & CONSTANTS
 // ===============================
-
-const OMR_PER_KWH = 0.025;
 
 // Enhanced Muscat Bay Color Scheme - Using Tailwind Classes
 const COLORS = {
@@ -26,136 +27,6 @@ const COLORS = {
     '#C3FBF4', '#F2F0EA', '#10B981', '#EF4444', '#6A5ACD'
   ]
 };
-
-// ===============================
-// ELECTRICITY DATA
-// ===============================
-
-const rawDataString = `Name,Type,Meter Account No.,Apr-24,May-24,Jun-24,Jul-24,Aug-24,Sep-24,Oct-24,Nov-24,Dec-24,Jan-25,Feb-25,Mar-25,Apr-26
-Pumping Station 01,PS,R52330,1608,1940,1783,1874,1662,3822,6876,1629,1640,1903,2095,3032,3940
-Pumping Station 03,PS,R52329,31,47,25,3,0,0,33,0,179,33,137,131,276.6
-Pumping Station 04,PS,R52327,1200,1350,1180,1456,1234,2100,3456,919,921,245,870,646,985
-Pumping Station 05,PS,R52325,2800,2650,2890,2340,2567,2980,3200,2599,1952,2069,2521,2601,3317
-Lifting Station 02,LS,R52328,0,0,0,0,0,0,0,0,0,0,0,0,0
-Lifting Station 03,LS,R52333,120,135,98,87,76,145,156,91,185,28,40,58,83
-Lifting Station 04,LS,R52324,890,765,678,723,645,712,834,686,631,701,638,572,750
-Lifting Station 05,LS,R52332,3200,3100,2980,2890,2756,3145,3289,2413,2643,2873,3665,3069,4201
-Irrigation Tank 01,IT,R52326,1890,1675,1456,1598,1734,1823,1945,1432,1268,1689,2214,1718,1663
-Irrigation Tank 02,IT,R52331,1200,1156,1089,1134,1076,1245,1345,974,1026,983,1124,1110,1830
-Irrigation Tank 03,IT,R52323,345,398,456,378,398,445,523,269,417,840,1009,845,1205
-Irrigation Tank 04,IT,R53195,278,245,189,234,198,267,298,212,213,40,233,235,447
-Actuator DB 01,ADB,R53196,45,38,42,35,29,41,44,34,29,7,28,24,27
-Actuator DB 02,ADB,R51900,289,267,234,198,176,245,278,232,161,33,134,139,211
-Actuator DB 03,ADB,R51904,267,234,198,223,187,234,256,220,199,56,203,196,212
-Actuator DB 04,ADB,R51901,198,234,167,189,156,201,223,172,173,186,161,227,253
-Actuator DB 05,ADB,R51907,23,19,16,21,14,18,22,18,16,4,18,14,18
-Actuator DB 06,ADB,R51909,56,52,48,51,44,49,53,49,44,47,45,38,47
-Street Light FP 01,SL,R53197,4200,3890,3567,3445,3234,3567,3890,3593,3147,787,3228,2663,3230
-Street Light FP 02,SL,R51906,2890,2567,2345,2456,2198,2345,2567,2361,2258,633,2298,1812,2153
-Street Light FP 03,SL,R51905,2456,2234,2098,2156,1987,2098,2234,2060,1966,1868,1974,1562,1847
-Street Light FP 04,SL,R51908,2234,1987,1345,1456,1234,1345,1987,2299,1389,325,1406,1401,2413
-Street Light FP 05,SL,R51902,1987,1756,1456,1598,1345,1456,1756,1477,1121,449,2070,1870,3233
-Beachwell,BW,R51903,28000,32000,35000,30000,28000,32000,35000,24383,37236,38168,18422,40,27749
-Helipad,HP,R52334,0,0,0,0,0,0,0,0,0,0,0,0,0
-Central Park,CP,R54672,12000,15000,18000,16000,14000,16000,18000,9604,19032,22819,19974,14190,13846
-Guard House,GH,R53651,1456,1345,1234,1298,1156,1234,1345,1225,814,798,936,879,1467
-Security Building,SB,R53649,6789,6234,5890,6123,5678,5890,6234,5702,5131,5559,5417,4504,5978
-ROP Building,RB,R53648,4234,3890,3567,3745,3456,3567,3890,3581,2352,2090,2246,1939,3537
-Apartment D44,APT,R53705,1678,1456,1234,1345,1189,1234,1456,1377,764,647,657,650,1306
-Apartment D45,APT,R53665,1456,1298,1134,1245,1089,1134,1298,1252,841,670,556,608,1069
-Apartment D46,APT,R53700,1789,1567,1345,1456,1298,1345,1567,1577,890,724,690,752,1292
-Apartment D47,APT,R53690,1890,1678,1456,1567,1398,1456,1678,1774,1055,887,738,792,1545
-Apartment D48,APT,R53666,1234,1089,945,1034,912,945,1089,1046,785,826,676,683,1092
-Apartment D49,APT,R53715,1789,1567,1345,1456,1298,1345,1567,1608,1068,860,837,818,984
-Apartment D50,APT,R53672,1345,1189,1034,1134,1001,1034,1189,1102,789,765,785,707,1331
-Apartment D51,APT,R53657,1987,1756,1456,1598,1423,1456,1756,1855,710,661,682,642,904
-Apartment D52,APT,R53699,2234,1987,1678,1834,1634,1678,1987,1986,1208,979,896,952,1651
-Apartment D53,APT,R54782,1987,1756,1456,1598,1423,1456,1756,1764,968,693,732,760,1281
-Apartment D54,APT,R54793,1890,1678,1456,1567,1398,1456,1678,1777,834,681,559,531,1042
-Apartment D55,APT,R54804,1987,1756,1456,1598,1423,1456,1756,1828,1035,677,616,719,1417
-Apartment D56,APT,R54815,1987,1756,1456,1598,1423,1456,1756,1805,937,683,731,765,1536
-Apartment D57,APT,R54826,2456,2234,1987,2134,1901,1987,2234,2262,1332,990,846,795,1732
-Apartment D58,APT,R54836,1678,1456,1234,1345,1189,1234,1456,1534,778,593,535,594,1415
-Apartment D59,APT,R54847,1789,1567,1345,1456,1298,1345,1567,1634,998,628,582,697,1138
-Apartment D60,APT,R54858,1456,1298,1134,1245,1089,1134,1298,1275,705,674,612,679,1069
-Apartment D61,APT,R54869,1890,1678,1456,1567,1398,1456,1678,1734,977,767,800,719,1394
-Apartment D62,APT,R53717,1789,1567,1345,1456,1298,1345,1567,1630,957,715,677,595,800
-Apartment D74,APT,R53675,1456,1298,1134,1245,1089,1134,1298,1303,766,639,566,463,1079
-Apartment D75,APT,R53668,1298,1134,987,1089,956,987,1134,1169,702,475,508,554,912
-Village Square,VS,R56628,7890,6789,5890,6234,5567,5890,6789,6229,3695,3304,3335,3383,4415
-Zone-3 Light FP-17,ZL,R54872,0,0,0,0,0,0,0,0,0,0,0,0,0
-Zone-3 Light FP-21,ZL,R54873,56,48,42,47,39,42,48,40,48,13,57,47,55
-Zone-3 Light FP-22,ZL,R54874,8,7,6,7,5,6,7,6,8,0,0,0,0
-Bank Muscat,BM,MISSING_METER,189,156,134,148,123,134,156,148,72,59,98,88,163
-CIF Kitchen,CK,MISSING_METER,18900,17800,16700,17234,15890,16700,17800,16742,15554,16788,16154,14971,18446`.trim();
-
-const extractCategory = (unitName, type) => {
-    if (!unitName && !type) return 'Other';
-    
-    switch(type) {
-        case 'PS': return 'Pumping Station';
-        case 'LS': return 'Lifting Station';
-        case 'IT': return 'Irrigation Tank';
-        case 'ADB': return 'Actuator DB';
-        case 'SL': return 'Street Light';
-        case 'BW': return 'Beachwell';
-        case 'HP': return 'Helipad';
-        case 'CP': return 'Central Park';
-        case 'GH': return 'Guard House';
-        case 'SB': return 'Security Building';
-        case 'RB': return 'ROP Building';
-        case 'APT': return 'Apartment';
-        case 'VS': return 'Village Square';
-        case 'ZL': return 'Zone Light';
-        case 'BM': return 'Bank Muscat';
-        case 'CK': return 'CIF Kitchen';
-        default:
-            const lowerUnitName = unitName?.toLowerCase() || '';
-            if (lowerUnitName.includes('pumping station')) return 'Pumping Station';
-            if (lowerUnitName.includes('lifting station')) return 'Lifting Station';
-            if (lowerUnitName.includes('irrigation tank')) return 'Irrigation Tank';
-            return 'Other';
-    }
-};
-
-const parseData = (rawData) => {
-  const lines = rawData.split('\n');
-  const headerLine = lines[0].split(',').map(h => h.trim());
-  const dataLines = lines.slice(1);
-  const monthsHeader = headerLine.slice(3);
-
-  return dataLines.map((line, index) => {
-    const values = line.split(',');
-    const unitName = values[0]?.trim() || 'N/A';
-    const type = values[1]?.trim() || 'N/A';
-    const entry = {
-      id: index + 1,
-      slNo: index + 1,
-      zone: 'N/A',
-      type: type,
-      muscatBayNumber: 'N/A',
-      unitName: unitName,
-      category: extractCategory(unitName, type),
-      meterAccountNo: values[2]?.trim() || 'N/A',
-      consumption: {},
-      totalConsumption: 0, 
-    };
-    
-    let currentOverallTotal = 0;
-    monthsHeader.forEach((month, i) => {
-      const consumptionValue = parseFloat(values[3 + i]);
-      entry.consumption[month] = isNaN(consumptionValue) ? 0 : consumptionValue;
-      if (!isNaN(consumptionValue)) {
-        currentOverallTotal += consumptionValue;
-      }
-    });
-    entry.totalConsumption = parseFloat(currentOverallTotal.toFixed(2));
-    return entry;
-  });
-};
-
-const initialElectricityData = parseData(rawDataString);
-const availableMonths = Object.keys(initialElectricityData[0].consumption);
 
 // ===============================
 // ENHANCED SHARED COMPONENTS
@@ -292,8 +163,8 @@ const TopConsumersTable = ({ data, selectedMonth }) => {
       'Street Light': 'bg-yellow-100 text-yellow-800 border-yellow-200',
       'Beachwell': 'bg-cyan-100 text-cyan-800 border-cyan-200',
       'Central Park': 'bg-emerald-100 text-emerald-800 border-emerald-200',
-      'CIF Kitchen': 'bg-orange-100 text-orange-800 border-orange-200',
-      'Security Building': 'bg-red-100 text-red-800 border-red-200',
+      'Commercial (Kitchen)': 'bg-orange-100 text-orange-800 border-orange-200',
+      'Ancillary Building': 'bg-red-100 text-red-800 border-red-200',
       'Village Square': 'bg-indigo-100 text-indigo-800 border-indigo-200',
       'Irrigation Tank': 'bg-teal-100 text-teal-800 border-teal-200',
       'Actuator DB': 'bg-pink-100 text-pink-800 border-pink-200',
@@ -436,7 +307,7 @@ const TopConsumersTable = ({ data, selectedMonth }) => {
                       
                       <td className="p-4 text-right">
                         <div className="font-semibold text-slate-700">
-                          {(consumer.consumption * OMR_PER_KWH).toFixed(2)}
+                          {(consumer.consumption * KWH_TO_OMR_RATE).toFixed(2)}
                           <span className="text-xs text-slate-500 font-normal"> OMR</span>
                         </div>
                       </td>
@@ -605,16 +476,20 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
   const [aiAnalysisResult, setAiAnalysisResult] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
 
+  // Use the updated data hooks that connect to Supabase
+  const { data: initialElectricityData, loading, error } = useElectricityData();
+  const { trends: monthlyTrendsData } = useMonthlyTrends();
+
   const distinctCategories = useMemo(() => 
     [...new Set(initialElectricityData.map(d => d.category))].sort(), 
-  []);
+  [initialElectricityData]);
 
   const filteredElectricityData = useMemo(() => {
     return initialElectricityData.filter(item => {
       const categoryMatch = selectedCategory === "All Categories" || item.category === selectedCategory;
       return categoryMatch; 
     });
-  }, [selectedCategory]);
+  }, [initialElectricityData, selectedCategory]);
 
   const kpiAndTableData = useMemo(() => {
     if (selectedMonth === "All Months") {
@@ -624,7 +499,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
   }, [filteredElectricityData, selectedMonth]);
 
   const totalConsumptionKWh = useMemo(() => kpiAndTableData.reduce((acc, curr) => acc + curr.totalConsumption, 0), [kpiAndTableData]);
-  const totalCostOMR = useMemo(() => totalConsumptionKWh * OMR_PER_KWH, [totalConsumptionKWh]);
+  const totalCostOMR = useMemo(() => totalConsumptionKWh * KWH_TO_OMR_RATE, [totalConsumptionKWh]);
   const averageConsumptionPerUnit = useMemo(() => kpiAndTableData.length > 0 ? totalConsumptionKWh / kpiAndTableData.length : 0, [totalConsumptionKWh, kpiAndTableData]);
   const activeMeters = useMemo(() => kpiAndTableData.filter(d => d.meterAccountNo !== 'N/A' && d.meterAccountNo !== 'MISSING_METER' && d.totalConsumption > 0).length, [kpiAndTableData]);
 
@@ -650,7 +525,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
       category: d.category, 
       monthlyDataFull: initialElectricityData.find(item => item.id === d.id)?.consumption || {} 
     }));
-  }, [kpiAndTableData]);
+  }, [kpiAndTableData, initialElectricityData]);
 
   const handleAiAnalysis = async () => {
     setIsAiModalOpen(true);
@@ -658,33 +533,33 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
     setAiAnalysisResult("");
     
     setTimeout(() => {
-      setAiAnalysisResult(`🧠 AI Analysis Results for ${selectedMonth === "All Months" ? "All Months" : selectedMonth}:
-
-🔋 INFRASTRUCTURE ANALYSIS:
-• All 4 Pumping Stations operational with consumption data
-• Pumping Station 01 shows highest consumption (${initialElectricityData.find(item => item.unitName === 'Pumping Station 01')?.totalConsumption.toLocaleString()} kWh total)
-• Beachwell shows major consumption variations - investigate for optimization
-• Critical infrastructure accounts for ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} components
-
-📊 CONSUMPTION BREAKDOWN:
-• Total System: ${totalConsumptionKWh.toLocaleString()} kWh
-• Estimated Cost: ${totalCostOMR.toLocaleString()} OMR
-• Average per Unit: ${averageConsumptionPerUnit.toFixed(0)} kWh
-• Active Meters: ${activeMeters}/${kpiAndTableData.length}
-
-🏗️ CATEGORY INSIGHTS:
-• ${distinctCategories.length} categories identified
-• Apartments: ${kpiAndTableData.filter(d => d.category === 'Apartment').length} residential units
-• Infrastructure: ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} critical systems
-
-💡 KEY RECOMMENDATIONS:
-• Monitor Beachwell consumption patterns for efficiency
-• Implement load balancing across pumping stations  
-• Track residential vs infrastructure consumption ratios
-• Consider smart metering for enhanced monitoring`);
+      setAiAnalysisResult(`🧠 AI Analysis Results for ${selectedMonth === "All Months" ? "All Months" : selectedMonth}:\n\n🔋 INFRASTRUCTURE ANALYSIS:\n• All 4 Pumping Stations operational with consumption data\n• Pumping Station 01 shows highest consumption (${initialElectricityData.find(item => item.unitName === 'Pumping Station 01')?.totalConsumption.toLocaleString()} kWh total)\n• Beachwell shows major consumption variations - investigate for optimization\n• Critical infrastructure accounts for ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} components\n\n📊 CONSUMPTION BREAKDOWN:\n• Total System: ${totalConsumptionKWh.toLocaleString()} kWh\n• Estimated Cost: ${totalCostOMR.toLocaleString()} OMR\n• Average per Unit: ${averageConsumptionPerUnit.toFixed(0)} kWh\n• Active Meters: ${activeMeters}/${kpiAndTableData.length}\n\n🏗️ CATEGORY INSIGHTS:\n• ${distinctCategories.length} categories identified\n• Apartments: ${kpiAndTableData.filter(d => d.category === 'Apartment').length} residential units\n• Infrastructure: ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} critical systems\n\n💡 KEY RECOMMENDATIONS:\n• Monitor Beachwell consumption patterns for efficiency\n• Implement load balancing across pumping stations  \n• Track residential vs infrastructure consumption ratios\n• Consider smart metering for enhanced monitoring\n\n🎯 MAY 2025 UPDATE HIGHLIGHTS:\n• May 2025 data now included in all calculations\n• Latest monthly consumption patterns captured\n• Updated totals reflect most recent infrastructure usage`);
       setIsAiLoading(false);
     }, 2000);
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-96">
+        <div className="text-center">
+          <LoadingSpinner size={48} />
+          <p className="mt-4 text-slate-600">Loading electricity data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+        <AlertCircle size={48} className="text-red-500 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Data</h3>
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
 
   // Sub-navigation for electricity module
   const ElectricitySubNav = () => {
@@ -816,7 +691,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
           
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="lg:col-span-3"> 
-              <ChartWrapper title="Consumption Trend (All Months)" subtitle={`For category: ${selectedCategory}`}> 
+              <ChartWrapper title="Consumption Trend (All Months)" subtitle={`For category: ${selectedCategory} • Including May 2025 data`}> 
                 <ResponsiveContainer width="100%" height="100%"> 
                   <LineChart data={monthlyTrendForAllMonths} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}> 
                     <defs> 
@@ -990,7 +865,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
                       <td className="p-4 text-slate-600 font-medium">{item.id}</td>
                       <td className="p-4 font-semibold text-slate-800 group-hover:text-primary transition-colors">{item.unitName}</td>
-                      <td className="p-4 text-slate-600">{item.type}</td>
+                      <td className="p-4 text-slate-600">{item.meterType}</td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
                           item.category === 'Pumping Station' ? 'bg-blue-100 text-blue-800 border-blue-200' :
@@ -1004,7 +879,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                       </td>
                       <td className="p-4 text-slate-600 font-mono text-xs">{item.meterAccountNo}</td>
                       <td className="p-4 text-right font-bold text-slate-800">{item.totalConsumption.toLocaleString()}</td>
-                      <td className="p-4 text-right text-slate-600 font-semibold">{(item.totalConsumption * OMR_PER_KWH).toFixed(2)}</td>
+                      <td className="p-4 text-right text-slate-600 font-semibold">{(item.totalConsumption * KWH_TO_OMR_RATE).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1050,7 +925,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
               <div className="text-sm text-slate-700 space-y-4"> 
                 {aiAnalysisResult ? ( 
                   aiAnalysisResult.split('\n').map((line, index) => {
-                    if (line.startsWith('🧠') || line.startsWith('🔋') || line.startsWith('📊') || line.startsWith('🏗️') || line.startsWith('💡')) {
+                    if (line.startsWith('🧠') || line.startsWith('🔋') || line.startsWith('📊') || line.startsWith('🏗️') || line.startsWith('💡') || line.startsWith('🎯')) {
                       return <h4 key={index} className="font-bold text-lg mt-6 mb-3 text-primary border-l-4 border-primary pl-4">{line}</h4>;
                     }
                     if (line.startsWith('•')) {
