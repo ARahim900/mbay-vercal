@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Sidebar } from "./layout/sidebar"
 import { Header } from "./layout/header"
 import { ElectricitySystemModule } from "./modules/electricity-system"
