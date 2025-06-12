@@ -2,13 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===============================
+   MUSCAT BAY GLOBAL STYLES
+   =============================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  /* Custom Scrollbar Styles for Muscat Bay */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) rgb(248 250 252);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgb(248 250 252);
+    border-radius: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgb(203 213 225);
+    border-radius: 4px;
+    border: 1px solid rgb(248 250 252);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgb(148 163 184);
+  }
+  
+  .scrollbar-muscat {
+    scrollbar-width: thin;
+    scrollbar-color: #7E708A #F8F7F8;
+  }
+  
+  .scrollbar-muscat::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .scrollbar-muscat::-webkit-scrollbar-track {
+    background: #F8F7F8;
+    border-radius: 6px;
+  }
+  
+  .scrollbar-muscat::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #7E708A, #4E4456);
+    border-radius: 6px;
+    border: 2px solid #F8F7F8;
+  }
+  
+  .scrollbar-muscat::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4E4456, #3B3241);
+  }
+  
+  /* Custom Focus Styles */
+  .focus-muscat:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: #7E708A;
+    ring-opacity: 0.5;
+    border-color: #4E4456;
+  }
+  
+  /* Custom Selection Colors */
+  ::selection {
+    background-color: #A8D5E3;
+    color: #0A1828;
+  }
+  
+  ::-moz-selection {
+    background-color: #A8D5E3;
+    color: #0A1828;
   }
 }
 
@@ -47,7 +126,19 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Muscat Bay Custom Variables */
+    --muscat-primary: #4E4456;
+    --muscat-primary-light: #7E708A;
+    --muscat-primary-dark: #3B3241;
+    --muscat-secondary: #A8D5E3;
+    --muscat-accent: #BFA181;
+    --muscat-success: #10B981;
+    --muscat-warning: #F59E0B;
+    --muscat-info: #0A1828;
+    --muscat-error: #EF4444;
   }
+  
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -81,6 +172,13 @@ body {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Dark mode Muscat Bay adjustments */
+    --muscat-primary: #7E708A;
+    --muscat-primary-light: #A598AC;
+    --muscat-primary-dark: #4E4456;
+    --muscat-secondary: #5E91AB;
+    --muscat-accent: #A68B5B;
   }
 }
 
@@ -90,5 +188,278 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ===============================
+   MUSCAT BAY COMPONENT STYLES
+   =============================== */
+
+@layer components {
+  /* Enhanced button styles with Muscat Bay theme */
+  .btn-muscat-primary {
+    @apply bg-primary hover:bg-primary-dark text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-muscat hover:shadow-muscat-lg transform hover:scale-105;
+  }
+  
+  .btn-muscat-secondary {
+    @apply bg-secondary hover:bg-secondary-dark text-slate-800 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-muscat hover:shadow-muscat-lg;
+  }
+  
+  .btn-muscat-accent {
+    @apply bg-accent hover:bg-accent-dark text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-muscat hover:shadow-muscat-lg;
+  }
+  
+  .btn-muscat-ghost {
+    @apply text-primary hover:bg-primary/10 hover:text-primary-dark font-medium py-2 px-3 rounded-lg transition-all duration-200;
+  }
+  
+  /* Enhanced card styles */
+  .card-muscat {
+    @apply bg-white p-6 rounded-xl shadow-muscat hover:shadow-muscat-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-100;
+  }
+  
+  .card-muscat-interactive {
+    @apply card-muscat group cursor-pointer;
+  }
+  
+  /* Enhanced input styles */
+  .input-muscat {
+    @apply w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-light focus:border-primary-light focus:outline-none bg-white text-slate-700 transition-all duration-200 hover:border-primary-light;
+  }
+  
+  /* Enhanced table styles */
+  .table-muscat {
+    @apply bg-white rounded-xl shadow-muscat-lg border border-slate-100 overflow-hidden;
+  }
+  
+  .table-muscat-header {
+    @apply bg-gradient-to-r from-primary via-primary-light to-secondary text-white;
+  }
+  
+  .table-muscat-row {
+    @apply hover:bg-slate-50/50 transition-colors group;
+  }
+  
+  .table-muscat-cell {
+    @apply p-4 text-slate-700;
+  }
+  
+  .table-muscat-sticky {
+    @apply sticky left-0 bg-white group-hover:bg-slate-50/50 z-10 border-r border-slate-100;
+  }
+  
+  /* Enhanced modal styles */
+  .modal-muscat-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4;
+  }
+  
+  .modal-muscat-container {
+    @apply bg-white p-6 rounded-2xl shadow-muscat-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto;
+  }
+  
+  /* Enhanced navigation styles */
+  .nav-muscat-item {
+    @apply flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ease-in-out group hover:text-white;
+  }
+  
+  .nav-muscat-active {
+    @apply bg-primary text-white shadow-muscat;
+  }
+  
+  .nav-muscat-inactive {
+    @apply text-white hover:bg-primary-light;
+  }
+  
+  /* Enhanced badge styles */
+  .badge-muscat-primary {
+    @apply bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium border border-primary/20;
+  }
+  
+  .badge-muscat-secondary {
+    @apply bg-secondary/10 text-secondary-800 px-3 py-1 rounded-full text-xs font-medium border border-secondary/20;
+  }
+  
+  .badge-muscat-success {
+    @apply bg-success/10 text-success px-3 py-1 rounded-full text-xs font-medium border border-success/20;
+  }
+  
+  .badge-muscat-warning {
+    @apply bg-warning/10 text-warning px-3 py-1 rounded-full text-xs font-medium border border-warning/20;
+  }
+  
+  .badge-muscat-error {
+    @apply bg-error/10 text-error px-3 py-1 rounded-full text-xs font-medium border border-error/20;
+  }
+}
+
+/* ===============================
+   PRINT STYLES
+   =============================== */
+
+@media print {
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  .print\\:block {
+    display: block !important;
+  }
+  
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  
+  .shadow-muscat,
+  .shadow-muscat-lg,
+  .shadow-muscat-xl {
+    box-shadow: none !important;
+  }
+}
+
+/* ===============================
+   ACCESSIBILITY ENHANCEMENTS
+   =============================== */
+
+/* Focus styles for better accessibility */
+.focus\\:ring-muscat:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--muscat-primary-light);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border-slate-100 {
+    border-color: rgb(71 85 105) !important;
+  }
+  
+  .border-slate-200 {
+    border-color: rgb(51 65 85) !important;
+  }
+  
+  .text-slate-500 {
+    color: rgb(15 23 42) !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .transition-all,
+  .transition-colors,
+  .transition-transform,
+  .transition-shadow {
+    transition: none !important;
+  }
+  
+  .animate-pulse,
+  .animate-bounce,
+  .animate-spin,
+  .animate-fade-in,
+  .animate-slide-up {
+    animation: none !important;
+  }
+}
+
+/* ===============================
+   UTILITY ANIMATIONS
+   =============================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceSubtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(78, 68, 86, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(78, 68, 86, 0.8);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-bounce-subtle {
+  animation: bounceSubtle 2s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ===============================
+   LOADING STATES
+   =============================== */
+
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
