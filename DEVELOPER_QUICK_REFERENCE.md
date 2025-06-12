@@ -4,7 +4,7 @@
 
 ### Using Muscat Bay Colors
 
-```typescript
+\`\`\`typescript
 // Import the design system
 import { MUSCAT_BAY_COLORS, getColor, getChartColors } from '@/lib/theme';
 
@@ -17,11 +17,11 @@ const color = getColor('primary.500'); // Returns #4E4456
 
 // Chart colors
 const chartColors = getChartColors(5); // Returns 5 colors from primary palette
-```
+\`\`\`
 
 ### CSS Classes
 
-```html
+\`\`\`html
 <!-- Buttons -->
 <button className="muscat-button-primary">Primary Action</button>
 <button className="muscat-button-secondary">Secondary Action</button>
@@ -44,11 +44,11 @@ const chartColors = getChartColors(5); // Returns 5 colors from primary palette
 
 <!-- Input Fields -->
 <input className="muscat-input" type="text" placeholder="Enter text..." />
-```
+\`\`\`
 
 ### Tailwind Utilities
 
-```html
+\`\`\`html
 <!-- Background Colors -->
 <div className="bg-primary text-white">Primary Background</div>
 <div className="bg-secondary text-slate-800">Secondary Background</div>
@@ -62,46 +62,46 @@ const chartColors = getChartColors(5); // Returns 5 colors from primary palette
 <!-- Border Colors -->
 <div className="border-2 border-primary">Primary Border</div>
 <div className="border border-secondary-light">Light Secondary Border</div>
-```
+\`\`\`
 
 ## 🎨 Color Palette Reference
 
 ### Primary Colors (Purple-Gray)
-```
+\`\`\`
 primary-50:  #F8F7F8  (Very Light)
 primary-100: #F1EEF2  (Light)
 primary-500: #4E4456  (DEFAULT - Main Brand)
 primary-700: #3B3241  (Dark)
 primary-900: #251E26  (Very Dark)
-```
+\`\`\`
 
 ### Secondary Colors (Teal)
-```
+\`\`\`
 secondary-50:  #F0F9FB  (Very Light)
 secondary-100: #E1F3F7  (Light) 
 secondary-500: #A8D5E3  (DEFAULT - Soft Teal)
 secondary-700: #2A4D73  (Dark)
 secondary-900: #0D093B  (Very Dark)
-```
+\`\`\`
 
 ### Accent Colors (Gold)
-```
+\`\`\`
 accent-50:  #FDFCFA  (Very Light)
 accent-100: #F9F7F2  (Light)
 accent-500: #BFA181  (DEFAULT - Muted Gold)
 accent-700: #8D7540  (Dark)
 accent-900: #5B4913  (Very Dark)
-```
+\`\`\`
 
 ## 📊 Chart Color Schemes
 
 ### Primary Palette (Recommended for most charts)
-```typescript
+\`\`\`typescript
 const colors = ['#4E4456', '#A8D5E3', '#BFA181', '#0A1828', '#5f5168'];
-```
+\`\`\`
 
 ### Category Colors for Unit Types
-```typescript
+\`\`\`typescript
 const categoryColors = {
   'Pumping Station': '#3B82F6',  // Blue
   'Lifting Station': '#10B981',  // Green
@@ -110,13 +110,13 @@ const categoryColors = {
   'Central Park': '#10B981',     // Emerald
   'Beachwell': '#0EA5E9',        // Sky
 };
-```
+\`\`\`
 
 ## 🧩 Component Examples
 
 ### Enhanced Table with Muscat Bay Styling
 
-```typescript
+\`\`\`typescript
 const EnhancedTable = ({ data }) => (
   <div className="muscat-table-responsive">
     <table className="muscat-table">
@@ -143,11 +143,11 @@ const EnhancedTable = ({ data }) => (
     </table>
   </div>
 );
-```
+\`\`\`
 
 ### Chart with Muscat Bay Colors
 
-```typescript
+\`\`\`typescript
 import { getChartColors } from '@/lib/theme';
 
 const EnhancedChart = ({ data }) => {
@@ -165,11 +165,11 @@ const EnhancedChart = ({ data }) => {
     </ResponsiveContainer>
   );
 };
-```
+\`\`\`
 
 ### Summary Card Component
 
-```typescript
+\`\`\`typescript
 const SummaryCard = ({ title, value, icon: Icon, trend, type = 'primary' }) => {
   const iconColors = {
     primary: 'var(--muscat-primary)',
@@ -194,7 +194,7 @@ const SummaryCard = ({ title, value, icon: Icon, trend, type = 'primary' }) => {
     </div>
   );
 };
-```
+\`\`\`
 
 ## 🎯 Best Practices
 
@@ -207,16 +207,16 @@ const SummaryCard = ({ title, value, icon: Icon, trend, type = 'primary' }) => {
 
 ### Accessibility
 
-```css
+\`\`\`css
 /* Ensure proper contrast ratios */
 .text-on-primary { color: white; } /* High contrast on primary background */
 .text-on-secondary { color: #1a2b57; } /* Dark text on light secondary */
 .text-on-accent { color: #5b4913; } /* Dark text on light accent */
-```
+\`\`\`
 
 ### Responsive Design
 
-```html
+\`\`\`html
 <!-- Use responsive utilities -->
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
   <!-- Cards adapt to screen size -->
@@ -226,13 +226,13 @@ const SummaryCard = ({ title, value, icon: Icon, trend, type = 'primary' }) => {
 <button className="w-full sm:w-auto muscat-button-primary">
   Responsive Button
 </button>
-```
+\`\`\`
 
 ## 🔧 CSS Variables Reference
 
 All Muscat Bay colors are available as CSS custom properties:
 
-```css
+\`\`\`css
 /* Primary colors */
 var(--muscat-primary)
 var(--muscat-primary-light)
@@ -254,11 +254,11 @@ var(--muscat-success)
 var(--muscat-warning)
 var(--muscat-error)
 var(--muscat-info)
-```
+\`\`\`
 
 ## 📱 Mobile Considerations
 
-```css
+\`\`\`css
 /* Mobile-first responsive design */
 @media (max-width: 640px) {
   .muscat-card { @apply mx-2; }
@@ -270,13 +270,13 @@ var(--muscat-info)
   min-height: 44px; /* iOS recommendation */
   min-width: 44px;
 }
-```
+\`\`\`
 
 ## 🌙 Dark Mode Support
 
 The design system includes built-in dark mode support:
 
-```css
+\`\`\`css
 .dark .muscat-card {
   @apply bg-slate-800 border-slate-700;
 }
@@ -284,7 +284,7 @@ The design system includes built-in dark mode support:
 .dark .muscat-button-primary {
   /* Automatically adjusted for dark mode */
 }
-```
+\`\`\`
 
 ## ⚡ Performance Tips
 

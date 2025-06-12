@@ -118,7 +118,7 @@ This document outlines the comprehensive UI enhancements made to the Muscat Bay 
 
 ### Using Muscat Bay Colors in Components
 
-```jsx
+\`\`\`jsx
 import { MUSCAT_BAY_COLORS, muscatBayUtils } from '@/lib/muscat-bay-theme';
 
 // Get category color
@@ -129,11 +129,11 @@ const chartColor = muscatBayUtils.getChartColor(index);
 
 // Format numbers
 const formattedNumber = muscatBayUtils.formatNumber(123456, 1); // "123.5K"
-```
+\`\`\`
 
 ### CSS Classes Available
 
-```css
+\`\`\`css
 /* Button Styles */
 .btn-muscat-primary
 .btn-muscat-secondary
@@ -156,11 +156,11 @@ const formattedNumber = muscatBayUtils.formatNumber(123456, 1); // "123.5K"
 .badge-muscat-primary
 .badge-muscat-success
 .badge-muscat-warning
-```
+\`\`\`
 
 ### Tailwind Classes
 
-```css
+\`\`\`css
 /* Primary Colors */
 bg-primary, text-primary, border-primary
 bg-primary-light, bg-primary-dark
@@ -177,14 +177,14 @@ shadow-muscat, shadow-muscat-lg, shadow-muscat-xl
 
 /* Scrollbars */
 scrollbar-thin, scrollbar-muscat
-```
+\`\`\`
 
 ## 🔧 Technical Implementation Details
 
 ### Table Overflow Solution
 
 **Key Technical Approach:**
-```jsx
+\`\`\`jsx
 // Container with proper overflow handling
 <div className="overflow-hidden">
   <div className="overflow-x-auto scrollbar-muscat">
@@ -200,10 +200,10 @@ scrollbar-thin, scrollbar-muscat
     </div>
   </div>
 </div>
-```
+\`\`\`
 
 **CSS Scrollbar Styling:**
-```css
+\`\`\`css
 .scrollbar-muscat::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -214,7 +214,7 @@ scrollbar-thin, scrollbar-muscat
   border-radius: 6px;
   border: 2px solid #F8F7F8;
 }
-```
+\`\`\`
 
 ### Performance Optimizations
 
@@ -227,16 +227,16 @@ scrollbar-thin, scrollbar-muscat
 
 ### 1. Using the Enhanced Electricity Module
 
-```jsx
+\`\`\`jsx
 import { ElectricitySystemModuleEnhanced } from '@/components/modules/electricity-system-enhanced';
 
 // In your main component
 <ElectricitySystemModuleEnhanced isDarkMode={isDarkMode} />
-```
+\`\`\`
 
 ### 2. Applying Muscat Bay Theme to New Components
 
-```jsx
+\`\`\`jsx
 import { MUSCAT_BAY_COLORS, MUSCAT_BAY_STYLES } from '@/lib/muscat-bay-theme';
 
 const MyComponent = () => {
@@ -248,16 +248,16 @@ const MyComponent = () => {
     </div>
   );
 };
-```
+\`\`\`
 
 ### 3. Custom Scrollbar Implementation
 
-```jsx
+\`\`\`jsx
 // Add to any component with overflow
 <div className="overflow-x-auto scrollbar-muscat">
   {/* Your scrollable content */}
 </div>
-```
+\`\`\`
 
 ## 🎯 Benefits Achieved
 

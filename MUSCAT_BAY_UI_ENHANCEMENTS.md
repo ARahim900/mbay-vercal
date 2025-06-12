@@ -17,7 +17,7 @@ This document outlines the comprehensive UI enhancements made to the Muscat Bay 
 - **Interactive Elements**: Added hover effects, ranking badges, and performance indicators
 
 **Key Features Added**:
-```typescript
+\`\`\`typescript
 // Enhanced table with pagination and expansion
 const TopConsumersTable = ({ data, selectedMonth }) => {
   const [expandedRow, setExpandedRow] = useState(null);
@@ -25,7 +25,7 @@ const TopConsumersTable = ({ data, selectedMonth }) => {
   const itemsPerPage = 8; // Optimized for better UI
   // ... implementation
 };
-```
+\`\`\`
 
 ### ✅ 2. Complete Muscat Bay Color Scheme Implementation
 **Objective**: Apply the official Muscat Bay brand colors throughout the entire application.
@@ -41,7 +41,7 @@ const TopConsumersTable = ({ data, selectedMonth }) => {
 ## 📁 Files Enhanced
 
 ### 1. **Tailwind Configuration** (`tailwind.config.js`)
-```javascript
+\`\`\`javascript
 // Added complete Muscat Bay color system
 module.exports = {
   theme: {
@@ -65,7 +65,7 @@ module.exports = {
     }
   }
 }
-```
+\`\`\`
 
 ### 2. **Design System** (`lib/theme.ts`)
 Created a comprehensive design system with:
@@ -75,7 +75,7 @@ Created a comprehensive design system with:
 - **Typography Scale**: Consistent text sizing
 - **Spacing System**: Harmonious spacing values
 
-```typescript
+\`\`\`typescript
 export const MUSCAT_BAY_COLORS = {
   primary: { /* complete color scale */ },
   secondary: { /* complete color scale */ },
@@ -87,7 +87,7 @@ export const CHART_COLORS = {
   categorical: [/* optimized for different chart types */],
   // ... multiple palettes
 };
-```
+\`\`\`
 
 ### 3. **Enhanced Electricity System** (`components/modules/electricity-system.tsx`)
 Major improvements include:
@@ -98,7 +98,7 @@ Major improvements include:
 - **Responsive Design**: Better mobile and tablet support
 
 Key enhancements:
-```typescript
+\`\`\`typescript
 // Enhanced summary cards with brand colors
 <SummaryCard 
   iconBgColor={COLORS.primary}
@@ -111,7 +111,7 @@ Key enhancements:
     <Line stroke={COLORS.primary} strokeWidth={3} />
   </LineChart>
 </ResponsiveContainer>
-```
+\`\`\`
 
 ### 4. **Global Styles** (`app/globals.css`)
 Comprehensive CSS system with:
@@ -121,7 +121,7 @@ Comprehensive CSS system with:
 - **Dark Mode Support**: Proper dark mode variations
 - **Animation System**: Smooth transitions and hover effects
 
-```css
+\`\`\`css
 :root {
   /* Muscat Bay Color System */
   --muscat-primary: #4E4456;
@@ -134,7 +134,7 @@ Comprehensive CSS system with:
   background: linear-gradient(135deg, var(--muscat-primary) 0%, var(--muscat-primary-dark) 100%);
   /* ... enhanced styling */
 }
-```
+\`\`\`
 
 ## 🎨 Visual Improvements
 
@@ -192,7 +192,7 @@ Comprehensive CSS system with:
 ## 🚀 How to Use the Enhanced System
 
 ### Using Muscat Bay Colors in Components
-```typescript
+\`\`\`typescript
 import { MUSCAT_BAY_COLORS, getColor } from '@/lib/theme';
 
 // Direct usage
@@ -203,10 +203,10 @@ const accentColor = getColor('accent.500');
 
 // Chart colors
 const chartColors = getChartColors(5, 'primary');
-```
+\`\`\`
 
 ### Using CSS Classes
-```html
+\`\`\`html
 <!-- Button with Muscat Bay styling -->
 <button className="muscat-button-primary">
   Primary Action
@@ -219,16 +219,16 @@ const chartColors = getChartColors(5, 'primary');
 
 <!-- Status indicators -->
 <span className="status-active">Active</span>
-```
+\`\`\`
 
 ### Custom Tailwind Classes
-```html
+\`\`\`html
 <!-- Using the extended Tailwind colors -->
 <div className="bg-primary text-white">
   <h1 className="text-primary-light">Heading</h1>
   <p className="text-secondary">Description</p>
 </div>
-```
+\`\`\`
 
 ## 🎯 Results Achieved
 

@@ -24,7 +24,7 @@ Complete transformation of the Top Electricity Consumers component with overflow
 ### Enhanced Top Consumers Table (`TopConsumersTableFixed`)
 
 #### **Responsive Design Features:**
-```typescript
+\`\`\`typescript
 // Desktop View: Full table with horizontal scroll
 <div className="hidden lg:block">
   <div className="overflow-x-auto scrollbar-muscat">
@@ -40,7 +40,7 @@ Complete transformation of the Top Electricity Consumers component with overflow
     // ... card components
   </div>
 </div>
-```
+\`\`\`
 
 #### **Brand Theming Features:**
 - **Premium Rank Badges**: Gold, silver, bronze styling with animations
@@ -51,7 +51,7 @@ Complete transformation of the Top Electricity Consumers component with overflow
 ### Theme Utility System (`lib/muscat-bay-theme.ts`)
 
 #### **Complete Color System:**
-```typescript
+\`\`\`typescript
 export const MUSCAT_BAY_COLORS = {
   primary: {
     DEFAULT: '#4E4456',
@@ -65,10 +65,10 @@ export const MUSCAT_BAY_COLORS = {
   },
   // ... complete palette
 };
-```
+\`\`\`
 
 #### **Pre-built Component Styles:**
-```typescript
+\`\`\`typescript
 export const MUSCAT_BAY_STYLES = {
   buttons: {
     primary: 'bg-primary hover:bg-primary-dark text-white...',
@@ -81,7 +81,7 @@ export const MUSCAT_BAY_STYLES = {
     // ... all variants
   }
 };
-```
+\`\`\`
 
 ## 🚀 Performance Improvements
 
@@ -100,7 +100,7 @@ export const MUSCAT_BAY_STYLES = {
 ## 🎯 Key Features Added
 
 ### **Enhanced Sorting System**
-```typescript
+\`\`\`typescript
 const handleSort = (field) => {
   if (sortBy === field) {
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
@@ -109,18 +109,18 @@ const handleSort = (field) => {
     setSortOrder('desc');
   }
 };
-```
+\`\`\`
 
 ### **Smart Pagination**
-```typescript
+\`\`\`typescript
 const paginatedData = sortedData.slice(
   (currentPage - 1) * itemsPerPage, 
   currentPage * itemsPerPage
 );
-```
+\`\`\`
 
 ### **Expandable Row Details**
-```typescript
+\`\`\`typescript
 {isExpanded && (
   <tr className="bg-gradient-to-r from-slate-50 via-white to-slate-50 border-l-4 border-primary animate-slide-up">
     <td colSpan="7" className="p-6">
@@ -128,10 +128,10 @@ const paginatedData = sortedData.slice(
     </td>
   </tr>
 )}
-```
+\`\`\`
 
 ### **Mobile-Optimized Cards**
-```typescript
+\`\`\`typescript
 <div className="card-muscat-interactive">
   <div className="flex items-center justify-between mb-3">
     <div className={getRankBadgeStyle(index)}>
@@ -143,7 +143,7 @@ const paginatedData = sortedData.slice(
   </div>
   // ... card content
 </div>
-```
+\`\`\`
 
 ## 📱 Responsive Breakpoints
 
@@ -155,7 +155,7 @@ const paginatedData = sortedData.slice(
   - All breakpoints: Consistent Muscat Bay theming
 
 ### **Table Overflow Solution**
-```css
+\`\`\`css
 /* Custom scrollbar styling */
 .scrollbar-muscat::-webkit-scrollbar {
   width: 10px;
@@ -167,12 +167,12 @@ const paginatedData = sortedData.slice(
   border-radius: 6px;
   border: 2px solid #F8F7F8;
 }
-```
+\`\`\`
 
 ## 🎨 Advanced Theming Features
 
 ### **Dynamic Color Assignment**
-```typescript
+\`\`\`typescript
 const getCategoryBadgeStyle = (category) => {
   const styles = {
     'Pumping Station': 'badge-muscat-primary',
@@ -182,40 +182,40 @@ const getCategoryBadgeStyle = (category) => {
   };
   return styles[category] || 'default-style';
 };
-```
+\`\`\`
 
 ### **Rank-Based Styling**
-```typescript
+\`\`\`typescript
 const getRankBadgeStyle = (rank) => {
   if (rank === 1) return 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600...';
   if (rank === 2) return 'bg-gradient-to-br from-slate-300 via-slate-400 to-slate-500...';
   if (rank === 3) return 'bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600...';
   return 'bg-gradient-to-br from-primary via-primary-light to-primary-dark...';
 };
-```
+\`\`\`
 
 ## 🔧 Technical Implementation
 
 ### **Component Architecture**
-```
+\`\`\`
 ElectricitySystemModuleEnhancedFixed/
 ├── TopConsumersTableFixed (Main table component)
 ├── SummaryCard (KPI cards with theming)
 ├── ChartWrapper (Consistent chart containers)
 ├── StyledSelect (Themed form controls)
 └── AI Analysis Modal (Enhanced with branding)
-```
+\`\`\`
 
 ### **State Management**
-```typescript
+\`\`\`typescript
 const [expandedRow, setExpandedRow] = useState(null);
 const [currentPage, setCurrentPage] = useState(1);
 const [sortBy, setSortBy] = useState('consumption');
 const [sortOrder, setSortOrder] = useState('desc');
-```
+\`\`\`
 
 ### **Performance Optimizations**
-```typescript
+\`\`\`typescript
 // Memoized calculations for performance
 const sortedData = useMemo(() => {
   return [...data].sort((a, b) => {
@@ -227,17 +227,17 @@ const paginatedData = sortedData.slice(
   (currentPage - 1) * itemsPerPage, 
   currentPage * itemsPerPage
 );
-```
+\`\`\`
 
 ## 🎯 Usage Instructions
 
 ### **1. Import the Enhanced Component**
-```typescript
+\`\`\`typescript
 import { ElectricitySystemModuleEnhancedFixed } from '@/components/modules/electricity-system-enhanced-fixed';
-```
+\`\`\`
 
 ### **2. Use Theme Utilities**
-```typescript
+\`\`\`typescript
 import muscatBay from '@/lib/muscat-bay-theme';
 
 // Apply button styles
@@ -250,16 +250,16 @@ color={muscatBay.utils.getChartColor(index)}
 
 // Format numbers
 {muscatBay.utils.formatNumber(123456)}
-```
+\`\`\`
 
 ### **3. Apply Custom CSS Classes**
-```typescript
+\`\`\`typescript
 // From globals.css
 <div className="card-muscat">
 <button className="btn-muscat-primary">
 <input className="input-muscat">
 <div className="table-muscat">
-```
+\`\`\`
 
 ## 🚀 Benefits Achieved
 

@@ -28,19 +28,19 @@ This document outlines the comprehensive enhancements made to fix the Top Electr
 
 ## 📱 Responsive Breakpoint Strategy
 
-```typescript
+\`\`\`typescript
 // Responsive Layout Strategy
 2xl (1536px+): Full featured table with all columns
 xl (1280px-1535px): Compact table with essential columns  
 lg (1024px-1279px): Simplified table with key data
 md (768px-1023px): Card layout transition
 sm/xs (0-767px): Mobile-optimized card layout
-```
+\`\`\`
 
 ## 🎨 Enhanced Muscat Bay Theming
 
 ### Color Palette Integration
-```css
+\`\`\`css
 Primary: #4E4456 (Deep purple-gray)
 Secondary: #A8D5E3 (Soft teal)
 Accent: #BFA181 (Muted gold)
@@ -48,7 +48,7 @@ Success: #10B981 (Green)
 Warning: #F59E0B (Amber)
 Info: #0A1828 (Deep navy)
 Error: #EF4444 (Red)
-```
+\`\`\`
 
 ### Component Classes Applied
 - `card-muscat`: Enhanced card styling with Muscat Bay shadows
@@ -60,7 +60,7 @@ Error: #EF4444 (Red)
 ## 🔄 Progressive Enhancement Features
 
 ### 1. **Adaptive Table Structure**
-```tsx
+\`\`\`tsx
 // Extra Large Screens - Full Table
 <div className="hidden 2xl:block">
   {/* Complete table with all features */}
@@ -80,24 +80,24 @@ Error: #EF4444 (Red)
 <div className="lg:hidden">
   {/* Mobile-optimized cards */}
 </div>
-```
+\`\`\`
 
 ### 2. **Smart Text Truncation**
-```tsx
+\`\`\`tsx
 const truncateText = (text, maxLength) => {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + '...';
 };
 
 // Usage: {truncateText(consumer.name, 25)}
-```
+\`\`\`
 
 ### 3. **Responsive Pagination**
-```tsx
+\`\`\`tsx
 // Adaptive button text
 <span className="hidden sm:inline">Previous</span>
 <span className="sm:hidden">Prev</span>
-```
+\`\`\`
 
 ## 🎯 Performance Optimizations
 
@@ -149,14 +149,14 @@ const truncateText = (text, maxLength) => {
 - **Improvements**: Better spacing, responsive typography, optimized for all screen sizes
 
 ### CSS Utilities Enhanced
-```css
+\`\`\`css
 .scrollbar-muscat: Custom scrollbar theming
 .table-muscat-*: Comprehensive table styling system
 .card-muscat-interactive: Enhanced interactive cards
 .btn-muscat-*: Complete button system
 .badge-muscat-*: Status and category badges
 .modal-muscat-*: Modal system with proper theming
-```
+\`\`\`
 
 ## 🔍 Testing Strategy
 
@@ -184,37 +184,37 @@ const truncateText = (text, maxLength) => {
 ## 🎨 Design System Integration
 
 ### Spacing System
-```css
+\`\`\`css
 Mobile: 3-4 spacing units (12px-16px)
 Tablet: 4-6 spacing units (16px-24px)  
 Desktop: 6-8 spacing units (24px-32px)
-```
+\`\`\`
 
 ### Typography Scale
-```css
+\`\`\`css
 Mobile: text-xs to text-base
 Tablet: text-sm to text-lg
 Desktop: text-base to text-xl
-```
+\`\`\`
 
 ### Interactive States
-```css
+\`\`\`css
 Hover: transform scale(1.05) + shadow enhancement
 Active: transform scale(0.98) + shadow reduction
 Focus: ring-2 ring-primary-light + border-primary
-```
+\`\`\`
 
 ## 🚀 Usage Instructions
 
 ### 1. **Import the Component**
-```tsx
+\`\`\`tsx
 import { ElectricitySystemModuleUltimate } from '@/components/modules/electricity-system-enhanced-ultimate';
-```
+\`\`\`
 
 ### 2. **Implementation**
-```tsx
+\`\`\`tsx
 <ElectricitySystemModuleUltimate isDarkMode={darkMode} />
-```
+\`\`\`
 
 ### 3. **Required Dependencies**
 - React 18+
