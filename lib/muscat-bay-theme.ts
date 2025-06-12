@@ -1,289 +1,312 @@
 // ===============================
 // MUSCAT BAY THEME UTILITIES
+// Complete theme system for consistent styling
 // ===============================
 
-/**
- * Complete Muscat Bay Design System
- * This file provides consistent theming utilities for the entire application
- */
-
 export const MUSCAT_BAY_COLORS = {
-  // Primary Brand Colors (Deep Purple-Gray)
+  // Primary Brand Colors
   primary: {
-    DEFAULT: '#4E4456',        // Main brand color
-    50: '#F8F7F8',            // Ultra light
-    100: '#F1EEF2',           // Very light
-    200: '#E3DCE5',           // Light
-    300: '#D5CAD8',           // Medium light
-    400: '#B69BB5',           // Medium
-    500: '#4E4456',           // Default
-    600: '#463D4D',           // Dark
-    700: '#3B3241',           // Darker
-    800: '#302833',           // Very dark
-    900: '#251E26',           // Darkest
-    light: '#7E708A',         // Lighter variant for hover states
-    dark: '#3B3241',          // Darker variant for active states
+    DEFAULT: '#4E4456',
+    50: '#F8F7F8',
+    100: '#F1EEF2',
+    200: '#E3DDE6',
+    300: '#D5CCD9',
+    400: '#C7BBCC',
+    500: '#B9AABF',
+    600: '#A598AC',
+    700: '#918699',
+    800: '#7E708A',
+    900: '#6B5E77',
+    950: '#3B3241',
+    light: '#7E708A',
+    dark: '#3B3241',
   },
   
-  // Secondary Colors (Soft Teal)
+  // Secondary Teal Colors
   secondary: {
-    DEFAULT: '#A8D5E3',        // Soft teal for highlights
-    50: '#F0F9FB',            // Ultra light teal
-    100: '#E1F3F7',           // Very light teal
-    200: '#C3E7EF',           // Light teal
-    300: '#A8D5E3',           // Default soft teal
-    400: '#7BB3C7',           // Medium teal
-    500: '#5491AB',           // Darker teal
-    600: '#3D6F8F',           // Deep teal
-    700: '#2A4D73',           // Very deep teal
-    800: '#1A2B57',           // Darkest teal
-    900: '#0D093B',           // Ultra dark
-    light: '#C3FBF4',         // Very light teal
-    dark: '#7BB3C7',          // Darker teal
+    DEFAULT: '#A8D5E3',
+    50: '#F7FDFE',
+    100: '#EEFBFC',
+    200: '#DDF7F9',
+    300: '#CCF3F6',
+    400: '#BBEFF3',
+    500: '#A8D5E3',
+    600: '#7BB3C7',
+    700: '#5E91AB',
+    800: '#416F8F',
+    900: '#244D73',
+    light: '#C3FBF4',
+    dark: '#7BB3C7',
   },
   
-  // Accent Colors (Muted Gold)
+  // Accent Gold Colors
   accent: {
-    DEFAULT: '#BFA181',        // Muted gold for warnings/accents
-    50: '#FDFCFA',            // Ultra light gold
-    100: '#F9F7F2',           // Very light gold
-    200: '#F2F0EA',           // Light gold/cream
-    300: '#E5E0D5',           // Medium light gold
-    400: '#D1C7B0',           // Medium gold
-    500: '#BFA181',           // Default muted gold
-    600: '#A68B5B',           // Darker gold
-    700: '#8D7540',           // Deep gold
-    800: '#745F28',           // Very deep gold
-    900: '#5B4913',           // Darkest gold
-    light: '#F2F0EA',         // Light cream
-    dark: '#A68B5B',          // Darker gold
+    DEFAULT: '#BFA181',
+    50: '#FDF9F6',
+    100: '#FBF3ED',
+    200: '#F7E7DB',
+    300: '#F3DBC9',
+    400: '#EFCFB7',
+    500: '#BFA181',
+    600: '#A68B5B',
+    700: '#8D7535',
+    800: '#745F0F',
+    900: '#5B4900',
+    light: '#F2F0EA',
+    dark: '#A68B5B',
   },
   
   // Status Colors
-  status: {
-    success: '#10B981',        // Green for positive metrics
-    successLight: '#6EE7B7',
-    successDark: '#047857',
-    warning: '#F59E0B',        // Amber for warnings
-    warningLight: '#FCD34D',
-    warningDark: '#D97706',
-    info: '#0A1828',          // Deep navy for information
-    infoLight: '#3B82F6',
-    infoDark: '#1E40AF',
-    error: '#EF4444',         // Red for errors
-    errorLight: '#F87171',
-    errorDark: '#DC2626',
-  },
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#0A1828',
   
-  // Extended Brand Palette
-  brand: {
-    logoPurple: '#5f5168',     // Original logo purple
-    logoTeal: '#A8D5E3',       // Logo teal accent
-    logoGold: '#BFA181',       // Warm gold
-    logoCream: '#F2F0EA',      // Light cream
-    logoNavy: '#0A1828',       // Deep navy
-    logoWhite: '#ffffff',      // Pure white
-  },
-  
-  // Chart Colors - Muscat Bay themed
+  // Chart Colors
   chart: [
-    '#4E4456', // Primary purple
-    '#A8D5E3', // Teal
-    '#BFA181', // Gold
-    '#0A1828', // Navy
-    '#5f5168', // Logo purple
-    '#C3FBF4', // Light teal
-    '#F2F0EA', // Cream
-    '#10B981', // Success green
-    '#EF4444', // Error red
-    '#6A5ACD', // Accent purple
-  ],
+    '#4E4456', '#A8D5E3', '#BFA181', '#0A1828', '#5f5168',
+    '#C3FBF4', '#F2F0EA', '#10B981', '#EF4444', '#6A5ACD'
+  ]
 };
 
-// CSS Class Utilities
-export const MUSCAT_BAY_CLASSES = {
-  // Card styles
-  card: 'bg-white rounded-xl shadow-muscat hover:shadow-muscat-lg transition-all duration-300 border border-slate-100',
-  cardHover: 'transform hover:-translate-y-1',
+// Component Style Presets
+export const MUSCAT_BAY_STYLES = {
+  // Button Styles
+  buttons: {
+    primary: 'bg-primary hover:bg-primary-dark text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-muscat hover:shadow-muscat-lg transform hover:scale-105',
+    secondary: 'bg-secondary hover:bg-secondary-dark text-slate-800 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-muscat hover:shadow-muscat-lg',
+    accent: 'bg-accent hover:bg-accent-dark text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-muscat hover:shadow-muscat-lg',
+    ghost: 'text-primary hover:bg-primary/10 hover:text-primary-dark font-medium py-2 px-3 rounded-lg transition-all duration-200',
+    outline: 'border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200'
+  },
   
-  // Button styles
-  buttonPrimary: 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 shadow-muscat hover:shadow-muscat-lg transform hover:scale-105',
-  buttonSecondary: 'bg-gradient-to-r from-secondary-400 to-secondary-500 hover:from-secondary-500 hover:to-secondary-600 text-slate-800 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 shadow-muscat hover:shadow-muscat-lg transform hover:scale-105',
-  buttonAccent: 'bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-slate-800 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 shadow-muscat hover:shadow-muscat-lg transform hover:scale-105',
+  // Card Styles
+  cards: {
+    default: 'bg-white p-6 rounded-xl shadow-muscat hover:shadow-muscat-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-100',
+    interactive: 'bg-white p-6 rounded-xl shadow-muscat hover:shadow-muscat-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-100 group cursor-pointer',
+    elevated: 'bg-white p-8 rounded-2xl shadow-muscat-xl border border-slate-100',
+    minimal: 'bg-white p-4 rounded-lg shadow-muscat border border-slate-100'
+  },
   
-  // Input styles
-  input: 'border-2 border-slate-300 bg-white text-slate-900 rounded-lg px-4 py-2.5 transition-all duration-200 outline-none focus:border-primary-light focus:ring-2 focus:ring-primary-light/30',
+  // Input Styles
+  inputs: {
+    default: 'w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-light focus:border-primary-light focus:outline-none bg-white text-slate-700 transition-all duration-200 hover:border-primary-light',
+    search: 'w-full p-3 pl-10 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-light focus:border-primary-light focus:outline-none bg-white text-slate-700 transition-all duration-200',
+    select: 'appearance-none w-full p-2.5 pr-10 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-light focus:border-primary-light focus:outline-none bg-white text-slate-700 transition-all duration-200'
+  },
   
-  // Badge styles
-  badgePrimary: 'bg-primary-100 text-primary-800 border-primary-200 px-3 py-1 rounded-full text-xs font-medium border',
-  badgeSecondary: 'bg-secondary-100 text-secondary-800 border-secondary-200 px-3 py-1 rounded-full text-xs font-medium border',
-  badgeSuccess: 'bg-green-100 text-green-800 border-green-200 px-3 py-1 rounded-full text-xs font-medium border',
-  badgeWarning: 'bg-yellow-100 text-yellow-800 border-yellow-200 px-3 py-1 rounded-full text-xs font-medium border',
-  badgeError: 'bg-red-100 text-red-800 border-red-200 px-3 py-1 rounded-full text-xs font-medium border',
+  // Badge Styles
+  badges: {
+    primary: 'bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium border border-primary/20',
+    secondary: 'bg-secondary/10 text-secondary-800 px-3 py-1 rounded-full text-xs font-medium border border-secondary/20',
+    accent: 'bg-accent/10 text-accent-700 px-3 py-1 rounded-full text-xs font-medium border border-accent/20',
+    success: 'bg-success/10 text-success px-3 py-1 rounded-full text-xs font-medium border border-success/20',
+    warning: 'bg-warning/10 text-warning px-3 py-1 rounded-full text-xs font-medium border border-warning/20',
+    error: 'bg-error/10 text-error px-3 py-1 rounded-full text-xs font-medium border border-error/20'
+  },
   
-  // Text styles
-  textPrimary: 'text-primary-600',
-  textSecondary: 'text-secondary-600',
-  textAccent: 'text-accent-600',
+  // Table Styles
+  tables: {
+    container: 'bg-white rounded-xl shadow-muscat-lg border border-slate-100 overflow-hidden',
+    header: 'bg-gradient-to-r from-primary via-primary-light to-secondary text-white',
+    row: 'hover:bg-slate-50/50 transition-colors group',
+    cell: 'p-4 text-slate-700',
+    stickyCell: 'sticky left-0 bg-white group-hover:bg-slate-50/50 z-10 border-r border-slate-100'
+  },
   
-  // Background styles
-  bgPrimary: 'bg-primary-500',
-  bgSecondary: 'bg-secondary-400',
-  bgAccent: 'bg-accent-500',
+  // Modal Styles
+  modals: {
+    overlay: 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4',
+    container: 'bg-white p-6 rounded-2xl shadow-muscat-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto',
+    header: 'flex justify-between items-center mb-6',
+    title: 'text-2xl font-bold text-primary flex items-center gap-3'
+  },
   
-  // Gradient styles
-  gradientPrimary: 'bg-gradient-to-r from-primary-500 to-primary-600',
-  gradientSecondary: 'bg-gradient-to-r from-secondary-400 to-secondary-500',
-  gradientAccent: 'bg-gradient-to-r from-accent-500 to-accent-600',
+  // Navigation Styles
+  navigation: {
+    item: 'flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ease-in-out group hover:text-white',
+    active: 'bg-primary text-white shadow-muscat',
+    inactive: 'text-white hover:bg-primary-light'
+  }
 };
 
-// Theme utilities
-export const getMuscatBayTheme = () => ({
-  colors: MUSCAT_BAY_COLORS,
-  classes: MUSCAT_BAY_CLASSES,
-});
-
-// Category badge color mapping
-export const getCategoryBadgeColor = (category) => {
-  const categoryColors = {
-    'Pumping Station': 'bg-blue-50 text-blue-700 border-blue-200',
-    'Lifting Station': 'bg-green-50 text-green-700 border-green-200',
-    'Apartment': 'bg-purple-50 text-purple-700 border-purple-200',
-    'Street Light': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-    'Beachwell': 'bg-cyan-50 text-cyan-700 border-cyan-200',
-    'Central Park': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    'CIF Kitchen': 'bg-orange-50 text-orange-700 border-orange-200',
-    'Security Building': 'bg-red-50 text-red-700 border-red-200',
-    'Village Square': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    'Irrigation Tank': 'bg-teal-50 text-teal-700 border-teal-200',
-    'Actuator DB': 'bg-pink-50 text-pink-700 border-pink-200',
-    'Guard House': 'bg-slate-50 text-slate-700 border-slate-200',
-    'ROP Building': 'bg-gray-50 text-gray-700 border-gray-200',
-    'Zone Light': 'bg-amber-50 text-amber-700 border-amber-200',
-    'Bank Muscat': 'bg-violet-50 text-violet-700 border-violet-200',
-    'Helipad': 'bg-rose-50 text-rose-700 border-rose-200',
-  };
-  return categoryColors[category] || 'bg-gray-50 text-gray-700 border-gray-200';
+// Utility Functions
+export const muscatBayUtils = {
+  // Get color for charts
+  getChartColor: (index) => {
+    return MUSCAT_BAY_COLORS.chart[index % MUSCAT_BAY_COLORS.chart.length];
+  },
+  
+  // Get category badge style
+  getCategoryBadgeStyle: (category) => {
+    const styles = {
+      'Pumping Station': MUSCAT_BAY_STYLES.badges.primary,
+      'Lifting Station': MUSCAT_BAY_STYLES.badges.success,
+      'Apartment': MUSCAT_BAY_STYLES.badges.secondary,
+      'Street Light': MUSCAT_BAY_STYLES.badges.warning,
+      'Beachwell': 'bg-info/10 text-info px-3 py-1 rounded-full text-xs font-medium border border-info/20',
+      'Central Park': MUSCAT_BAY_STYLES.badges.success,
+      'CIF Kitchen': MUSCAT_BAY_STYLES.badges.accent,
+      'Security Building': MUSCAT_BAY_STYLES.badges.error,
+      'Village Square': 'bg-muscat-purple/10 text-muscat-purple px-3 py-1 rounded-full text-xs font-medium border border-muscat-purple/20',
+    };
+    return styles[category] || 'bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-medium border border-slate-200';
+  },
+  
+  // Get rank badge style
+  getRankBadgeStyle: (rank) => {
+    if (rank === 1) return 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 text-white shadow-lg ring-4 ring-yellow-300/50';
+    if (rank === 2) return 'bg-gradient-to-br from-slate-300 via-slate-400 to-slate-500 text-white shadow-lg ring-4 ring-slate-300/50';
+    if (rank === 3) return 'bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white shadow-lg ring-4 ring-orange-300/50';
+    return 'bg-gradient-to-br from-primary via-primary-light to-primary-dark text-white shadow-muscat';
+  },
+  
+  // Get status color
+  getStatusColor: (status) => {
+    const statusMap = {
+      active: MUSCAT_BAY_COLORS.success,
+      inactive: MUSCAT_BAY_COLORS.error,
+      pending: MUSCAT_BAY_COLORS.warning,
+      completed: MUSCAT_BAY_COLORS.success,
+      cancelled: MUSCAT_BAY_COLORS.error
+    };
+    return statusMap[status.toLowerCase()] || MUSCAT_BAY_COLORS.primary;
+  },
+  
+  // Format numbers with commas
+  formatNumber: (num) => {
+    return new Intl.NumberFormat().format(num);
+  },
+  
+  // Format currency
+  formatCurrency: (amount, currency = 'OMR') => {
+    return `${amount.toFixed(2)} ${currency}`;
+  },
+  
+  // Get performance indicator
+  getPerformanceIndicator: (value, max) => {
+    const percentage = (value / max) * 100;
+    if (percentage >= 90) return { color: 'success', label: 'Excellent', icon: '⭐' };
+    if (percentage >= 70) return { color: 'warning', label: 'Good', icon: '🟡' };
+    if (percentage >= 50) return { color: 'info', label: 'Average', icon: '🔵' };
+    return { color: 'error', label: 'Poor', icon: '🔴' };
+  }
 };
 
-// Status indicator colors
-export const getStatusColor = (status) => {
-  const statusColors = {
-    active: 'bg-green-100 text-green-800 border-green-200',
-    inactive: 'bg-red-100 text-red-800 border-red-200',
-    warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    pending: 'bg-blue-100 text-blue-800 border-blue-200',
-    completed: 'bg-purple-100 text-purple-800 border-purple-200',
-    expired: 'bg-gray-100 text-gray-800 border-gray-200',
-  };
-  return statusColors[status] || statusColors.inactive;
-};
-
-// Chart color generator
-export const getChartColor = (index) => {
-  return MUSCAT_BAY_COLORS.chart[index % MUSCAT_BAY_COLORS.chart.length];
-};
-
-// Rank badge helper
-export const getRankBadge = (rank) => {
-  if (rank === 1) return { 
-    icon: '👑', 
-    class: 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg', 
-    label: 'Champion' 
-  };
-  if (rank === 2) return { 
-    icon: '🥈', 
-    class: 'bg-gradient-to-r from-gray-300 to-gray-500 text-white shadow-md', 
-    label: 'Runner-up' 
-  };
-  if (rank === 3) return { 
-    icon: '🥉', 
-    class: 'bg-gradient-to-r from-orange-400 to-orange-600 text-white shadow-md', 
-    label: 'Third Place' 
-  };
-  return { 
-    icon: '', 
-    class: 'bg-gradient-to-r from-slate-400 to-slate-600 text-white', 
-    label: `#${rank}` 
-  };
-};
-
-// Performance score color
-export const getPerformanceColor = (score) => {
-  if (score >= 90) return 'text-green-600 bg-green-100';
-  if (score >= 70) return 'text-blue-600 bg-blue-100';
-  if (score >= 50) return 'text-yellow-600 bg-yellow-100';
-  return 'text-red-600 bg-red-100';
-};
-
-// Loading states
-export const LOADING_STATES = {
-  spinner: 'animate-spin rounded-full border-4 border-slate-200 border-t-primary-500',
-  pulse: 'animate-pulse bg-slate-200 rounded',
-  shimmer: 'bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-shimmer',
-};
-
-// Animation utilities
-export const ANIMATIONS = {
+// Animation Classes
+export const MUSCAT_BAY_ANIMATIONS = {
   fadeIn: 'animate-fade-in',
   slideUp: 'animate-slide-up',
   bounceSubtle: 'animate-bounce-subtle',
-  float: 'animate-float',
   glow: 'animate-glow',
-};
-
-// Responsive breakpoints
-export const BREAKPOINTS = {
-  sm: '640px',
-  md: '768px',
-  lg: '1024px',
-  xl: '1280px',
-  '2xl': '1536px',
-};
-
-// Shadow utilities
-export const SHADOWS = {
-  muscat: 'shadow-muscat',
-  muscatLg: 'shadow-muscat-lg',
-  muscatXl: 'shadow-muscat-xl',
-};
-
-// Common component props
-export const getCommonProps = (variant = 'default') => {
-  const variants = {
-    default: {
-      className: MUSCAT_BAY_CLASSES.card,
-    },
-    primary: {
-      className: `${MUSCAT_BAY_CLASSES.card} border-primary-200 bg-primary-50`,
-    },
-    secondary: {
-      className: `${MUSCAT_BAY_CLASSES.card} border-secondary-200 bg-secondary-50`,
-    },
-    accent: {
-      className: `${MUSCAT_BAY_CLASSES.card} border-accent-200 bg-accent-50`,
-    },
-  };
+  float: 'animate-float',
+  pulse: 'animate-pulse',
   
-  return variants[variant] || variants.default;
+  // Hover Effects
+  hoverScale: 'transition-transform hover:scale-105',
+  hoverLift: 'transition-all hover:-translate-y-1',
+  hoverShadow: 'transition-shadow hover:shadow-muscat-lg',
+  
+  // Combined Effects
+  cardHover: 'transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-muscat-lg',
+  buttonHover: 'transition-all duration-200 transform hover:scale-105 hover:shadow-muscat'
 };
 
-// Export default theme object
+// Responsive Breakpoints
+export const MUSCAT_BAY_BREAKPOINTS = {
+  mobile: '320px',
+  tablet: '768px',
+  desktop: '1024px',
+  wide: '1440px'
+};
+
+// Icon Size Standards
+export const MUSCAT_BAY_ICON_SIZES = {
+  xs: 12,
+  sm: 16,
+  md: 20,
+  lg: 24,
+  xl: 32,
+  '2xl': 48
+};
+
+// Typography Scales
+export const MUSCAT_BAY_TYPOGRAPHY = {
+  headings: {
+    h1: 'text-3xl md:text-4xl font-bold text-slate-800',
+    h2: 'text-2xl md:text-3xl font-bold text-slate-800',
+    h3: 'text-xl md:text-2xl font-semibold text-slate-700',
+    h4: 'text-lg md:text-xl font-semibold text-slate-700',
+    h5: 'text-base md:text-lg font-medium text-slate-700',
+    h6: 'text-sm md:text-base font-medium text-slate-700'
+  },
+  
+  body: {
+    large: 'text-lg text-slate-600',
+    default: 'text-base text-slate-600',
+    small: 'text-sm text-slate-500',
+    xs: 'text-xs text-slate-500'
+  },
+  
+  labels: {
+    default: 'text-sm font-medium text-slate-700',
+    required: 'text-sm font-medium text-slate-700 after:content-["*"] after:text-error after:ml-1',
+    optional: 'text-sm font-medium text-slate-500'
+  }
+};
+
+// Component Size Variants
+export const MUSCAT_BAY_SIZES = {
+  buttons: {
+    sm: 'py-1.5 px-3 text-sm',
+    md: 'py-2.5 px-4 text-sm',
+    lg: 'py-3 px-6 text-base',
+    xl: 'py-4 px-8 text-lg'
+  },
+  
+  inputs: {
+    sm: 'p-2 text-sm',
+    md: 'p-2.5 text-sm',
+    lg: 'p-3 text-base',
+    xl: 'p-4 text-lg'
+  },
+  
+  cards: {
+    sm: 'p-4',
+    md: 'p-6',
+    lg: 'p-8',
+    xl: 'p-10'
+  }
+};
+
+// Layout Constants
+export const MUSCAT_BAY_LAYOUT = {
+  sidebar: {
+    collapsed: 'w-16',
+    expanded: 'w-64',
+    transition: 'transition-all duration-300 ease-in-out'
+  },
+  
+  header: {
+    height: 'h-16',
+    mobile: 'h-14'
+  },
+  
+  content: {
+    padding: 'p-6 md:p-8',
+    maxWidth: 'max-w-7xl mx-auto'
+  }
+};
+
+// Export default object with all utilities
 export default {
   colors: MUSCAT_BAY_COLORS,
-  classes: MUSCAT_BAY_CLASSES,
-  utilities: {
-    getCategoryBadgeColor,
-    getStatusColor,
-    getChartColor,
-    getRankBadge,
-    getPerformanceColor,
-    getCommonProps,
-  },
-  constants: {
-    LOADING_STATES,
-    ANIMATIONS,
-    BREAKPOINTS,
-    SHADOWS,
-  },
+  styles: MUSCAT_BAY_STYLES,
+  utils: muscatBayUtils,
+  animations: MUSCAT_BAY_ANIMATIONS,
+  breakpoints: MUSCAT_BAY_BREAKPOINTS,
+  iconSizes: MUSCAT_BAY_ICON_SIZES,
+  typography: MUSCAT_BAY_TYPOGRAPHY,
+  sizes: MUSCAT_BAY_SIZES,
+  layout: MUSCAT_BAY_LAYOUT
 };
