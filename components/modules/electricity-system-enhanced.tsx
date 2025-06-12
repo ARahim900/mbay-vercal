@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Label, Area } from 'recharts';
-import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, ChevronRight, Award, TrendingDown, Star, Crown, Medal, ExternalLink, Info, Maximize2 } from 'lucide-react';
+import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, ChevronRight, Award, TrendingDown, Star, Crown, Medal, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 // ===============================
 // DESIGN SYSTEM & CONSTANTS
@@ -8,59 +8,18 @@ import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, 
 
 const OMR_PER_KWH = 0.025;
 
-// Enhanced Muscat Bay Color Scheme - Fully Applied
-const MUSCAT_COLORS = {
-  primary: {
-    DEFAULT: '#4E4456',
-    50: '#F8F7F8',
-    100: '#F1EEF2',
-    200: '#E3DCE5',
-    300: '#D5CAD8',
-    400: '#B69BB5',
-    500: '#4E4456',
-    600: '#463D4D',
-    700: '#3B3241',
-    800: '#302833',
-    900: '#251E26',
-    light: '#7E708A',
-    dark: '#3B3241',
-  },
-  secondary: {
-    DEFAULT: '#A8D5E3',
-    50: '#F0F9FB',
-    100: '#E1F3F7',
-    200: '#C3E7EF',
-    300: '#A8D5E3',
-    400: '#7BB3C7',
-    500: '#5491AB',
-    600: '#3D6F8F',
-    700: '#2A4D73',
-    800: '#1A2B57',
-    900: '#0D093B',
-    light: '#C3FBF4',
-    dark: '#7BB3C7',
-  },
-  accent: {
-    DEFAULT: '#BFA181',
-    50: '#FDFCFA',
-    100: '#F9F7F2',
-    200: '#F2F0EA',
-    300: '#E5E0D5',
-    400: '#D1C7B0',
-    500: '#BFA181',
-    600: '#A68B5B',
-    700: '#8D7540',
-    800: '#745F28',
-    900: '#5B4913',
-    light: '#F2F0EA',
-    dark: '#A68B5B',
-  },
-  status: {
-    success: '#10B981',
-    warning: '#F59E0B',
-    info: '#0A1828',
-    error: '#EF4444',
-  },
+// Enhanced Muscat Bay Color Scheme - Using Tailwind Classes
+const COLORS = {
+  primary: '#4E4456',           // Main brand color
+  primaryLight: '#7E708A',      // Lighter variant
+  primaryDark: '#3B3241',       // Darker variant
+  secondary: '#A8D5E3',         // Soft teal
+  accent: '#BFA181',            // Muted gold
+  success: '#10B981',           // Green
+  warning: '#F59E0B',           // Amber
+  info: '#0A1828',             // Deep navy
+  error: '#EF4444',            // Red
+  
   // Chart colors - Muscat Bay themed
   chart: [
     '#4E4456', '#A8D5E3', '#BFA181', '#0A1828', '#5f5168', 
@@ -202,27 +161,27 @@ const availableMonths = Object.keys(initialElectricityData[0].consumption);
 // ENHANCED SHARED COMPONENTS
 // ===============================
 
-const MuscatSummaryCard = ({ title, value, icon, unit, trend, trendColor, iconBgColor, isLoading, className = "" }) => {
+const SummaryCard = ({ title, value, icon, unit, trend, trendColor, iconBgColor, isLoading }) => {
   const IconComponent = icon;
   return (
-    <div className={`muscat-card p-6 group hover:shadow-muscat-lg transition-all duration-300 transform hover:-translate-y-1 ${className}`}>
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-slate-500 font-semibold text-sm leading-tight">{title}</h3>
+    <div className="bg-white p-6 rounded-xl shadow-muscat hover:shadow-muscat-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-100 group">
+      <div className="flex justify-between items-start mb-3">
+        <h3 className="text-slate-500 font-semibold text-sm">{title}</h3>
         <div 
-          className="p-3 rounded-xl text-white shadow-md group-hover:scale-110 transition-all duration-300 group-hover:shadow-lg" 
-          style={{backgroundColor: iconBgColor || MUSCAT_COLORS.primary.DEFAULT }}
+          className="p-3 rounded-full text-white shadow-md group-hover:scale-110 transition-transform duration-200 group-hover:animate-glow" 
+          style={{backgroundColor: iconBgColor || COLORS.primary }}
         >
           <IconComponent size={20} />
         </div>
       </div>
       {isLoading ? (
-        <div className="animate-pulse space-y-3">
-          <div className="h-8 bg-slate-200 rounded-lg w-24"></div>
+        <div className="animate-pulse">
+          <div className="h-8 bg-slate-200 rounded w-24 mb-2"></div>
           <div className="h-4 bg-slate-200 rounded w-16"></div>
         </div>
       ) : (
         <>
-          <p className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2 tracking-tight">
+          <p className="text-2xl sm:text-3xl font-bold text-slate-800 mb-1.5">
             {value} <span className="text-base font-medium text-slate-500">{unit}</span>
           </p>
           {trend && <p className={`text-xs sm:text-sm font-medium ${trendColor}`}>{trend}</p>}
@@ -232,8 +191,8 @@ const MuscatSummaryCard = ({ title, value, icon, unit, trend, trendColor, iconBg
   );
 };
 
-const MuscatChartWrapper = ({ title, children, subtitle, actions, className = "" }) => (
-  <div className={`muscat-card p-6 hover:shadow-muscat-xl transition-all duration-300 ${className}`}>
+const ChartWrapper = ({ title, children, subtitle, actions, className = "" }) => (
+  <div className={`bg-white p-6 rounded-xl shadow-muscat hover:shadow-muscat-xl transition-shadow border border-slate-100 ${className}`}>
     <div className="flex justify-between items-start mb-4">
       <div>
         <h3 className="text-xl font-semibold text-slate-700">{title}</h3>
@@ -247,21 +206,21 @@ const MuscatChartWrapper = ({ title, children, subtitle, actions, className = ""
   </div>
 );
 
-const MuscatStyledSelect = ({ label, value, onChange, options, id, icon: Icon, disabled }) => {
+const StyledSelect = ({ label, value, onChange, options, id, icon: Icon, disabled }) => {
     return (
-        <div className="space-y-1">
-            <label htmlFor={id} className="block text-sm font-medium text-slate-700">{label}</label>
+        <div>
+            <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
             <div className="relative">
                 <select 
                   id={id} 
                   value={value} 
                   onChange={onChange} 
                   disabled={disabled}
-                  className="muscat-input appearance-none w-full pr-10 focus:ring-2 focus:ring-primary-light focus:border-primary-light disabled:opacity-50 disabled:cursor-not-allowed" 
+                  className="appearance-none w-full p-2.5 pr-10 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-light focus:border-primary-light focus:outline-none bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:border-primary-light" 
                 >
                     {options.map(option => ( <option key={option.value} value={option.value}>{option.label}</option> ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
                     {Icon ? <Icon size={16} /> : <ChevronDown size={16} />}
                 </div>
             </div>
@@ -270,18 +229,17 @@ const MuscatStyledSelect = ({ label, value, onChange, options, id, icon: Icon, d
 };
 
 // ===============================
-// COMPLETELY REDESIGNED TOP CONSUMERS TABLE - OVERFLOW FIXED
+// COMPLETELY ENHANCED TOP CONSUMERS TABLE - OVERFLOW FIXED
 // ===============================
 
-const EnhancedTopConsumersTable = ({ data, selectedMonth }) => {
+const TopConsumersTable = ({ data, selectedMonth }) => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('consumption');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
-  const itemsPerPage = 8;
+  const itemsPerPage = 8; // Optimized for better display
 
-  // Sort and paginate data
+  // Sort data
   const sortedData = useMemo(() => {
     return [...data].sort((a, b) => {
       if (sortBy === 'consumption') {
@@ -290,6 +248,9 @@ const EnhancedTopConsumersTable = ({ data, selectedMonth }) => {
       if (sortBy === 'name') {
         return sortOrder === 'desc' ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name);
       }
+      if (sortBy === 'category') {
+        return sortOrder === 'desc' ? b.category.localeCompare(a.category) : a.category.localeCompare(b.category);
+      }
       return 0;
     });
   }, [data, sortBy, sortOrder]);
@@ -297,29 +258,37 @@ const EnhancedTopConsumersTable = ({ data, selectedMonth }) => {
   const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
 
-  const getRankBadge = (index) => {
+  const getRankBadgeColor = (index) => {
     const actualIndex = (currentPage - 1) * itemsPerPage + index;
-    if (actualIndex === 0) return { icon: Crown, class: 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white', label: '👑 Champion' };
-    if (actualIndex === 1) return { icon: Medal, class: 'bg-gradient-to-r from-gray-400 to-gray-600 text-white', label: '🥈 Runner-up' };
-    if (actualIndex === 2) return { icon: Star, class: 'bg-gradient-to-r from-orange-400 to-orange-600 text-white', label: '🥉 Third' };
-    return { icon: null, class: 'bg-gradient-to-r from-slate-400 to-slate-600 text-white', label: `#${actualIndex + 1}` };
+    if (actualIndex === 0) return 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg ring-2 ring-yellow-300'; // Gold
+    if (actualIndex === 1) return 'bg-gradient-to-r from-gray-300 to-gray-500 text-white shadow-md ring-2 ring-gray-200';   // Silver
+    if (actualIndex === 2) return 'bg-gradient-to-r from-orange-400 to-orange-600 text-white shadow-md ring-2 ring-orange-300'; // Bronze
+    return 'bg-gradient-to-r from-primary to-primary-dark text-white';
   };
 
-  const getCategoryBadge = (category) => {
-    const badges = {
-      'Pumping Station': 'bg-blue-50 text-blue-700 border-blue-200',
-      'Lifting Station': 'bg-green-50 text-green-700 border-green-200', 
-      'Apartment': 'bg-purple-50 text-purple-700 border-purple-200',
-      'Street Light': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-      'Beachwell': 'bg-cyan-50 text-cyan-700 border-cyan-200',
-      'Central Park': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      'CIF Kitchen': 'bg-orange-50 text-orange-700 border-orange-200',
-      'Security Building': 'bg-red-50 text-red-700 border-red-200',
-      'Village Square': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-      'Irrigation Tank': 'bg-teal-50 text-teal-700 border-teal-200',
-      'Actuator DB': 'bg-pink-50 text-pink-700 border-pink-200',
+  const getRankIcon = (index) => {
+    const actualIndex = (currentPage - 1) * itemsPerPage + index;
+    if (actualIndex === 0) return <Crown size={12} className="text-yellow-200" />;
+    if (actualIndex === 1) return <Medal size={12} className="text-gray-200" />;
+    if (actualIndex === 2) return <Star size={12} className="text-orange-200" />;
+    return null;
+  };
+
+  const getCategoryColor = (category) => {
+    const colors = {
+      'Pumping Station': 'bg-blue-50 text-blue-700 border border-blue-200',
+      'Lifting Station': 'bg-green-50 text-green-700 border border-green-200', 
+      'Apartment': 'bg-purple-50 text-purple-700 border border-purple-200',
+      'Street Light': 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+      'Beachwell': 'bg-cyan-50 text-cyan-700 border border-cyan-200',
+      'Central Park': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+      'CIF Kitchen': 'bg-orange-50 text-orange-700 border border-orange-200',
+      'Security Building': 'bg-red-50 text-red-700 border border-red-200',
+      'Village Square': 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+      'Irrigation Tank': 'bg-teal-50 text-teal-700 border border-teal-200',
+      'Actuator DB': 'bg-pink-50 text-pink-700 border border-pink-200',
     };
-    return badges[category] || 'bg-gray-50 text-gray-700 border-gray-200';
+    return colors[category] || 'bg-gray-50 text-gray-700 border border-gray-200';
   };
 
   const handleSort = (field) => {
@@ -329,247 +298,248 @@ const EnhancedTopConsumersTable = ({ data, selectedMonth }) => {
       setSortBy(field);
       setSortOrder('desc');
     }
-    setCurrentPage(1);
   };
 
-  const CardView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      {paginatedData.map((consumer, index) => {
-        const actualIndex = (currentPage - 1) * itemsPerPage + index;
-        const rank = getRankBadge(index);
-        const IconComponent = rank.icon;
-        
-        return (
-          <div key={actualIndex} className="muscat-card p-5 hover:shadow-muscat-lg transition-all duration-300 group">
-            {/* Card Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold ${rank.class} shadow-lg`}>
-                {actualIndex + 1}
-                {IconComponent && <IconComponent size={12} className="ml-1" />}
-              </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getCategoryBadge(consumer.category)}`}>
-                {consumer.category}
-              </span>
-            </div>
+  const getSortIcon = (field) => {
+    if (sortBy !== field) return <ArrowUpDown size={14} className="text-slate-400" />;
+    return sortOrder === 'desc' ? <ArrowDown size={14} className="text-primary" /> : <ArrowUp size={14} className="text-primary" />;
+  };
 
-            {/* Unit Name */}
-            <h4 className="font-bold text-slate-800 text-lg mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
-              {consumer.name}
-            </h4>
-
-            {/* Consumption */}
-            <div className="mb-3">
-              <div className="text-2xl font-bold text-slate-800">
-                {consumer.consumption.toLocaleString()}
-                <span className="text-sm text-slate-500 font-normal ml-1">kWh</span>
+  return (
+    <div className="bg-white rounded-xl shadow-muscat-lg border border-slate-100 overflow-hidden">
+      {/* Enhanced Header with Muscat Bay Colors */}
+      <div className="bg-gradient-to-r from-primary via-primary-light to-secondary p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-bold flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                <Award className="text-yellow-300" size={24} />
               </div>
-              <div className="text-sm text-slate-600">
-                {(consumer.consumption * OMR_PER_KWH).toFixed(2)} OMR estimated cost
-              </div>
-            </div>
-
-            {/* Performance Bar */}
-            <div className="mb-4">
-              <div className="flex justify-between text-xs text-slate-600 mb-1">
-                <span>Performance</span>
-                <span>{((consumer.consumption / data[0].consumption) * 100).toFixed(1)}%</span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-2">
-                <div 
-                  className="h-2 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500"
-                  style={{ width: `${Math.min(100, (consumer.consumption / data[0].consumption) * 100)}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-between items-center">
-              <button
-                onClick={() => setExpandedRow(expandedRow === actualIndex ? null : actualIndex)}
-                className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1 transition-colors"
-              >
-                <Info size={14} />
-                {expandedRow === actualIndex ? 'Hide Details' : 'View Details'}
-              </button>
-              <span className="text-xs text-slate-500">{rank.label}</span>
-            </div>
-
-            {/* Expanded Details */}
-            {expandedRow === actualIndex && (
-              <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-slate-500">Meter:</span>
-                    <span className="font-medium text-slate-700 ml-1">{consumer.meterAccountNo || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500">Rank:</span>
-                    <span className="font-medium text-slate-700 ml-1">#{actualIndex + 1}</span>
-                  </div>
-                </div>
-              </div>
-            )}
+              Top Electricity Consumers
+            </h3>
+            <p className="text-white/90 mt-1 text-sm">
+              Performance ranking for {selectedMonth === "All Months" ? "overall period" : selectedMonth}
+            </p>
           </div>
-        );
-      })}
-    </div>
-  );
+          <div className="flex items-center gap-4 text-white/90">
+            <div className="text-right">
+              <div className="text-2xl font-bold">{data.length}</div>
+              <div className="text-xs">Total Units</div>
+            </div>
+            <TrendingUp size={20} />
+          </div>
+        </div>
+      </div>
 
-  const TableView = () => (
-    <div className="bg-white rounded-xl shadow-muscat border border-slate-200 overflow-hidden">
-      {/* COMPLETELY FIXED RESPONSIVE TABLE CONTAINER */}
+      {/* Enhanced Sort Controls with Muscat Bay Theme */}
+      <div className="bg-slate-50 px-6 py-3 border-b border-slate-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-slate-600 font-medium">Sort by:</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleSort('consumption')}
+                className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1 ${
+                  sortBy === 'consumption' 
+                    ? 'bg-primary text-white shadow-md' 
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                Consumption {getSortIcon('consumption')}
+              </button>
+              <button
+                onClick={() => handleSort('name')}
+                className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1 ${
+                  sortBy === 'name' 
+                    ? 'bg-primary text-white shadow-md' 
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                Name {getSortIcon('name')}
+              </button>
+              <button
+                onClick={() => handleSort('category')}
+                className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1 ${
+                  sortBy === 'category' 
+                    ? 'bg-primary text-white shadow-md' 
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                Category {getSortIcon('category')}
+              </button>
+            </div>
+          </div>
+          <div className="text-xs text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200">
+            Page {currentPage} of {totalPages} • {data.length} total
+          </div>
+        </div>
+      </div>
+
+      {/* FIXED OVERFLOW TABLE CONTAINER - Complete solution */}
       <div className="overflow-hidden">
         <div className="overflow-x-auto">
-          <div className="inline-block min-w-full align-middle">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
+          <div className="min-w-[900px]"> {/* Minimum width to prevent cramping */}
+            <table className="w-full">
+              <thead className="bg-slate-100 border-b border-slate-200">
                 <tr>
-                  <th className="sticky left-0 z-20 bg-slate-50 px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider border-r border-slate-200 min-w-[80px]">
+                  <th className="text-left p-4 font-semibold text-slate-700 w-20 sticky left-0 bg-slate-100 z-20 border-r border-slate-200">
                     Rank
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider min-w-[200px]">
-                    <button
-                      onClick={() => handleSort('name')}
-                      className="flex items-center gap-1 hover:text-slate-700 transition-colors"
-                    >
-                      Unit Name
-                      {sortBy === 'name' && (
-                        <ChevronDown size={12} className={sortOrder === 'desc' ? 'rotate-180' : ''} />
-                      )}
-                    </button>
+                  <th className="text-left p-4 font-semibold text-slate-700 min-w-[220px]">
+                    Unit Details
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider min-w-[120px]">
+                  <th className="text-left p-4 font-semibold text-slate-700 min-w-[140px]">
                     Category
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider min-w-[140px]">
-                    <button
-                      onClick={() => handleSort('consumption')}
-                      className="flex items-center gap-1 hover:text-slate-700 transition-colors ml-auto"
-                    >
-                      Consumption
-                      {sortBy === 'consumption' && (
-                        <ChevronDown size={12} className={sortOrder === 'desc' ? 'rotate-180' : ''} />
-                      )}
-                    </button>
+                  <th className="text-right p-4 font-semibold text-slate-700 min-w-[130px]">
+                    Consumption
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider min-w-[100px]">
-                    Cost (OMR)
+                  <th className="text-right p-4 font-semibold text-slate-700 min-w-[120px]">
+                    Est. Cost
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider min-w-[120px]">
+                  <th className="text-center p-4 font-semibold text-slate-700 min-w-[120px]">
                     Performance
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider min-w-[80px]">
+                  <th className="text-center p-4 font-semibold text-slate-700 w-20">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100">
                 {paginatedData.map((consumer, index) => {
                   const actualIndex = (currentPage - 1) * itemsPerPage + index;
-                  const rank = getRankBadge(index);
-                  const IconComponent = rank.icon;
-                  const performancePercent = Math.min(100, (consumer.consumption / data[0].consumption) * 100);
+                  const isExpanded = expandedRow === actualIndex;
+                  const performanceScore = Math.min(100, Math.max(0, 100 - (consumer.consumption / Math.max(...data.map(d => d.consumption)) * 100)));
                   
                   return (
                     <React.Fragment key={actualIndex}>
-                      <tr className="hover:bg-slate-50 transition-colors group">
-                        <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 px-4 py-4 border-r border-slate-200">
-                          <div className="flex items-center gap-2">
-                            <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${rank.class} shadow-sm`}>
+                      <tr className="hover:bg-slate-50/50 transition-colors group">
+                        <td className="p-4 sticky left-0 bg-white group-hover:bg-slate-50/50 z-10 border-r border-slate-100">
+                          <div className="flex items-center justify-center">
+                            <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold ${getRankBadgeColor(index)} relative`}>
                               {actualIndex + 1}
+                              {getRankIcon(index) && (
+                                <div className="absolute -top-1 -right-1">
+                                  {getRankIcon(index)}
+                                </div>
+                              )}
                             </div>
-                            {IconComponent && <IconComponent size={14} className="text-yellow-500" />}
                           </div>
                         </td>
                         
-                        <td className="px-4 py-4">
-                          <div className="font-semibold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-2">
+                        <td className="p-4">
+                          <div className="font-semibold text-slate-800 group-hover:text-primary transition-colors">
                             {consumer.name}
                           </div>
-                          <div className="text-xs text-slate-500 mt-1">
-                            Meter: {consumer.meterAccountNo || 'N/A'}
+                          <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                            <Zap size={10} />
+                            ID: {actualIndex + 1} • {consumer.category?.split(' ')[0]}
                           </div>
                         </td>
                         
-                        <td className="px-4 py-4">
-                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${getCategoryBadge(consumer.category)}`}>
+                        <td className="p-4">
+                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(consumer.category)}`}>
                             {consumer.category}
                           </span>
                         </td>
                         
-                        <td className="px-4 py-4 text-right">
-                          <div className="font-bold text-slate-900 text-lg">
+                        <td className="p-4 text-right">
+                          <div className="font-bold text-slate-800 text-lg">
                             {consumer.consumption.toLocaleString()}
+                            <span className="text-xs text-slate-500 font-normal"> kWh</span>
                           </div>
-                          <div className="text-xs text-slate-500">kWh</div>
+                          {actualIndex > 0 && data.length > 0 && (
+                            <div className="text-xs text-slate-500 flex items-center justify-end gap-1">
+                              <TrendingDown size={12} />
+                              {((consumer.consumption / data[0].consumption) * 100).toFixed(1)}% of #1
+                            </div>
+                          )}
                         </td>
                         
-                        <td className="px-4 py-4 text-right">
+                        <td className="p-4 text-right">
                           <div className="font-semibold text-slate-700">
                             {(consumer.consumption * OMR_PER_KWH).toFixed(2)}
+                            <span className="text-xs text-slate-500 font-normal"> OMR</span>
                           </div>
                         </td>
 
-                        <td className="px-4 py-4">
-                          <div className="flex items-center justify-center">
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
                             <div className="w-16 h-2 bg-slate-200 rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500"
-                                style={{ width: `${performancePercent}%` }}
+                                className={`h-full transition-all duration-500 ${ 
+                                  actualIndex === 0 ? 'bg-yellow-500' :
+                                  actualIndex === 1 ? 'bg-gray-400' :
+                                  actualIndex === 2 ? 'bg-orange-500' :
+                                  'bg-primary'
+                                }`}
+                                style={{ width: `${100 - (actualIndex * 10)}%` }}
                               ></div>
                             </div>
-                            <span className="text-xs text-slate-600 ml-2 min-w-[35px]">
-                              {performancePercent.toFixed(0)}%
+                            <span className="text-xs text-slate-600 font-medium">
+                              {actualIndex === 0 ? '★' : actualIndex === 1 ? '▲' : actualIndex === 2 ? '●' : '·'}
                             </span>
                           </div>
                         </td>
                         
-                        <td className="px-4 py-4 text-center">
+                        <td className="p-4 text-center">
                           <button
-                            onClick={() => setExpandedRow(expandedRow === actualIndex ? null : actualIndex)}
-                            className="p-2 rounded-lg hover:bg-primary-50 transition-colors text-slate-600 hover:text-primary-600"
-                            title={expandedRow === actualIndex ? "Hide details" : "Show details"}
+                            onClick={() => setExpandedRow(isExpanded ? null : actualIndex)}
+                            className="p-2 rounded-full hover:bg-primary/10 transition-colors text-slate-600 hover:text-primary group"
+                            title={isExpanded ? "Hide details" : "Show details"}
                           >
-                            <ChevronDown 
+                            <ChevronRight 
                               size={16} 
-                              className={`transition-transform duration-200 ${expandedRow === actualIndex ? 'rotate-180' : ''}`} 
+                              className={`transition-transform duration-200 group-hover:scale-110 ${isExpanded ? 'rotate-90' : ''}`} 
                             />
                           </button>
                         </td>
                       </tr>
                       
-                      {/* Enhanced Expanded Row */}
-                      {expandedRow === actualIndex && (
-                        <tr className="bg-gradient-to-r from-primary-50 to-slate-50 border-l-4 border-primary-500">
-                          <td colSpan="7" className="px-6 py-4">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                      {/* Enhanced Expanded Row Details with Muscat Bay Theme */}
+                      {isExpanded && (
+                        <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-primary">
+                          <td colSpan="7" className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                                 <div className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-wide mb-2">
                                   <TrendingUp size={14} />
-                                  Consumption Rank
+                                  Monthly Trend
                                 </div>
                                 <div className="text-sm font-medium text-slate-800">
-                                  {rank.label} out of {data.length} units
+                                  {selectedMonth !== "All Months" ? "View all months" : "Seasonal patterns"}
                                 </div>
                               </div>
                               
-                              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-wide mb-2">
+                                  <Activity size={14} />
+                                  Efficiency Rating
+                                </div>
+                                <div className="text-sm font-medium text-slate-800">
+                                  {consumer.consumption > 10000 ? "🔴 High Load" : 
+                                   consumer.consumption > 1000 ? "🟡 Medium Load" : "🟢 Low Load"}
+                                </div>
+                              </div>
+                              
+                              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                                 <div className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-wide mb-2">
                                   <Award size={14} />
-                                  Performance Score
+                                  Ranking Status
                                 </div>
                                 <div className="text-sm font-medium text-slate-800">
-                                  {performancePercent.toFixed(1)}% of top consumer
+                                  {actualIndex === 0 ? "🏆 Top Consumer" :
+                                   actualIndex < 5 ? "⭐ High Consumer" : "📊 Standard Consumer"}
                                 </div>
                               </div>
                               
-                              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                                 <div className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-wide mb-2">
                                   <CheckCircle size={14} />
                                   Status
                                 </div>
                                 <div className="text-sm font-medium text-slate-800">
-                                  {consumer.consumption > 0 ? "✅ Active" : "⚠️ Inactive"}
+                                  {consumer.consumption > 0 ? "✅ Operational" : "⚠️ Inactive"}
                                 </div>
                               </div>
                             </div>
@@ -584,114 +554,23 @@ const EnhancedTopConsumersTable = ({ data, selectedMonth }) => {
           </div>
         </div>
       </div>
-    </div>
-  );
 
-  return (
-    <div className="space-y-6">
-      {/* Enhanced Header */}
-      <div className="muscat-card p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-3 rounded-xl text-white shadow-lg">
-              <Award size={24} />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-slate-800">
-                Top Electricity Consumers
-              </h3>
-              <p className="text-slate-600">
-                Performance ranking for {selectedMonth === "All Months" ? "overall period" : selectedMonth}
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-2xl font-bold text-slate-800">{data.length}</div>
-              <div className="text-xs text-slate-500">Total Units</div>
-            </div>
-            
-            {/* View Mode Toggle */}
-            <div className="flex bg-slate-100 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('table')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                  viewMode === 'table' 
-                    ? 'bg-white text-primary-600 shadow-sm' 
-                    : 'text-slate-600 hover:text-slate-800'
-                }`}
-              >
-                <List size={16} />
-                Table
-              </button>
-              <button
-                onClick={() => setViewMode('cards')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                  viewMode === 'cards' 
-                    ? 'bg-white text-primary-600 shadow-sm' 
-                    : 'text-slate-600 hover:text-slate-800'
-                }`}
-              >
-                <LayoutDashboard size={16} />
-                Cards
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Sort Controls */}
-      <div className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-600 font-medium">Sort by:</span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleSort('consumption')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  sortBy === 'consumption' 
-                    ? 'bg-primary-500 text-white shadow-md' 
-                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-300'
-                }`}
-              >
-                Consumption {sortBy === 'consumption' && (sortOrder === 'desc' ? '↓' : '↑')}
-              </button>
-              <button
-                onClick={() => handleSort('name')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  sortBy === 'name' 
-                    ? 'bg-primary-500 text-white shadow-md' 
-                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-300'
-                }`}
-              >
-                Name {sortBy === 'name' && (sortOrder === 'desc' ? '↓' : '↑')}
-              </button>
-            </div>
-          </div>
-          <div className="text-xs text-slate-500">
-            Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, data.length)} of {data.length}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      {viewMode === 'table' ? <TableView /> : <CardView />}
-
-      {/* Enhanced Pagination */}
+      {/* Enhanced Pagination with Muscat Bay Theme */}
       {totalPages > 1 && (
-        <div className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+        <div className="bg-gradient-to-r from-slate-50 to-slate-100 p-4 border-t border-slate-200">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-slate-600 flex items-center gap-2">
-              <Users2 size={16} />
-              <span>Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, data.length)} of {data.length} consumers</span>
+              <Users2 size={16} className="text-primary" />
+              <span>
+                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, data.length)} of {data.length} consumers
+              </span>
             </div>
             
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="flex items-center gap-1 px-3 py-2 text-sm border border-slate-300 rounded-lg hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-all muscat-button-secondary text-slate-700"
+                className="flex items-center gap-1 px-3 py-2 text-sm border border-slate-300 rounded-lg hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-sm"
               >
                 <ChevronDown size={14} className="rotate-90" />
                 Previous
@@ -714,10 +593,10 @@ const EnhancedTopConsumersTable = ({ data, selectedMonth }) => {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 text-sm rounded-lg transition-all ${
+                      className={`px-3 py-2 text-sm rounded-lg transition-all ${ 
                         currentPage === page 
-                          ? 'bg-primary-500 text-white shadow-md' 
-                          : 'border border-slate-300 hover:bg-white hover:shadow-sm text-slate-700'
+                          ? 'bg-primary text-white shadow-md' 
+                          : 'border border-slate-300 hover:bg-white hover:shadow-sm'
                       }`}
                     >
                       {page}
@@ -729,7 +608,7 @@ const EnhancedTopConsumersTable = ({ data, selectedMonth }) => {
               <button
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-                className="flex items-center gap-1 px-3 py-2 text-sm border border-slate-300 rounded-lg hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-all muscat-button-secondary text-slate-700"
+                className="flex items-center gap-1 px-3 py-2 text-sm border border-slate-300 rounded-lg hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-sm"
               >
                 Next
                 <ChevronDown size={14} className="-rotate-90" />
@@ -743,10 +622,10 @@ const EnhancedTopConsumersTable = ({ data, selectedMonth }) => {
 };
 
 // ===============================
-// MAIN ELECTRICITY SYSTEM MODULE - ENHANCED
+// MAIN ELECTRICITY SYSTEM MODULE
 // ===============================
 
-export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
+export const ElectricitySystemModuleEnhanced = ({ isDarkMode }) => {
   const [activeSubSection, setActiveSubSection] = useState('Dashboard');
   const [selectedMonth, setSelectedMonth] = useState("All Months"); 
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -797,7 +676,6 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
       name: d.unitName, 
       consumption: d.totalConsumption, 
       category: d.category, 
-      meterAccountNo: d.meterAccountNo,
       monthlyDataFull: initialElectricityData.find(item => item.id === d.id)?.consumption || {} 
     }));
   }, [kpiAndTableData]);
@@ -854,9 +732,13 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
                       <button 
                         key={tab.id} 
                         onClick={() => setActiveSubSection(tab.id)} 
-                        className={`px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${ isActive ? 'muscat-button-primary' : 'text-primary-600 hover:bg-primary-50 hover:text-primary-700' }`}
+                        className={`px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all duration-200 ease-in-out transform hover:scale-105 ${
+                          isActive 
+                            ? 'bg-primary text-white shadow-muscat' 
+                            : 'text-primary hover:bg-primary/10 hover:text-primary-dark'
+                        }`}
                       > 
-                        <tab.icon size={18} className={isActive ? 'text-white' : 'text-primary-600'} /> 
+                        <tab.icon size={18} className={isActive ? 'text-white' : 'text-primary'} /> 
                         <span>{tab.name}</span> 
                       </button> 
                     );
@@ -872,9 +754,9 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
     const categoryOptions = [{ value: "All Categories", label: "All Categories" }, ...distinctCategories.map(c => ({ value: c, label: c }))];
     
     return (
-        <div className="muscat-card p-4 mb-6 print:hidden sticky top-[110px] md:top-[88px] z-10">
+        <div className="bg-white shadow-muscat p-4 rounded-xl mb-6 print:hidden sticky top-[110px] md:top-[88px] z-10 border border-slate-200">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
-                <MuscatStyledSelect 
+                <StyledSelect 
                   id="monthFilter" 
                   label="Filter by Month" 
                   value={selectedMonth} 
@@ -882,7 +764,7 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
                   options={monthOptions} 
                   icon={CalendarDays}
                 />
-                <MuscatStyledSelect 
+                <StyledSelect 
                   id="categoryFilter" 
                   label="Filter by Unit Category" 
                   value={selectedCategory} 
@@ -892,7 +774,7 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
                 />
                 <button 
                   onClick={() => { setSelectedMonth("All Months"); setSelectedCategory("All Categories"); }} 
-                  className="muscat-button-primary flex items-center justify-center space-x-2 h-[46px] w-full lg:w-auto"
+                  className="bg-primary-dark hover:bg-primary text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 h-[46px] w-full lg:w-auto hover:shadow-muscat transform hover:scale-105"
                 > 
                   <Filter size={16}/> 
                   <span>Reset Filters</span> 
@@ -913,7 +795,7 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
           <div className="mb-6"> 
             <button 
               onClick={handleAiAnalysis} 
-              className="muscat-button-primary flex items-center justify-center space-x-2 w-full sm:w-auto group"
+              className="flex items-center justify-center space-x-2 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white py-3 px-6 rounded-xl text-sm font-semibold shadow-muscat hover:shadow-muscat-lg transition-all duration-300 w-full sm:w-auto group transform hover:scale-105"
               disabled={isAiLoading}
             > 
               <Sparkles size={18} className="group-hover:animate-pulse" /> 
@@ -922,53 +804,53 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MuscatSummaryCard 
+            <SummaryCard 
               title="Total Consumption" 
               value={totalConsumptionKWh.toLocaleString(undefined, {maximumFractionDigits:0})} 
               unit="kWh" 
               icon={Zap} 
               trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
               trendColor="text-slate-500 font-medium" 
-              iconBgColor={MUSCAT_COLORS.primary.DEFAULT} 
+              iconBgColor={COLORS.primary} 
             />
-            <MuscatSummaryCard 
+            <SummaryCard 
               title="Total Est. Cost" 
               value={totalCostOMR.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} 
               unit="OMR" 
               icon={DollarSign} 
               trend="Based on selection" 
               trendColor="text-slate-500 font-medium" 
-              iconBgColor={MUSCAT_COLORS.status.success} 
+              iconBgColor={COLORS.success} 
             />
-            <MuscatSummaryCard 
+            <SummaryCard 
               title="Avg. Consumption/Unit" 
               value={averageConsumptionPerUnit.toLocaleString(undefined, {maximumFractionDigits:0})} 
               unit="kWh" 
               icon={BarChart2} 
               trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
               trendColor="text-slate-500 font-medium" 
-              iconBgColor={MUSCAT_COLORS.accent.DEFAULT} 
+              iconBgColor={COLORS.accent} 
             />
-            <MuscatSummaryCard 
+            <SummaryCard 
               title="Active Meters" 
               value={activeMeters} 
               unit="units" 
               icon={Users2} 
               trend="In selection" 
               trendColor="text-slate-500 font-medium" 
-              iconBgColor={MUSCAT_COLORS.secondary.DEFAULT} 
+              iconBgColor={COLORS.secondary} 
             />
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="lg:col-span-3"> 
-              <MuscatChartWrapper title="Consumption Trend (All Months)" subtitle={`For category: ${selectedCategory}`}> 
+              <ChartWrapper title="Consumption Trend (All Months)" subtitle={`For category: ${selectedCategory}`}> 
                 <ResponsiveContainer width="100%" height="100%"> 
                   <LineChart data={monthlyTrendForAllMonths} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}> 
                     <defs> 
                       <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1"> 
-                        <stop offset="5%" stopColor={MUSCAT_COLORS.primary.DEFAULT} stopOpacity={0.8}/> 
-                        <stop offset="95%" stopColor={MUSCAT_COLORS.primary.DEFAULT} stopOpacity={0}/> 
+                        <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/> 
+                        <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/> 
                       </linearGradient> 
                     </defs> 
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" /> 
@@ -985,22 +867,22 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
                       labelStyle={{color: '#0f172a', fontWeight: 'bold'}}
                     /> 
                     <Legend wrapperStyle={{fontSize: "12px", paddingTop: '10px'}}/> 
-                    <Area type="monotone" dataKey="total" stroke={MUSCAT_COLORS.primary.DEFAULT} fillOpacity={1} fill="url(#colorTotal)" /> 
+                    <Area type="monotone" dataKey="total" stroke={COLORS.primary} fillOpacity={1} fill="url(#colorTotal)" /> 
                     <Line 
                       type="monotone" 
                       dataKey="total" 
-                      stroke={MUSCAT_COLORS.primary.DEFAULT} 
+                      stroke={COLORS.primary} 
                       strokeWidth={3} 
-                      activeDot={{ r: 7, strokeWidth: 2, fill: MUSCAT_COLORS.primary.DEFAULT }} 
-                      dot={{r:4, fill: MUSCAT_COLORS.primary.DEFAULT}} 
+                      activeDot={{ r: 7, strokeWidth: 2, fill: COLORS.primary }} 
+                      dot={{r:4, fill: COLORS.primary}} 
                       name="Total kWh" 
                     /> 
                   </LineChart> 
                 </ResponsiveContainer> 
-              </MuscatChartWrapper> 
+              </ChartWrapper> 
             </div>
             <div className="lg:col-span-2"> 
-              <MuscatChartWrapper title="Consumption by Category" subtitle={`For ${selectedMonth}`}> 
+              <ChartWrapper title="Consumption by Category" subtitle={`For ${selectedMonth}`}> 
                 <ResponsiveContainer width="100%" height="100%"> 
                   <PieChart> 
                     <Pie 
@@ -1017,7 +899,7 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
                       {consumptionByTypeChartData.map((entry, index) => ( 
                         <Cell 
                           key={`cell-${index}`} 
-                          fill={MUSCAT_COLORS.chart[index % MUSCAT_COLORS.chart.length]} 
+                          fill={COLORS.chart[index % COLORS.chart.length]} 
                           className="focus:outline-none hover:opacity-80 transition-opacity" 
                           stroke="none"
                         /> 
@@ -1046,23 +928,23 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
                     <Legend verticalAlign="bottom" wrapperStyle={{paddingTop: '15px', fontSize: '11px'}}/> 
                   </PieChart> 
                 </ResponsiveContainer> 
-              </MuscatChartWrapper> 
+              </ChartWrapper> 
             </div>
           </div>
 
-          {/* COMPLETELY FIXED Top Consumers Table */}
-          <EnhancedTopConsumersTable data={topConsumersChartData} selectedMonth={selectedMonth} />
+          {/* ENHANCED TOP CONSUMERS TABLE - FIXED OVERFLOW ISSUE */}
+          <TopConsumersTable data={topConsumersChartData} selectedMonth={selectedMonth} />
         </>
       )}
 
       {/* Enhanced AI Analysis Modal */}
       {isAiModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in"> 
-          <div className="muscat-card p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto"> 
+          <div className="bg-white p-6 rounded-2xl shadow-muscat-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto"> 
             <div className="flex justify-between items-center mb-6"> 
-              <h3 className="text-2xl font-bold text-primary-600 flex items-center gap-3">
-                <div className="bg-primary-100 p-2 rounded-lg">
-                  <Sparkles className="text-primary-600" size={24} />
+              <h3 className="text-2xl font-bold text-primary flex items-center gap-3">
+                <div className="bg-primary/10 p-2 rounded-lg">
+                  <Sparkles className="text-primary" size={24} />
                 </div>
                 AI Consumption Analysis
               </h3> 
@@ -1077,14 +959,14 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
             {isAiLoading ? ( 
               <div className="text-center py-12"> 
                 <div className="flex justify-center items-center space-x-4 mb-6">
-                  <Sparkles size={48} className="animate-pulse text-primary-500" /> 
-                  <Zap size={48} className="animate-bounce text-secondary-500" />
-                  <Activity size={48} className="animate-pulse text-accent-500" />
+                  <Sparkles size={48} className="animate-pulse text-primary" /> 
+                  <Zap size={48} className="animate-bounce text-secondary" />
+                  <Activity size={48} className="animate-pulse text-accent" />
                 </div>
                 <p className="text-lg text-slate-600 mb-2">AI is analyzing electricity consumption data...</p> 
                 <p className="text-sm text-slate-500">Processing {kpiAndTableData.length} units across {distinctCategories.length} categories</p>
                 <div className="mt-6 w-64 mx-auto bg-slate-200 rounded-full h-2">
-                  <div className="bg-primary-500 h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
+                  <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
                 </div>
               </div> 
             ) : ( 
@@ -1092,7 +974,7 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
                 {aiAnalysisResult ? ( 
                   aiAnalysisResult.split('\n').map((line, index) => {
                     if (line.startsWith('🧠') || line.startsWith('🔋') || line.startsWith('📊') || line.startsWith('🏗️') || line.startsWith('💡')) {
-                      return <h4 key={index} className="font-bold text-lg mt-6 mb-3 text-primary-600 border-l-4 border-primary-500 pl-4">{line}</h4>;
+                      return <h4 key={index} className="font-bold text-lg mt-6 mb-3 text-primary border-l-4 border-primary pl-4">{line}</h4>;
                     }
                     if (line.startsWith('•')) {
                       return <p key={index} className="ml-6 text-slate-700 py-1">{line}</p>;
@@ -1111,7 +993,7 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
             <div className="mt-8 flex justify-end gap-3"> 
               <button 
                 onClick={() => setIsAiModalOpen(false)} 
-                className="muscat-button-primary"
+                className="bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white py-3 px-6 rounded-lg text-sm font-semibold transition-all duration-200 shadow-muscat hover:shadow-muscat-lg transform hover:scale-105"
               > 
                 Close Analysis
               </button> 
@@ -1122,5 +1004,3 @@ export const EnhancedElectricitySystemModule = ({ isDarkMode }) => {
     </div>
   );
 };
-
-export default EnhancedElectricitySystemModule;
