@@ -64,7 +64,8 @@ const mapDatabaseToElectricityRecord = (
       'Jan-25': parseFloat(row.jan_2025_kwh) || 0,
       'Feb-25': parseFloat(row.feb_2025_kwh) || 0,
       'Mar-25': parseFloat(row.mar_2025_kwh) || 0,
-      'Apr-26': parseFloat(row.apr_2025_kwh) || 0,
+      'Apr-25': parseFloat(row.apr_2025_kwh) || 0,
+      'May-25': parseFloat(row.may_2025_kwh) || 0,
     }
 
     const { category, tagColor, zone } = extractCategoryAndColor(row.name || '', row.type || '')
@@ -209,7 +210,7 @@ const extractCategoryAndColor = (
   return { category, tagColor, zone }
 }
 
-// Enhanced mock data including all 4 pump stations
+// Enhanced mock data including all 4 pump stations with May 2025 data
 const getMockElectricityData = (): ElectricityRecord[] => {
   return [
     {
@@ -225,11 +226,12 @@ const getMockElectricityData = (): ElectricityRecord[] => {
       consumption: {
         'Apr-24': 1608, 'May-24': 1940, 'Jun-24': 1783, 'Jul-24': 1874,
         'Aug-24': 1662, 'Sep-24': 3822, 'Oct-24': 6876, 'Nov-24': 1629,
-        'Dec-24': 1640, 'Jan-25': 1903, 'Feb-25': 2095, 'Mar-25': 3032, 'Apr-26': 3940
+        'Dec-24': 1640, 'Jan-25': 1903, 'Feb-25': 2095, 'Mar-25': 3032, 
+        'Apr-25': 3940, 'May-25': 2982
       },
-      totalConsumption: 32804,
-      totalCost: 820.10,
-      averageMonthlyConsumption: 2523.38
+      totalConsumption: 36786,
+      totalCost: 919.65,
+      averageMonthlyConsumption: 2627.57
     },
     {
       id: 2,
@@ -244,11 +246,12 @@ const getMockElectricityData = (): ElectricityRecord[] => {
       consumption: {
         'Apr-24': 31, 'May-24': 47, 'Jun-24': 25, 'Jul-24': 3,
         'Aug-24': 0, 'Sep-24': 0, 'Oct-24': 33, 'Nov-24': 0,
-        'Dec-24': 179, 'Jan-25': 33, 'Feb-25': 137, 'Mar-25': 131, 'Apr-26': 276.6
+        'Dec-24': 179, 'Jan-25': 33, 'Feb-25': 137, 'Mar-25': 131, 
+        'Apr-25': 276.6, 'May-25': 397
       },
-      totalConsumption: 895.6,
-      totalCost: 22.39,
-      averageMonthlyConsumption: 112.0
+      totalConsumption: 1292.6,
+      totalCost: 32.32,
+      averageMonthlyConsumption: 161.58
     },
     {
       id: 3,
@@ -263,11 +266,12 @@ const getMockElectricityData = (): ElectricityRecord[] => {
       consumption: {
         'Apr-24': 830, 'May-24': 818, 'Jun-24': 720, 'Jul-24': 731,
         'Aug-24': 857, 'Sep-24': 1176, 'Oct-24': 445, 'Nov-24': 919,
-        'Dec-24': 921, 'Jan-25': 245, 'Feb-25': 870, 'Mar-25': 646, 'Apr-26': 984.9
+        'Dec-24': 921, 'Jan-25': 245, 'Feb-25': 870, 'Mar-25': 646, 
+        'Apr-25': 984.9, 'May-25': 880.6
       },
-      totalConsumption: 10162.9,
-      totalCost: 254.07,
-      averageMonthlyConsumption: 781.76
+      totalConsumption: 11043.5,
+      totalCost: 276.09,
+      averageMonthlyConsumption: 789.54
     },
     {
       id: 4,
@@ -282,11 +286,12 @@ const getMockElectricityData = (): ElectricityRecord[] => {
       consumption: {
         'Apr-24': 1774, 'May-24': 2216, 'Jun-24': 2011, 'Jul-24': 2059,
         'Aug-24': 2229, 'Sep-24': 5217, 'Oct-24': 2483, 'Nov-24': 2599,
-        'Dec-24': 1952, 'Jan-25': 2069, 'Feb-25': 2521, 'Mar-25': 2601, 'Apr-26': 3317
+        'Dec-24': 1952, 'Jan-25': 2069, 'Feb-25': 2521, 'Mar-25': 2601, 
+        'Apr-25': 3317, 'May-25': 3582
       },
-      totalConsumption: 33048,
-      totalCost: 826.20,
-      averageMonthlyConsumption: 2542.15
+      totalConsumption: 36630,
+      totalCost: 915.75,
+      averageMonthlyConsumption: 2616.43
     },
     {
       id: 5,
@@ -301,11 +306,12 @@ const getMockElectricityData = (): ElectricityRecord[] => {
       consumption: {
         'Apr-24': 12208, 'May-24': 21845, 'Jun-24': 29438, 'Jul-24': 28186,
         'Aug-24': 21995, 'Sep-24': 20202, 'Oct-24': 14900, 'Nov-24': 9604,
-        'Dec-24': 19032, 'Jan-25': 22819, 'Feb-25': 19974, 'Mar-25': 14190, 'Apr-26': 13846
+        'Dec-24': 19032, 'Jan-25': 22819, 'Feb-25': 19974, 'Mar-25': 14190, 
+        'Apr-25': 13846, 'May-25': 18783
       },
-      totalConsumption: 248239,
-      totalCost: 6205.98,
-      averageMonthlyConsumption: 19095.31
+      totalConsumption: 267022,
+      totalCost: 6675.55,
+      averageMonthlyConsumption: 19072.29
     },
     {
       id: 6,
@@ -320,11 +326,12 @@ const getMockElectricityData = (): ElectricityRecord[] => {
       consumption: {
         'Apr-24': 16908, 'May-24': 46, 'Jun-24': 19332, 'Jul-24': 23170,
         'Aug-24': 42241, 'Sep-24': 15223, 'Oct-24': 25370, 'Nov-24': 24383,
-        'Dec-24': 37236, 'Jan-25': 38168, 'Feb-25': 18422, 'Mar-25': 40, 'Apr-26': 27749
+        'Dec-24': 37236, 'Jan-25': 38168, 'Feb-25': 18422, 'Mar-25': 40, 
+        'Apr-25': 27749, 'May-25': 23674
       },
-      totalConsumption: 288288,
-      totalCost: 7207.20,
-      averageMonthlyConsumption: 22176.00
+      totalConsumption: 311962,
+      totalCost: 7799.05,
+      averageMonthlyConsumption: 22283.0
     }
   ]
 }
@@ -379,11 +386,12 @@ export const fetchElectricityData = async (): Promise<ElectricityRecord[]> => {
 }
 
 export const fetchMonthlyTrends = async (): Promise<{ [month: string]: number }> => {
-  // Default mock trends
+  // Default mock trends including May 2025
   const mockTrends: { [month: string]: number } = {
     'Apr-24': 76910, 'May-24': 82533, 'Jun-24': 87850, 'Jul-24': 92488,
     'Aug-24': 97389, 'Sep-24': 103755, 'Oct-24': 87543, 'Nov-24': 85678,
-    'Dec-24': 89234, 'Jan-25': 94567, 'Feb-25': 89876, 'Mar-25': 78654, 'Apr-26': 86432
+    'Dec-24': 89234, 'Jan-25': 94567, 'Feb-25': 89876, 'Mar-25': 78654, 
+    'Apr-25': 86432, 'May-25': 94521
   }
 
   if (!isSupabaseConfigured() || typeof window === 'undefined') {
@@ -482,8 +490,8 @@ export const diagnosePumpStationFiltering = async (): Promise<{
 // Additional safe data fetching functions (enhanced)
 export const fetchTypesSummary = async (): Promise<Array<{ type: string; total_kwh: number; count: number }>> => {
   const mockTypesSummary = [
-    { type: 'PS', total_kwh: 76910, count: 4 },
-    { type: 'D_Building', total_kwh: 536527, count: 2 },
+    { type: 'PS', total_kwh: 85752, count: 4 },
+    { type: 'D_Building', total_kwh: 578984, count: 2 },
     { type: 'LS', total_kwh: 21650, count: 1 },
     { type: 'IRR', total_kwh: 15350, count: 1 },
     { type: 'Street Light', total_kwh: 13350, count: 1 }
@@ -617,8 +625,8 @@ export const getMonthlyTrends = (data: ElectricityRecord[]): { [month: string]: 
   }
 }
 
-// Available months from the data structure
+// Available months from the data structure - Updated to include May 2025
 export const availableMonths = [
   'Apr-24', 'May-24', 'Jun-24', 'Jul-24', 'Aug-24', 'Sep-24', 
-  'Oct-24', 'Nov-24', 'Dec-24', 'Jan-25', 'Feb-25', 'Mar-25', 'Apr-26'
+  'Oct-24', 'Nov-24', 'Dec-24', 'Jan-25', 'Feb-25', 'Mar-25', 'Apr-25', 'May-25'
 ]
