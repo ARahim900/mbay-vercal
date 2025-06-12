@@ -59,7 +59,7 @@ Your STP Plant data for May 2025 is **ALREADY PERFECT** and **FULLY SYNCHRONIZED
 
 ## 🛠️ System Architecture
 
-```
+\`\`\`
 📁 GitHub Repository (ARahim900/mbay-vercal)
 ├── lib/stp-data.ts ← Raw data + parsing functions
 ├── Types & Interfaces ← Full TypeScript support
@@ -69,7 +69,7 @@ Your STP Plant data for May 2025 is **ALREADY PERFECT** and **FULLY SYNCHRONIZED
 ├── stp_daily_records table ← Normalized storage
 ├── Auto-calculated fields ← Treatment efficiency
 └── Data validation rules ← Quality assurance
-```
+\`\`\`
 
 ## 📈 Quality Metrics
 

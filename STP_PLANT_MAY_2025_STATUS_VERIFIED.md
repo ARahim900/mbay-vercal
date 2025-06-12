@@ -50,7 +50,7 @@
 ## Data Structure Verification
 
 ### 📝 **Fields Verified**
-```
+\`\`\`
 ✅ Date (1/5/2025 to 31/5/2025)
 ✅ Total Treated Water Produced (m³)
 ✅ Total TSE Water Output to Irrigation (m³)
@@ -59,7 +59,7 @@
 ✅ Expected Tanker Volume (m³) (20 m³ per tanker)
 ✅ Direct In line Sewage (MB)
 ✅ Maintenance Action logs
-```
+\`\`\`
 
 ### 🗂️ **GitHub Data Format**
 - **Raw Data String:** Tab-separated values in `lib/stp-data.ts`
@@ -68,7 +68,7 @@
 - **Calculated Metrics:** Real-time efficiency calculations
 
 ### 🏗️ **Supabase Schema**
-```sql
+\`\`\`sql
 stp_daily_records:
 ├── record_date (DATE)
 ├── tankers_discharged (INTEGER)
@@ -77,7 +77,7 @@ stp_daily_records:
 ├── total_inlet_sewage (NUMERIC)
 ├── total_treated_water (NUMERIC)
 └── total_tse_water_output (NUMERIC)
-```
+\`\`\`
 
 ---
 

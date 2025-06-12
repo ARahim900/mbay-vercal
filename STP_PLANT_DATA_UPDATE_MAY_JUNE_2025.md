@@ -48,7 +48,7 @@
 ## Technical Implementation
 
 ### Database Schema Mapping
-```sql
+\`\`\`sql
 GitHub Data Field          → Supabase Column
 ────────────────────────────────────────────────
 Date                       → record_date
@@ -58,7 +58,7 @@ Total Inlet Sewage         → total_inlet_sewage
 Number of Tankers          → tankers_discharged
 Expected Tanker Volume     → expected_tanker_volume
 Direct Inline Sewage       → direct_inline_sewage
-```
+\`\`\`
 
 ### Data Quality Features
 - **Automatic Efficiency Calculations:** Treatment and irrigation efficiency computed in real-time
@@ -86,20 +86,20 @@ Direct Inline Sewage       → direct_inline_sewage
 ## Files Modified
 
 ### GitHub Repository
-```
+\`\`\`
 lib/stp-data.ts - Updated with complete May-June 2025 data
 ├── Added 41 new daily records
 ├── Enhanced maintenance action tracking
 └── Updated data parsing algorithms
-```
+\`\`\`
 
 ### Supabase Database
-```
+\`\`\`
 stp_daily_records table - Inserted 41 new records
 ├── May 2025: 31 records (2025-05-01 to 2025-05-31)
 ├── June 2025: 10 records (2025-06-01 to 2025-06-10)
 └── Auto-calculated efficiency metrics
-```
+\`\`\`
 
 ---
 
