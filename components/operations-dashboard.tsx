@@ -41,7 +41,7 @@ class ErrorBoundary extends React.Component<
 }
 
 export function OperationsDashboard() {
-  const [activeMainSection, setActiveMainSection] = useState("ElectricitySystem")
+  const [activeMainSection, setActiveMainSection] = useState("STPPlant") // Start with STP Plant since it works offline
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -93,6 +93,12 @@ export function OperationsDashboard() {
     window.location.reload()
   }
 
+  // Define which modules work offline (with local data)
+  const offlineCapableModules = ["STPPlant", "ElectricitySystem", "WaterAnalysis"]
+  
+  // Check if current module needs database connection
+  const currentModuleNeedsDatabase = !offlineCapableModules.includes(activeMainSection)
+
   const renderMainContent = () => {
     if (isLoading) {
       return (
@@ -106,16 +112,16 @@ export function OperationsDashboard() {
       )
     }
 
-    // Show connection status if there's an issue
-    if (!connectionStatus.isConnected && connectionStatus.error) {
+    // Only show connection error for modules that specifically need database connection
+    if (!connectionStatus.isConnected && connectionStatus.error && currentModuleNeedsDatabase) {
       return (
         <div className="flex-1 p-8 space-y-8">
           <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
             <div className="text-center mb-6">
               <WifiOff size={48} className="mx-auto text-orange-500 mb-4" />
-              <h2 className="text-2xl font-bold text-slate-700 mb-2">Connection Issue</h2>
+              <h2 className="text-2xl font-bold text-slate-700 mb-2">Database Connection Required</h2>
               <p className="text-slate-500 mb-6">
-                We're having trouble connecting to the database. The application is running in offline mode.
+                This module requires a database connection to function. Some modules like STP Plant work offline.
               </p>
             </div>
             
@@ -130,13 +136,35 @@ export function OperationsDashboard() {
               <div className="flex items-start gap-3">
                 <AlertTriangle className="text-blue-600 mt-0.5" size={20} />
                 <div>
-                  <h4 className="text-blue-800 font-semibold mb-1">For Developers</h4>
-                  <p className="text-blue-700 text-sm">
-                    If you're deploying this application, ensure the following environment variables are set:
+                  <h4 className="text-blue-800 font-semibold mb-1">Available Offline Modules</h4>
+                  <p className="text-blue-700 text-sm mb-2">
+                    The following modules work without database connection:
                   </p>
-                  <ul className="text-blue-700 text-sm mt-2 space-y-1">
-                    <li>• <code className="bg-blue-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_URL</code></li>
-                    <li>• <code className="bg-blue-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+                  <ul className="text-blue-700 text-sm space-y-1">
+                    <li>• <strong>STP Plant</strong> - Full functionality with local data</li>
+                    <li>• <strong>Electricity System</strong> - Basic functionality</li>
+                    <li>• <strong>Water Analysis</strong> - Limited functionality</li>
+                  </ul>
+                  <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
+                    <p className="text-green-800 text-sm font-medium">
+                      💡 Try clicking on "STP Plant" - it should work perfectly!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="text-amber-600 mt-0.5" size={20} />
+                <div>
+                  <h4 className="text-amber-800 font-semibold mb-1">For Developers</h4>
+                  <p className="text-amber-700 text-sm">
+                    To enable full functionality, set these environment variables:
+                  </p>
+                  <ul className="text-amber-700 text-sm mt-2 space-y-1">
+                    <li>• <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_URL</code></li>
+                    <li>• <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
                   </ul>
                 </div>
               </div>
@@ -146,6 +174,7 @@ export function OperationsDashboard() {
       )
     }
 
+    // Render modules - they can handle their own offline/online states
     switch (activeMainSection) {
       case "ElectricitySystem":
         return (
@@ -210,28 +239,28 @@ export function OperationsDashboard() {
           <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} isCollapsed={isCollapsed} />
 
           {/* Connection Status Bar */}
-          {connectionStatus.status && (
-            <div className="px-4 py-2 bg-white border-b border-slate-200">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  {connectionStatus.isConnected ? (
-                    <>
-                      <CheckCircle className="text-green-600" size={16} />
-                      <span className="text-green-700">Connected to database</span>
-                    </>
-                  ) : (
-                    <>
-                      <WifiOff className="text-orange-600" size={16} />
-                      <span className="text-orange-700">Using offline mode</span>
-                    </>
-                  )}
-                </div>
-                <div className="text-slate-500 text-xs">
-                  Status: {connectionStatus.status.client}
-                </div>
+          <div className="px-4 py-2 bg-white border-b border-slate-200">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                {connectionStatus.isConnected ? (
+                  <>
+                    <CheckCircle className="text-green-600" size={16} />
+                    <span className="text-green-700">Connected to database</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="text-orange-600" size={16} />
+                    <span className="text-orange-700">
+                      Offline mode - {offlineCapableModules.includes(activeMainSection) ? "Current module supported" : "Limited functionality"}
+                    </span>
+                  </>
+                )}
+              </div>
+              <div className="text-slate-500 text-xs">
+                Status: {connectionStatus.status?.client || "Mock Client"}
               </div>
             </div>
-          )}
+          </div>
 
           <main className={`flex-1 p-4 md:p-6 space-y-4 md:space-y-6 ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}`}>
             {renderMainContent()}
