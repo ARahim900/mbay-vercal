@@ -41,7 +41,7 @@ class ErrorBoundary extends React.Component<
 }
 
 export function OperationsDashboard() {
-  const [activeMainSection, setActiveMainSection] = useState("STPPlant") // Start with STP Plant since it works offline
+  const [activeMainSection, setActiveMainSection] = useState("STPPlant") // Default to working module
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -58,7 +58,7 @@ export function OperationsDashboard() {
   const toggleSidebar = () => setIsCollapsed(!isCollapsed)
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode)
 
-  // Check connection status on mount
+  // Check connection status on mount (non-blocking)
   useEffect(() => {
     const checkConnection = async () => {
       try {
@@ -85,19 +85,198 @@ export function OperationsDashboard() {
   const handleSectionChange = (section: string) => {
     setIsLoading(true)
     setActiveMainSection(section)
-    // Simulate loading time for smooth transitions
-    setTimeout(() => setIsLoading(false), 300)
+    setTimeout(() => setIsLoading(false), 200)
   }
 
   const handleRetryConnection = () => {
     window.location.reload()
   }
 
-  // Define which modules work offline (with local data)
-  const offlineCapableModules = ["STPPlant", "ElectricitySystem", "WaterAnalysis"]
-  
-  // Check if current module needs database connection
-  const currentModuleNeedsDatabase = !offlineCapableModules.includes(activeMainSection)
+  // Define which modules work offline with local data
+  const OFFLINE_MODULES = {
+    "STPPlant": true,
+    "ElectricitySystem": true, 
+    "WaterAnalysis": true
+  }
+
+  // Define which modules require database connection
+  const DATABASE_ONLY_MODULES = {
+    "ContractorTracker": true,
+    "ElectricityDiagnostics": true
+  }
+
+  const renderModuleContent = () => {
+    // Always render offline-capable modules regardless of connection
+    switch (activeMainSection) {
+      case "STPPlant":
+        return (
+          <ErrorBoundary>
+            <STPPlantModule />
+          </ErrorBoundary>
+        )
+      
+      case "ElectricitySystem":
+        return (
+          <ErrorBoundary>
+            <ElectricitySystemModule isDarkMode={isDarkMode} />
+          </ErrorBoundary>
+        )
+        
+      case "WaterAnalysis":
+        return (
+          <ErrorBoundary>
+            <WaterLossAnalysis />
+          </ErrorBoundary>
+        )
+        
+      case "ContractorTracker":
+        // Only show connection error for database-only modules
+        if (!connectionStatus.isConnected) {
+          return (
+            <div className="flex-1 p-8 space-y-8">
+              <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                <div className="text-center mb-6">
+                  <WifiOff size={48} className="mx-auto text-orange-500 mb-4" />
+                  <h2 className="text-2xl font-bold text-slate-700 mb-2">Database Connection Required</h2>
+                  <p className="text-slate-500 mb-6">
+                    Contractor Tracker requires a database connection to access project data.
+                  </p>
+                </div>
+                
+                <ConnectionStatus 
+                  isConnected={connectionStatus.isConnected}
+                  error={connectionStatus.error}
+                  onRetry={handleRetryConnection}
+                  showDetails={true}
+                />
+                
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="text-blue-600 mt-0.5" size={20} />
+                    <div>
+                      <h4 className="text-blue-800 font-semibold mb-1">✅ Available Offline Modules</h4>
+                      <p className="text-blue-700 text-sm mb-2">
+                        These modules work without database connection:
+                      </p>
+                      <ul className="text-blue-700 text-sm space-y-1">
+                        <li>• <button 
+                              onClick={() => setActiveMainSection("STPPlant")}
+                              className="text-blue-800 font-semibold underline hover:text-blue-900"
+                            >
+                              STP Plant
+                            </button> - Full functionality with local data</li>
+                        <li>• <button 
+                              onClick={() => setActiveMainSection("ElectricitySystem")}
+                              className="text-blue-800 font-semibold underline hover:text-blue-900"
+                            >
+                              Electricity System
+                            </button> - Basic functionality</li>
+                        <li>• <button 
+                              onClick={() => setActiveMainSection("WaterAnalysis")}
+                              className="text-blue-800 font-semibold underline hover:text-blue-900"
+                            >
+                              Water Analysis
+                            </button> - Limited functionality</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        }
+        return (
+          <ErrorBoundary>
+            <ContractorTrackerModule />
+          </ErrorBoundary>
+        )
+        
+      case "ElectricityDiagnostics":
+        // Only show connection error for database-only modules
+        if (!connectionStatus.isConnected) {
+          return (
+            <div className="flex-1 p-8 space-y-8">
+              <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                <div className="text-center mb-6">
+                  <WifiOff size={48} className="mx-auto text-orange-500 mb-4" />
+                  <h2 className="text-2xl font-bold text-slate-700 mb-2">Database Connection Required</h2>
+                  <p className="text-slate-500 mb-6">
+                    System Diagnostics requires a database connection to access real-time data.
+                  </p>
+                </div>
+                
+                <ConnectionStatus 
+                  isConnected={connectionStatus.isConnected}
+                  error={connectionStatus.error}
+                  onRetry={handleRetryConnection}
+                  showDetails={true}
+                />
+                
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="text-green-600 mt-0.5" size={20} />
+                    <div>
+                      <h4 className="text-green-800 font-semibold mb-1">🚀 Try These Working Modules</h4>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <button 
+                          onClick={() => setActiveMainSection("STPPlant")}
+                          className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-green-200 transition-colors"
+                        >
+                          STP Plant ✅
+                        </button>
+                        <button 
+                          onClick={() => setActiveMainSection("ElectricitySystem")}
+                          className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+                        >
+                          Electricity System ✅
+                        </button>
+                        <button 
+                          onClick={() => setActiveMainSection("WaterAnalysis")}
+                          className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors"
+                        >
+                          Water Analysis ✅
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        }
+        return (
+          <ErrorBoundary>
+            <ElectricityDiagnostics />
+          </ErrorBoundary>
+        )
+        
+      default:
+        return (
+          <div className="flex-1 p-8 space-y-8">
+            <div className="bg-white p-10 rounded-xl shadow-lg text-center border border-slate-200">
+              <h2 className="text-3xl font-bold text-slate-700 mb-4">Module Not Found</h2>
+              <p className="text-slate-500 mb-6">The requested module could not be found.</p>
+              <Columns size={48} className="mx-auto mt-6 text-slate-400 mb-6" style={{ color: COLORS.primaryLight }} />
+              
+              <div className="space-y-2">
+                <p className="text-slate-600 font-medium">Available Modules:</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {Object.keys(OFFLINE_MODULES).map((moduleName) => (
+                    <button
+                      key={moduleName}
+                      onClick={() => setActiveMainSection(moduleName)}
+                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+                    >
+                      {moduleName.replace(/([A-Z])/g, ' $1').trim()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+    }
+  }
 
   const renderMainContent = () => {
     if (isLoading) {
@@ -105,118 +284,14 @@ export function OperationsDashboard() {
         <div className="flex-1 p-8 space-y-8">
           <div className="bg-white p-10 rounded-xl shadow-lg text-center border border-slate-200">
             <Loader2 size={48} className="mx-auto animate-spin mb-4" style={{ color: COLORS.primary }} />
-            <h2 className="text-2xl font-bold text-slate-700 mb-2">Loading Module...</h2>
-            <p className="text-slate-500">Please wait while we load the requested section.</p>
+            <h2 className="text-2xl font-bold text-slate-700 mb-2">Loading {activeMainSection}...</h2>
+            <p className="text-slate-500">Please wait while we load the module.</p>
           </div>
         </div>
       )
     }
 
-    // Only show connection error for modules that specifically need database connection
-    if (!connectionStatus.isConnected && connectionStatus.error && currentModuleNeedsDatabase) {
-      return (
-        <div className="flex-1 p-8 space-y-8">
-          <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
-            <div className="text-center mb-6">
-              <WifiOff size={48} className="mx-auto text-orange-500 mb-4" />
-              <h2 className="text-2xl font-bold text-slate-700 mb-2">Database Connection Required</h2>
-              <p className="text-slate-500 mb-6">
-                This module requires a database connection to function. Some modules like STP Plant work offline.
-              </p>
-            </div>
-            
-            <ConnectionStatus 
-              isConnected={connectionStatus.isConnected}
-              error={connectionStatus.error}
-              onRetry={handleRetryConnection}
-              showDetails={true}
-            />
-            
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="text-blue-600 mt-0.5" size={20} />
-                <div>
-                  <h4 className="text-blue-800 font-semibold mb-1">Available Offline Modules</h4>
-                  <p className="text-blue-700 text-sm mb-2">
-                    The following modules work without database connection:
-                  </p>
-                  <ul className="text-blue-700 text-sm space-y-1">
-                    <li>• <strong>STP Plant</strong> - Full functionality with local data</li>
-                    <li>• <strong>Electricity System</strong> - Basic functionality</li>
-                    <li>• <strong>Water Analysis</strong> - Limited functionality</li>
-                  </ul>
-                  <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
-                    <p className="text-green-800 text-sm font-medium">
-                      💡 Try clicking on "STP Plant" - it should work perfectly!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="text-amber-600 mt-0.5" size={20} />
-                <div>
-                  <h4 className="text-amber-800 font-semibold mb-1">For Developers</h4>
-                  <p className="text-amber-700 text-sm">
-                    To enable full functionality, set these environment variables:
-                  </p>
-                  <ul className="text-amber-700 text-sm mt-2 space-y-1">
-                    <li>• <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_URL</code></li>
-                    <li>• <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    // Render modules - they can handle their own offline/online states
-    switch (activeMainSection) {
-      case "ElectricitySystem":
-        return (
-          <ErrorBoundary>
-            <ElectricitySystemModule isDarkMode={isDarkMode} />
-          </ErrorBoundary>
-        )
-      case "WaterAnalysis":
-        return (
-          <ErrorBoundary>
-            <WaterLossAnalysis />
-          </ErrorBoundary>
-        )
-      case "STPPlant":
-        return (
-          <ErrorBoundary>
-            <STPPlantModule />
-          </ErrorBoundary>
-        )
-      case "ContractorTracker":
-        return (
-          <ErrorBoundary>
-            <ContractorTrackerModule />
-          </ErrorBoundary>
-        )
-      case "ElectricityDiagnostics":
-        return (
-          <ErrorBoundary>
-            <ElectricityDiagnostics />
-          </ErrorBoundary>
-        )
-      default:
-        return (
-          <div className="flex-1 p-8 space-y-8">
-            <div className="bg-white p-10 rounded-xl shadow-lg text-center border border-slate-200">
-              <h2 className="text-3xl font-bold text-slate-700 mb-4">Module Not Found</h2>
-              <p className="text-slate-500">The requested module could not be found.</p>
-              <Columns size={48} className="mx-auto mt-6 text-slate-400" style={{ color: COLORS.primaryLight }} />
-            </div>
-          </div>
-        )
-    }
+    return renderModuleContent()
   }
 
   return (
@@ -238,26 +313,26 @@ export function OperationsDashboard() {
         >
           <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} isCollapsed={isCollapsed} />
 
-          {/* Connection Status Bar */}
+          {/* Enhanced Connection Status Bar */}
           <div className="px-4 py-2 bg-white border-b border-slate-200">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 {connectionStatus.isConnected ? (
                   <>
                     <CheckCircle className="text-green-600" size={16} />
-                    <span className="text-green-700">Connected to database</span>
+                    <span className="text-green-700">🟢 Online - Full functionality</span>
                   </>
                 ) : (
                   <>
                     <WifiOff className="text-orange-600" size={16} />
                     <span className="text-orange-700">
-                      Offline mode - {offlineCapableModules.includes(activeMainSection) ? "Current module supported" : "Limited functionality"}
+                      🟠 Offline - {OFFLINE_MODULES[activeMainSection] ? "✅ Module working" : "⚠️ Limited functionality"}
                     </span>
                   </>
                 )}
               </div>
               <div className="text-slate-500 text-xs">
-                Status: {connectionStatus.status?.client || "Mock Client"}
+                Module: {activeMainSection} | Status: {connectionStatus.status?.client || "Local"}
               </div>
             </div>
           </div>
