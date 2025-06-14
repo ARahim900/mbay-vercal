@@ -595,364 +595,370 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
     );
   };
 
-  // FIXED Filter Bar - Now uses proper fixed positioning that stays stationary
+  // COMPLETELY REDESIGNED Filter Bar - Now truly stationary
   const FilterBar = () => {
     const monthOptions = [{ value: "All Months", label: "All Months" }, ...availableMonths.map(m => ({ value: m, label: m }))];
     const categoryOptions = [{ value: "All Categories", label: "All Categories" }, ...distinctCategories.map(c => ({ value: c, label: c }))];
     
     return (
-        <div className="bg-white shadow-muscat p-4 rounded-xl mb-6 print:hidden border border-slate-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
-                <StyledSelect 
-                  id="monthFilter" 
-                  label="Filter by Month" 
-                  value={selectedMonth} 
-                  onChange={(e) => setSelectedMonth(e.target.value)} 
-                  options={monthOptions} 
-                  icon={CalendarDays}
-                />
-                <StyledSelect 
-                  id="categoryFilter" 
-                  label="Filter by Unit Category" 
-                  value={selectedCategory} 
-                  onChange={(e) => setSelectedCategory(e.target.value)} 
-                  options={categoryOptions} 
-                  icon={List}
-                />
-                <button 
-                  onClick={() => { setSelectedMonth("All Months"); setSelectedCategory("All Categories"); }} 
-                  className="bg-primary-dark hover:bg-primary text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 h-[46px] w-full lg:w-auto hover:shadow-muscat transform hover:scale-105"
-                > 
-                  <Filter size={16}/> 
-                  <span>Reset Filters</span> 
-                </button>
+        <div className="bg-white shadow-lg border-b border-slate-200 mb-6 print:hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+                    <StyledSelect 
+                      id="monthFilter" 
+                      label="Filter by Month" 
+                      value={selectedMonth} 
+                      onChange={(e) => setSelectedMonth(e.target.value)} 
+                      options={monthOptions} 
+                      icon={CalendarDays}
+                    />
+                    <StyledSelect 
+                      id="categoryFilter" 
+                      label="Filter by Unit Category" 
+                      value={selectedCategory} 
+                      onChange={(e) => setSelectedCategory(e.target.value)} 
+                      options={categoryOptions} 
+                      icon={List}
+                    />
+                    <button 
+                      onClick={() => { setSelectedMonth("All Months"); setSelectedCategory("All Categories"); }} 
+                      className="bg-primary-dark hover:bg-primary text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 h-[46px] w-full lg:w-auto hover:shadow-muscat transform hover:scale-105"
+                    > 
+                      <Filter size={16}/> 
+                      <span>Reset Filters</span> 
+                    </button>
+                </div>
             </div>
         </div>
     );
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="flex flex-col h-full">
       <ElectricitySubNav />
       
       {activeSubSection === 'Dashboard' && <FilterBar />}
       
-      {activeSubSection === 'Dashboard' && (
-        <>
-          <div className="mb-6"> 
-            <button 
-              onClick={handleAiAnalysis} 
-              className="flex items-center justify-center space-x-2 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white py-3 px-6 rounded-xl text-sm font-semibold shadow-muscat hover:shadow-muscat-lg transition-all duration-300 w-full sm:w-auto group transform hover:scale-105"
-              disabled={isAiLoading}
-            > 
-              <Sparkles size={18} className="group-hover:animate-pulse" /> 
-              <span>{isAiLoading ? 'Analyzing...' : '✨ Analyze Consumption with AI'}</span> 
-            </button> 
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <SummaryCard 
-              title="Total Consumption" 
-              value={totalConsumptionKWh.toLocaleString(undefined, {maximumFractionDigits:0})} 
-              unit="kWh" 
-              icon={Zap} 
-              trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
-              trendColor="text-slate-500 font-medium" 
-              iconBgColor={COLORS.primary} 
-            />
-            <SummaryCard 
-              title="Total Est. Cost" 
-              value={totalCostOMR.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} 
-              unit="OMR" 
-              icon={DollarSign} 
-              trend="Based on selection" 
-              trendColor="text-slate-500 font-medium" 
-              iconBgColor={COLORS.success} 
-            />
-            <SummaryCard 
-              title="Avg. Consumption/Unit" 
-              value={averageConsumptionPerUnit.toLocaleString(undefined, {maximumFractionDigits:0})} 
-              unit="kWh" 
-              icon={BarChart2} 
-              trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
-              trendColor="text-slate-500 font-medium" 
-              iconBgColor={COLORS.accent} 
-            />
-            <SummaryCard 
-              title="Active Meters" 
-              value={activeMeters} 
-              unit="units" 
-              icon={Users2} 
-              trend="In selection" 
-              trendColor="text-slate-500 font-medium" 
-              iconBgColor={COLORS.secondary} 
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div className="lg:col-span-3"> 
-              <ChartWrapper title="Consumption Trend (All Months)" subtitle={`For category: ${selectedCategory} • Including May 2025 data`}> 
-                <ResponsiveContainer width="100%" height="100%"> 
-                  <LineChart data={monthlyTrendForAllMonths} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}> 
-                    <defs> 
-                      <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1"> 
-                        <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/> 
-                        <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/> 
-                      </linearGradient> 
-                    </defs> 
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" /> 
-                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} /> 
-                    <YAxis tick={{ fontSize: 12, fill: '#64748b' }} /> 
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'white', 
-                        borderRadius: '12px', 
-                        borderColor: '#e2e8f0',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                      }} 
-                      itemStyle={{color: '#334155'}} 
-                      labelStyle={{color: '#0f172a', fontWeight: 'bold'}}
-                    /> 
-                    <Legend wrapperStyle={{fontSize: "12px", paddingTop: '10px'}}/> 
-                    <Area type="monotone" dataKey="total" stroke={COLORS.primary} fillOpacity={1} fill="url(#colorTotal)" /> 
-                    <Line 
-                      type="monotone" 
-                      dataKey="total" 
-                      stroke={COLORS.primary} 
-                      strokeWidth={3} 
-                      activeDot={{ r: 7, strokeWidth: 2, fill: COLORS.primary }} 
-                      dot={{r:4, fill: COLORS.primary}} 
-                      name="Total kWh" 
-                    /> 
-                  </LineChart> 
-                </ResponsiveContainer> 
-              </ChartWrapper> 
-            </div>
-            <div className="lg:col-span-2"> 
-              <ChartWrapper title="Consumption by Category" subtitle={`For ${selectedMonth}`}> 
-                <ResponsiveContainer width="100%" height="100%"> 
-                  <PieChart> 
-                    <Pie 
-                      data={consumptionByTypeChartData} 
-                      dataKey="value" 
-                      nameKey="name" 
-                      cx="50%" 
-                      cy="45%" 
-                      innerRadius={60} 
-                      outerRadius={90} 
-                      paddingAngle={2} 
-                      cornerRadius={5}
-                    > 
-                      {consumptionByTypeChartData.map((entry, index) => ( 
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={COLORS.chart[index % COLORS.chart.length]} 
-                          className="focus:outline-none hover:opacity-80 transition-opacity" 
-                          stroke="none"
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-6 animate-fade-in p-4 md:p-6">
+          {activeSubSection === 'Dashboard' && (
+            <>
+              <div className="mb-6"> 
+                <button 
+                  onClick={handleAiAnalysis} 
+                  className="flex items-center justify-center space-x-2 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white py-3 px-6 rounded-xl text-sm font-semibold shadow-muscat hover:shadow-muscat-lg transition-all duration-300 w-full sm:w-auto group transform hover:scale-105"
+                  disabled={isAiLoading}
+                > 
+                  <Sparkles size={18} className="group-hover:animate-pulse" /> 
+                  <span>{isAiLoading ? 'Analyzing...' : '✨ Analyze Consumption with AI'}</span> 
+                </button> 
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <SummaryCard 
+                  title="Total Consumption" 
+                  value={totalConsumptionKWh.toLocaleString(undefined, {maximumFractionDigits:0})} 
+                  unit="kWh" 
+                  icon={Zap} 
+                  trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
+                  trendColor="text-slate-500 font-medium" 
+                  iconBgColor={COLORS.primary} 
+                />
+                <SummaryCard 
+                  title="Total Est. Cost" 
+                  value={totalCostOMR.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} 
+                  unit="OMR" 
+                  icon={DollarSign} 
+                  trend="Based on selection" 
+                  trendColor="text-slate-500 font-medium" 
+                  iconBgColor={COLORS.success} 
+                />
+                <SummaryCard 
+                  title="Avg. Consumption/Unit" 
+                  value={averageConsumptionPerUnit.toLocaleString(undefined, {maximumFractionDigits:0})} 
+                  unit="kWh" 
+                  icon={BarChart2} 
+                  trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
+                  trendColor="text-slate-500 font-medium" 
+                  iconBgColor={COLORS.accent} 
+                />
+                <SummaryCard 
+                  title="Active Meters" 
+                  value={activeMeters} 
+                  unit="units" 
+                  icon={Users2} 
+                  trend="In selection" 
+                  trendColor="text-slate-500 font-medium" 
+                  iconBgColor={COLORS.secondary} 
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div className="lg:col-span-3"> 
+                  <ChartWrapper title="Consumption Trend (All Months)" subtitle={`For category: ${selectedCategory} • Including May 2025 data`}> 
+                    <ResponsiveContainer width="100%" height="100%"> 
+                      <LineChart data={monthlyTrendForAllMonths} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}> 
+                        <defs> 
+                          <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1"> 
+                            <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/> 
+                            <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/> 
+                          </linearGradient> 
+                        </defs> 
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" /> 
+                        <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} /> 
+                        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} /> 
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'white', 
+                            borderRadius: '12px', 
+                            borderColor: '#e2e8f0',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                          }} 
+                          itemStyle={{color: '#334155'}} 
+                          labelStyle={{color: '#0f172a', fontWeight: 'bold'}}
                         /> 
-                      ))} 
-                      <Label 
-                        value={`${consumptionByTypeChartData.reduce((sum, item) => sum + item.value, 0).toLocaleString(undefined, {maximumFractionDigits:0})}`} 
-                        position="centerBottom" 
-                        dy={-5} 
-                        className="text-2xl font-bold fill-slate-700"
-                      /> 
-                      <Label 
-                        value="Total kWh" 
-                        position="centerTop" 
-                        dy={10} 
-                        className="text-xs fill-slate-500"
-                      /> 
-                    </Pie> 
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'white', 
-                        borderRadius: '12px', 
-                        borderColor: '#e2e8f0',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                      }}
-                    /> 
-                    <Legend verticalAlign="bottom" wrapperStyle={{paddingTop: '15px', fontSize: '11px'}}/> 
-                  </PieChart> 
-                </ResponsiveContainer> 
-              </ChartWrapper> 
-            </div>
-          </div>
-
-          {/* Enhanced Top Consumers Table - FIXED OVERFLOW ISSUE */}
-          <TopConsumersTable data={topConsumersChartData} selectedMonth={selectedMonth} />
-
-          {/* Enhanced Category Summary */}
-          <ChartWrapper title="Category Performance Overview" subtitle={`Comprehensive breakdown by category for ${selectedMonth === "All Months" ? "all data" : selectedMonth}`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-auto">
-              {distinctCategories.map((category, index) => {
-                const categoryData = kpiAndTableData.filter(item => item.category === category);
-                const totalCategoryConsumption = categoryData.reduce((acc, curr) => acc + curr.totalConsumption, 0);
-                const categoryCount = categoryData.length;
-                const avgConsumption = categoryCount > 0 ? totalCategoryConsumption / categoryCount : 0;
-                const categoryColor = COLORS.chart[index % COLORS.chart.length];
-                
-                return (
-                  <div key={category} className="bg-gradient-to-br from-white to-slate-50 p-5 rounded-xl border border-slate-200 hover:shadow-muscat transition-all duration-200 group">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-bold text-slate-700 truncate pr-2">{category}</h4>
-                      <div 
-                        className="w-4 h-4 rounded-full group-hover:scale-110 transition-transform" 
-                        style={{ backgroundColor: categoryColor }}
-                      ></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">Units:</span>
-                        <span className="font-semibold text-slate-800">{categoryCount}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">Total:</span>
-                        <span className="font-bold text-slate-800">{totalCategoryConsumption.toLocaleString()} kWh</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">Average:</span>
-                        <span className="font-medium text-slate-700">{avgConsumption.toFixed(0)} kWh</span>
-                      </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2 mt-3">
-                        <div 
-                          className="h-2 rounded-full transition-all duration-500"
-                          style={{ 
-                            backgroundColor: categoryColor,
-                            width: `${Math.min(100, (totalCategoryConsumption / Math.max(...distinctCategories.map(cat => 
-                              kpiAndTableData.filter(item => item.category === cat).reduce((acc, curr) => acc + curr.totalConsumption, 0)
-                            ))) * 100)}%`
+                        <Legend wrapperStyle={{fontSize: "12px", paddingTop: '10px'}}/> 
+                        <Area type="monotone" dataKey="total" stroke={COLORS.primary} fillOpacity={1} fill="url(#colorTotal)" /> 
+                        <Line 
+                          type="monotone" 
+                          dataKey="total" 
+                          stroke={COLORS.primary} 
+                          strokeWidth={3} 
+                          activeDot={{ r: 7, strokeWidth: 2, fill: COLORS.primary }} 
+                          dot={{r:4, fill: COLORS.primary}} 
+                          name="Total kWh" 
+                        /> 
+                      </LineChart> 
+                    </ResponsiveContainer> 
+                  </ChartWrapper> 
+                </div>
+                <div className="lg:col-span-2"> 
+                  <ChartWrapper title="Consumption by Category" subtitle={`For ${selectedMonth}`}> 
+                    <ResponsiveContainer width="100%" height="100%"> 
+                      <PieChart> 
+                        <Pie 
+                          data={consumptionByTypeChartData} 
+                          dataKey="value" 
+                          nameKey="name" 
+                          cx="50%" 
+                          cy="45%" 
+                          innerRadius={60} 
+                          outerRadius={90} 
+                          paddingAngle={2} 
+                          cornerRadius={5}
+                        > 
+                          {consumptionByTypeChartData.map((entry, index) => ( 
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={COLORS.chart[index % COLORS.chart.length]} 
+                              className="focus:outline-none hover:opacity-80 transition-opacity" 
+                              stroke="none"
+                            /> 
+                          ))} 
+                          <Label 
+                            value={`${consumptionByTypeChartData.reduce((sum, item) => sum + item.value, 0).toLocaleString(undefined, {maximumFractionDigits:0})}`} 
+                            position="centerBottom" 
+                            dy={-5} 
+                            className="text-2xl font-bold fill-slate-700"
+                          /> 
+                          <Label 
+                            value="Total kWh" 
+                            position="centerTop" 
+                            dy={10} 
+                            className="text-xs fill-slate-500"
+                          /> 
+                        </Pie> 
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'white', 
+                            borderRadius: '12px', 
+                            borderColor: '#e2e8f0',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                           }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </ChartWrapper>
-        </>
-      )}
+                        /> 
+                        <Legend verticalAlign="bottom" wrapperStyle={{paddingTop: '15px', fontSize: '11px'}}/> 
+                      </PieChart> 
+                    </ResponsiveContainer> 
+                  </ChartWrapper> 
+                </div>
+              </div>
 
-      {/* Enhanced Unit Details Section */}
-      {activeSubSection === 'UnitDetails' && (
-        <div className="space-y-6">
-          <div className="bg-white shadow-muscat-lg p-6 rounded-xl border border-slate-200">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-700 flex items-center gap-2">
-                <List className="text-primary" size={24} />
-                All Electricity Units
-              </h3>
-              <div className="text-sm text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                {kpiAndTableData.length} Total Units
+              {/* Enhanced Top Consumers Table - FIXED OVERFLOW ISSUE */}
+              <TopConsumersTable data={topConsumersChartData} selectedMonth={selectedMonth} />
+
+              {/* Enhanced Category Summary */}
+              <ChartWrapper title="Category Performance Overview" subtitle={`Comprehensive breakdown by category for ${selectedMonth === "All Months" ? "all data" : selectedMonth}`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-auto">
+                  {distinctCategories.map((category, index) => {
+                    const categoryData = kpiAndTableData.filter(item => item.category === category);
+                    const totalCategoryConsumption = categoryData.reduce((acc, curr) => acc + curr.totalConsumption, 0);
+                    const categoryCount = categoryData.length;
+                    const avgConsumption = categoryCount > 0 ? totalCategoryConsumption / categoryCount : 0;
+                    const categoryColor = COLORS.chart[index % COLORS.chart.length];
+                    
+                    return (
+                      <div key={category} className="bg-gradient-to-br from-white to-slate-50 p-5 rounded-xl border border-slate-200 hover:shadow-muscat transition-all duration-200 group">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-bold text-slate-700 truncate pr-2">{category}</h4>
+                          <div 
+                            className="w-4 h-4 rounded-full group-hover:scale-110 transition-transform" 
+                            style={{ backgroundColor: categoryColor }}
+                          ></div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-600">Units:</span>
+                            <span className="font-semibold text-slate-800">{categoryCount}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-600">Total:</span>
+                            <span className="font-bold text-slate-800">{totalCategoryConsumption.toLocaleString()} kWh</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-600">Average:</span>
+                            <span className="font-medium text-slate-700">{avgConsumption.toFixed(0)} kWh</span>
+                          </div>
+                          <div className="w-full bg-slate-200 rounded-full h-2 mt-3">
+                            <div 
+                              className="h-2 rounded-full transition-all duration-500"
+                              style={{ 
+                                backgroundColor: categoryColor,
+                                width: `${Math.min(100, (totalCategoryConsumption / Math.max(...distinctCategories.map(cat => 
+                                  kpiAndTableData.filter(item => item.category === cat).reduce((acc, curr) => acc + curr.totalConsumption, 0)
+                                ))) * 100)}%`
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ChartWrapper>
+            </>
+          )}
+
+          {/* Enhanced Unit Details Section */}
+          {activeSubSection === 'UnitDetails' && (
+            <div className="space-y-6">
+              <div className="bg-white shadow-muscat-lg p-6 rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-slate-700 flex items-center gap-2">
+                    <List className="text-primary" size={24} />
+                    All Electricity Units
+                  </h3>
+                  <div className="text-sm text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                    {kpiAndTableData.length} Total Units
+                  </div>
+                </div>
+                <div className="overflow-x-auto rounded-lg border border-slate-200">
+                  <table className="w-full text-sm min-w-full">
+                    <thead className="bg-gradient-to-r from-slate-100 to-slate-200">
+                      <tr>
+                        <th className="text-left p-4 font-semibold text-slate-700">ID</th>
+                        <th className="text-left p-4 font-semibold text-slate-700">Unit Name</th>
+                        <th className="text-left p-4 font-semibold text-slate-700">Type</th>
+                        <th className="text-left p-4 font-semibold text-slate-700">Category</th>
+                        <th className="text-left p-4 font-semibold text-slate-700">Meter Account</th>
+                        <th className="text-right p-4 font-semibold text-slate-700">Total Consumption (kWh)</th>
+                        <th className="text-right p-4 font-semibold text-slate-700">Est. Cost (OMR)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {kpiAndTableData.map((item) => (
+                        <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
+                          <td className="p-4 text-slate-600 font-medium">{item.id}</td>
+                          <td className="p-4 font-semibold text-slate-800 group-hover:text-primary transition-colors">{item.unitName}</td>
+                          <td className="p-4 text-slate-600">{item.meterType}</td>
+                          <td className="p-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                              item.category === 'Pumping Station' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                              item.category === 'Lifting Station' ? 'bg-green-100 text-green-800 border-green-200' :
+                              item.category === 'Apartment' ? 'bg-purple-100 text-purple-800 border-purple-200' :
+                              item.category === 'Street Light' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                              'bg-gray-100 text-gray-800 border-gray-200'
+                            }`}>
+                              {item.category}
+                            </span>
+                          </td>
+                          <td className="p-4 text-slate-600 font-mono text-xs">{item.meterAccountNo}</td>
+                          <td className="p-4 text-right font-bold text-slate-800">{item.totalConsumption.toLocaleString()}</td>
+                          <td className="p-4 text-right text-slate-600 font-semibold">{(item.totalConsumption * KWH_TO_OMR_RATE).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-            <div className="overflow-x-auto rounded-lg border border-slate-200">
-              <table className="w-full text-sm min-w-full">
-                <thead className="bg-gradient-to-r from-slate-100 to-slate-200">
-                  <tr>
-                    <th className="text-left p-4 font-semibold text-slate-700">ID</th>
-                    <th className="text-left p-4 font-semibold text-slate-700">Unit Name</th>
-                    <th className="text-left p-4 font-semibold text-slate-700">Type</th>
-                    <th className="text-left p-4 font-semibold text-slate-700">Category</th>
-                    <th className="text-left p-4 font-semibold text-slate-700">Meter Account</th>
-                    <th className="text-right p-4 font-semibold text-slate-700">Total Consumption (kWh)</th>
-                    <th className="text-right p-4 font-semibold text-slate-700">Est. Cost (OMR)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {kpiAndTableData.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
-                      <td className="p-4 text-slate-600 font-medium">{item.id}</td>
-                      <td className="p-4 font-semibold text-slate-800 group-hover:text-primary transition-colors">{item.unitName}</td>
-                      <td className="p-4 text-slate-600">{item.meterType}</td>
-                      <td className="p-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                          item.category === 'Pumping Station' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                          item.category === 'Lifting Station' ? 'bg-green-100 text-green-800 border-green-200' :
-                          item.category === 'Apartment' ? 'bg-purple-100 text-purple-800 border-purple-200' :
-                          item.category === 'Street Light' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                          'bg-gray-100 text-gray-800 border-gray-200'
-                        }`}>
-                          {item.category}
-                        </span>
-                      </td>
-                      <td className="p-4 text-slate-600 font-mono text-xs">{item.meterAccountNo}</td>
-                      <td className="p-4 text-right font-bold text-slate-800">{item.totalConsumption.toLocaleString()}</td>
-                      <td className="p-4 text-right text-slate-600 font-semibold">{(item.totalConsumption * KWH_TO_OMR_RATE).toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* Enhanced AI Analysis Modal */}
-      {isAiModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in"> 
-          <div className="bg-white p-6 rounded-2xl shadow-muscat-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto"> 
-            <div className="flex justify-between items-center mb-6"> 
-              <h3 className="text-2xl font-bold text-primary flex items-center gap-3">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <Sparkles className="text-primary" size={24} />
-                </div>
-                AI Consumption Analysis
-              </h3> 
-              <button 
-                onClick={() => setIsAiModalOpen(false)} 
-                className="p-2 rounded-full hover:bg-slate-100 transition-colors"
-              > 
-                <X size={24} className="text-slate-600"/> 
-              </button> 
-            </div> 
-            
-            {isAiLoading ? ( 
-              <div className="text-center py-12"> 
-                <div className="flex justify-center items-center space-x-4 mb-6">
-                  <Sparkles size={48} className="animate-pulse text-primary" /> 
-                  <Zap size={48} className="animate-bounce text-secondary" />
-                  <Activity size={48} className="animate-pulse text-accent" />
-                </div>
-                <p className="text-lg text-slate-600 mb-2">AI is analyzing electricity consumption data...</p> 
-                <p className="text-sm text-slate-500">Processing {kpiAndTableData.length} units across {distinctCategories.length} categories</p>
-                <div className="mt-6 w-64 mx-auto bg-slate-200 rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
-                </div>
-              </div> 
-            ) : ( 
-              <div className="text-sm text-slate-700 space-y-4"> 
-                {aiAnalysisResult ? ( 
-                  aiAnalysisResult.split('\n').map((line, index) => {
-                    if (line.startsWith('🧠') || line.startsWith('🔋') || line.startsWith('📊') || line.startsWith('🏗️') || line.startsWith('💡') || line.startsWith('🎯')) {
-                      return <h4 key={index} className="font-bold text-lg mt-6 mb-3 text-primary border-l-4 border-primary pl-4">{line}</h4>;
-                    }
-                    if (line.startsWith('•')) {
-                      return <p key={index} className="ml-6 text-slate-700 py-1">{line}</p>;
-                    }
-                    return <p key={index} className="text-slate-700">{line}</p>;
-                  })
+          {/* Enhanced AI Analysis Modal */}
+          {isAiModalOpen && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in"> 
+              <div className="bg-white p-6 rounded-2xl shadow-muscat-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto"> 
+                <div className="flex justify-between items-center mb-6"> 
+                  <h3 className="text-2xl font-bold text-primary flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-lg">
+                      <Sparkles className="text-primary" size={24} />
+                    </div>
+                    AI Consumption Analysis
+                  </h3> 
+                  <button 
+                    onClick={() => setIsAiModalOpen(false)} 
+                    className="p-2 rounded-full hover:bg-slate-100 transition-colors"
+                  > 
+                    <X size={24} className="text-slate-600"/> 
+                  </button> 
+                </div> 
+                
+                {isAiLoading ? ( 
+                  <div className="text-center py-12"> 
+                    <div className="flex justify-center items-center space-x-4 mb-6">
+                      <Sparkles size={48} className="animate-pulse text-primary" /> 
+                      <Zap size={48} className="animate-bounce text-secondary" />
+                      <Activity size={48} className="animate-pulse text-accent" />
+                    </div>
+                    <p className="text-lg text-slate-600 mb-2">AI is analyzing electricity consumption data...</p> 
+                    <p className="text-sm text-slate-500">Processing {kpiAndTableData.length} units across {distinctCategories.length} categories</p>
+                    <div className="mt-6 w-64 mx-auto bg-slate-200 rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
+                    </div>
+                  </div> 
                 ) : ( 
-                  <div className="text-center py-8">
-                    <AlertCircle size={48} className="text-orange-500 mx-auto mb-4" />
-                    <p className="text-slate-600">No analysis available or an error occurred.</p>
-                  </div>
+                  <div className="text-sm text-slate-700 space-y-4"> 
+                    {aiAnalysisResult ? ( 
+                      aiAnalysisResult.split('\n').map((line, index) => {
+                        if (line.startsWith('🧠') || line.startsWith('🔋') || line.startsWith('📊') || line.startsWith('🏗️') || line.startsWith('💡') || line.startsWith('🎯')) {
+                          return <h4 key={index} className="font-bold text-lg mt-6 mb-3 text-primary border-l-4 border-primary pl-4">{line}</h4>;
+                        }
+                        if (line.startsWith('•')) {
+                          return <p key={index} className="ml-6 text-slate-700 py-1">{line}</p>;
+                        }
+                        return <p key={index} className="text-slate-700">{line}</p>;
+                      })
+                    ) : ( 
+                      <div className="text-center py-8">
+                        <AlertCircle size={48} className="text-orange-500 mx-auto mb-4" />
+                        <p className="text-slate-600">No analysis available or an error occurred.</p>
+                      </div>
+                    )} 
+                  </div> 
                 )} 
+                
+                <div className="mt-8 flex justify-end gap-3"> 
+                  <button 
+                    onClick={() => setIsAiModalOpen(false)} 
+                    className="bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white py-3 px-6 rounded-lg text-sm font-semibold transition-all duration-200 shadow-muscat hover:shadow-muscat-lg transform hover:scale-105"
+                  > 
+                    Close Analysis
+                  </button> 
+                </div> 
               </div> 
-            )} 
-            
-            <div className="mt-8 flex justify-end gap-3"> 
-              <button 
-                onClick={() => setIsAiModalOpen(false)} 
-                className="bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white py-3 px-6 rounded-lg text-sm font-semibold transition-all duration-200 shadow-muscat hover:shadow-muscat-lg transform hover:scale-105"
-              > 
-                Close Analysis
-              </button> 
-            </div> 
-          </div> 
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
