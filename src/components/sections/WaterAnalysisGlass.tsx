@@ -10,7 +10,7 @@ import {
   TrendingUp, Users2, Gauge, FlaskConical, Waves
 } from 'lucide-react';
 import { 
-  GlassChart, GlassSummaryCard, GlassDropdown, GlassButton, GlassCard 
+  GlassChart, GlassSummaryCard, GlassDropdown, GlassButton, GlassCard, GlassFilterBar
 } from '@/components/glassmorphism';
 import { COLORS } from '@/constants/colors';
 
@@ -180,8 +180,8 @@ export const WaterAnalysisModule: React.FC = () => {
         <p className="text-gray-600">Real Hierarchical Water Distribution Monitoring & Loss Analysis</p>
       </div>
 
-      {/* Filters */}
-      <GlassCard className="p-6">
+      {/* Filters with proper sticky positioning */}
+      <GlassFilterBar>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
           <GlassDropdown
             label="Select Month"
@@ -208,7 +208,7 @@ export const WaterAnalysisModule: React.FC = () => {
             Reset Filters
           </GlassButton>
         </div>
-      </GlassCard>
+      </GlassFilterBar>
 
       {/* KPI Cards */}
       <div className="mb-4">
