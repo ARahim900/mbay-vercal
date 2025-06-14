@@ -14,6 +14,10 @@ import {
 } from '@/components/glassmorphism';
 import { COLORS } from '@/constants/colors';
 
+interface WaterAnalysisModuleProps {
+  isCollapsed?: boolean; // Pass this from parent component that knows sidebar state
+}
+
 // Water System Data (using the data from your document)
 const waterRawDataString = `Meter Label,Acct #,Zone,Type,Parent Meter,Label,Jan-24,Feb-24,Mar-24,Apr-24,May-24,Jun-24,Jul-24,Aug-24,Sep-24,Oct-24,Nov-24,Dec-24,Jan-25,Feb-25,Mar-25,Apr-25
 Main Bulk (NAMA),C43659,Main Bulk,Main BULK,NAMA,L1,32803,27996,23860,31869,30737,41953,35166,35420,41341,31519,35290,36733,32580,44043,34915,46039
@@ -62,7 +66,7 @@ const parseWaterSystemData = (rawData: string) => {
 const waterSystemData = parseWaterSystemData(waterRawDataString);
 const waterMonthsAvailable = Object.keys(waterSystemData[0]?.consumption || {});
 
-export const WaterAnalysisModule: React.FC = () => {
+export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isCollapsed = false }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedWaterMonth, setSelectedWaterMonth] = useState('Mar-25');
   const [activeWaterSubSection, setActiveWaterSubSection] = useState('Overview');
@@ -73,32 +77,27 @@ export const WaterAnalysisModule: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Water System Calculations
+  // Water System Calculations (unchanged)
   const waterCalculations = useMemo(() => {
     const monthData = selectedWaterMonth;
     
-    // Level A1 (L1) - Main Source
     const mainBulkMeter = waterSystemData.find(item => item.label === 'L1');
     const A1_totalSupply = mainBulkMeter ? mainBulkMeter.consumption[monthData] || 0 : 0;
 
-    // Level A2 = L2 + DC - Primary Distribution  
     const zoneBulkMeters = waterSystemData.filter(item => item.label === 'L2');
     const directConnections = waterSystemData.filter(item => item.label === 'DC');
     const L2_total = zoneBulkMeters.reduce((sum, meter) => sum + (meter.consumption[monthData] || 0), 0);
     const DC_total = directConnections.reduce((sum, meter) => sum + (meter.consumption[monthData] || 0), 0);
     const A2_total = L2_total + DC_total;
 
-    // Level A3 = L3 + DC - End-User Consumption
     const endUserMeters = waterSystemData.filter(item => item.label === 'L3');
     const L3_total = endUserMeters.reduce((sum, meter) => sum + (meter.consumption[monthData] || 0), 0);
     const A3_total = L3_total + DC_total;
 
-    // Water Loss Calculations
     const stage1Loss = A1_totalSupply - A2_total;
     const stage2Loss = L2_total - L3_total;
     const totalLoss = A1_totalSupply - A3_total;
     
-    // Percentage calculations
     const stage1LossPercent = A1_totalSupply > 0 ? (stage1Loss / A1_totalSupply) * 100 : 0;
     const stage2LossPercent = L2_total > 0 ? (stage2Loss / L2_total) * 100 : 0;
     const totalLossPercent = A1_totalSupply > 0 ? (totalLoss / A1_totalSupply) * 100 : 0;
@@ -180,8 +179,8 @@ export const WaterAnalysisModule: React.FC = () => {
         <p className="text-gray-600">Real Hierarchical Water Distribution Monitoring & Loss Analysis</p>
       </div>
 
-      {/* Filters with proper sticky positioning */}
-      <GlassFilterBar>
+      {/* Fixed Filter Bar */}
+      <GlassFilterBar isCollapsed={isCollapsed}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
           <GlassDropdown
             label="Select Month"
