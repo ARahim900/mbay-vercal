@@ -595,13 +595,13 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
     );
   };
 
-  // Filter Bar
+  // FIXED Filter Bar - Now uses proper fixed positioning that stays stationary
   const FilterBar = () => {
     const monthOptions = [{ value: "All Months", label: "All Months" }, ...availableMonths.map(m => ({ value: m, label: m }))];
     const categoryOptions = [{ value: "All Categories", label: "All Categories" }, ...distinctCategories.map(c => ({ value: c, label: c }))];
     
     return (
-        <div className="bg-white shadow-muscat p-4 rounded-xl mb-6 print:hidden sticky top-[110px] md:top-[88px] z-10 border border-slate-200">
+        <div className="bg-white shadow-muscat p-4 rounded-xl mb-6 print:hidden border border-slate-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
                 <StyledSelect 
                   id="monthFilter" 
