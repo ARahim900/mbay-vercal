@@ -22,6 +22,12 @@ export function OperationsDashboard() {
 
   const handleSectionChange = (section: string) => {
     setIsLoading(true)
+    // Reset scroll position to top when changing sections
+    const mainContent = document.getElementById('main-content')
+    if (mainContent) {
+      mainContent.scrollTop = 0
+    }
+    
     setActiveMainSection(section)
     // Simulate loading time for smooth transitions
     setTimeout(() => setIsLoading(false), 300)
@@ -30,7 +36,7 @@ export function OperationsDashboard() {
   const renderMainContent = () => {
     if (isLoading) {
       return (
-        <div className="flex-1 p-8 space-y-8">
+        <div className="p-8">
           <div className="bg-white p-10 rounded-xl shadow-lg text-center border border-slate-200">
             <Loader2 size={48} className="mx-auto animate-spin mb-4" style={{ color: COLORS.primary }} />
             <h2 className="text-2xl font-bold text-slate-700 mb-2">Loading Module...</h2>
@@ -53,7 +59,7 @@ export function OperationsDashboard() {
         return <ElectricityDiagnostics />
       default:
         return (
-          <div className="flex-1 p-8 space-y-8">
+          <div className="p-8">
             <div className="bg-white p-10 rounded-xl shadow-lg text-center border border-slate-200">
               <h2 className="text-3xl font-bold text-slate-700 mb-4">Module Not Found</h2>
               <p className="text-slate-500">The requested module could not be found.</p>
@@ -65,9 +71,7 @@ export function OperationsDashboard() {
   }
 
   return (
-    <div
-      className={`flex min-h-screen ${isDarkMode ? "bg-slate-900" : "bg-slate-100"} font-inter transition-colors duration-300`}
-    >
+    <div className={`flex h-screen ${isDarkMode ? "bg-slate-900" : "bg-slate-100"} font-inter transition-colors duration-300 overflow-hidden`}>
       <Sidebar
         activeMainSection={activeMainSection}
         setActiveMainSection={handleSectionChange}
@@ -76,14 +80,16 @@ export function OperationsDashboard() {
         isDarkMode={isDarkMode}
       />
 
-      <div
-        className="flex-1 flex flex-col max-h-screen overflow-y-auto transition-all duration-300 ease-in-out"
-        data-collapsed={isCollapsed}
-      >
+      <div className="flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ease-in-out" data-collapsed={isCollapsed}>
         <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} isCollapsed={isCollapsed} />
 
-        <main className={`flex-1 p-4 md:p-6 space-y-4 md:space-y-6 ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}`}>
-          {renderMainContent()}
+        <main 
+          id="main-content"
+          className={`flex-1 p-4 md:p-6 overflow-y-auto overflow-x-hidden ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}`}
+        >
+          <div className="min-h-full">
+            {renderMainContent()}
+          </div>
         </main>
       </div>
     </div>
