@@ -6,6 +6,7 @@ export { GlassSidebar } from './GlassSidebar';
 export { GlassHeader } from './GlassHeader';
 export { GlassChart } from './GlassChart';
 export { GlassSummaryCard } from './GlassSummaryCard';
+export { default as GlassFilterBar } from './GlassFilterBar';
 
 // Re-export types
 export type { GlassDropdownProps } from './GlassDropdown';
