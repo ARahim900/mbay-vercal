@@ -1,0 +1,249 @@
+/* Glassmorphism Design System */
+
+/* Base glass effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(95, 81, 104, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(95, 81, 104, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Glass dropdown styles */
+.glass-dropdown {
+  appearance: none;
+  width: 100%;
+  padding: 0.75rem 3rem 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(95, 81, 104, 0.15);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235f5168' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
+.glass-dropdown:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(95, 81, 104, 0.25);
+  box-shadow: 0 4px 12px rgba(95, 81, 104, 0.1);
+}
+
+.glass-dropdown:focus {
+  outline: none;
+  border-color: #5f5168;
+  box-shadow: 
+    0 0 0 3px rgba(95, 81, 104, 0.1),
+    0 4px 12px rgba(95, 81, 104, 0.1);
+}
+
+/* Glass button styles */
+.glass-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(95, 81, 104, 0.15);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #5f5168;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-button:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(95, 81, 104, 0.15);
+}
+
+.glass-button:active {
+  transform: translateY(0);
+}
+
+/* Primary button variant */
+.glass-button-primary {
+  background: linear-gradient(135deg, rgba(95, 81, 104, 0.9), rgba(78, 68, 86, 0.9));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-button-primary:hover {
+  background: linear-gradient(135deg, rgba(95, 81, 104, 1), rgba(78, 68, 86, 1));
+  box-shadow: 0 6px 20px rgba(95, 81, 104, 0.3);
+}
+
+/* Secondary button variant */
+.glass-button-secondary {
+  background: rgba(95, 81, 104, 0.1);
+  color: #5f5168;
+}
+
+.glass-button-secondary:hover {
+  background: rgba(95, 81, 104, 0.15);
+}
+
+/* Glass input styles */
+.glass-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(95, 81, 104, 0.15);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #5f5168;
+  box-shadow: 
+    0 0 0 3px rgba(95, 81, 104, 0.1),
+    0 4px 12px rgba(95, 81, 104, 0.1);
+}
+
+.glass-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Glass navigation styles */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(95, 81, 104, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+/* Z-index hierarchy for proper layering */
+.z-header {
+  z-index: 40;
+}
+
+.z-filter-bar {
+  z-index: 30;
+}
+
+.z-sidebar {
+  z-index: 50;
+}
+
+.z-modal {
+  z-index: 100;
+}
+
+.z-dropdown {
+  z-index: 35;
+}
+
+/* Sticky positioning for filter bars */
+.sticky-filter-bar {
+  position: sticky;
+  top: 80px; /* Below header */
+  z-index: 30;
+  transition: all 0.3s ease;
+}
+
+/* Ensure header is always on top */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+/* Glass sidebar styles */
+.glass-sidebar {
+  background: rgba(59, 50, 65, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 50;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #5f5168, #4E4456);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass tooltip */
+.glass-tooltip {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(95, 81, 104, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .glass-card {
+    backdrop-filter: blur(12px);
+  }
+  
+  .sticky-filter-bar {
+    top: 60px; /* Adjust for smaller header on mobile */
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .glass-card {
+    background: rgba(30, 30, 30, 0.7);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-dropdown,
+  .glass-input {
+    background: rgba(30, 30, 30, 0.8);
+    color: #e2e8f0;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Print styles */
+@media print {
+  .glass-card,
+  .glass-dropdown,
+  .glass-button,
+  .glass-input {
+    backdrop-filter: none;
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+  }
+}
