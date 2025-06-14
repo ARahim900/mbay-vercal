@@ -1,259 +1,196 @@
-# Muscat Bay Operations Dashboard
+# Muscat Bay Operations Management System
 
-*A comprehensive facility management system with live database integration*
+A modern web application for managing and monitoring Muscat Bay's utilities and operations, featuring a cutting-edge glassmorphism design inspired by Apple's design language.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/arahim900s-projects/v0-muscat-bay-design)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/0JZ62ExbE2V)
-[![Powered by Supabase](https://img.shields.io/badge/Powered%20by-Supabase-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
+## 🎨 Design Features
 
-## 🏢 Project Overview
+### Glassmorphism UI Enhancement
+The application now features a contemporary glassmorphism (liquid glass) design system with:
 
-Advanced operations dashboard for Muscat Bay facility management, featuring real-time electricity consumption monitoring, water analysis, STP plant management, and contractor tracking. Now integrated with live Supabase database for production-ready data management.
+- **Translucent Glass Effects**: Beautiful frosted glass appearance with backdrop blur
+- **Smooth Animations**: Fluid transitions and micro-interactions
+- **Modern Dropdowns**: Apple-inspired liquid glass dropdown menus
+- **Enhanced Charts**: Visually appealing and interactive data visualizations
+- **Brand Colors**: Muscat Bay signature purple (#5f5168) with complementary palette
 
-## ⚡ Features
+### Key Design Elements
 
-### **Electricity System Analytics** (Supabase-Powered)
-- **Live Data**: Real-time electricity consumption from 56 systems
-- **Comprehensive Coverage**: 13 months of historical data (Apr 2024 - Apr 2025)
-- **System Types**: Pumping Stations, Lifting Stations, Irrigation, Buildings, Street Lights
-- **Analytics**: Advanced filtering, category analysis, performance metrics
-- **Cost Tracking**: Automated cost calculations at 0.025 OMR per KWH
+1. **Glass Cards**: Semi-transparent cards with blur effects
+2. **Glass Buttons**: Interactive buttons with ripple effects
+3. **Glass Dropdowns**: Smooth, animated dropdown menus
+4. **Glass Charts**: Modern chart wrappers with glassmorphism styling
+5. **Summary Cards**: Enhanced KPI cards with gradient effects
 
-### **Water Analysis System**
-- Multi-zone water consumption tracking
-- Loss analysis and efficiency monitoring
-- Bulk meter vs individual consumption comparison
-- Monthly trends and performance metrics
+## 🚀 Quick Start
 
-### **STP Plant Management**
-- Daily operational records
-- Treatment efficiency monitoring
-- Sewage processing analytics
-- Water recovery tracking
+```bash
+# Clone the repository
+git clone https://github.com/ARahim900/mbay-vercal.git
 
-### **Contractor Tracking**
-- Project management and progress tracking
-- Resource allocation monitoring
-- Performance analytics
-
-## 🚀 Database Integration
-
-### **Supabase Backend**
-- **Database URL**: `https://hkmazjdexunxsnogadhb.supabase.co`
-- **Project**: Assets Muscat Bay
-- **Total Systems**: 56 electricity units monitored
-- **Total Consumption**: 1,582,665.52 KWH
-- **Total Cost**: 39,566.64 OMR
-
-### **Key Tables**
-\`\`\`sql
--- Main electricity consumption data
-electricity_consumption (56 records)
-
--- Pre-calculated monthly summaries  
-electricity_monthly_summary (13 months)
-
--- Analytics views
-electricity_type_summary
-electricity_high_consumption
-\`\`\`
-
-## 🛠️ Technology Stack
-
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **Styling**: Tailwind CSS, Radix UI components
-- **Charts**: Recharts for data visualization
-- **Database**: Supabase (PostgreSQL)
-- **Deployment**: Vercel
-- **State Management**: React Hooks
-- **Form Handling**: React Hook Form with Zod validation
-
-## 📦 Installation & Setup
-
-### **1. Clone Repository**
-\`\`\`bash
-git clone https://github.com/ARahim900/X1.git
-cd X1
-\`\`\`
-
-### **2. Install Dependencies**
-\`\`\`bash
+# Install dependencies
 npm install
-# or
-pnpm install
-\`\`\`
 
-### **3. Environment Setup**
-\`\`\`bash
-# Copy the example environment file
-cp .env.example .env.local
-
-# Edit .env.local and add your Supabase credentials:
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-\`\`\`
-
-**Note**: The app will work without Supabase configuration by using mock data for development/testing.
-
-### **4. Run Development Server**
-\`\`\`bash
+# Run development server
 npm run dev
-# or
-pnpm dev
-\`\`\`
+```
 
-Navigate to `http://localhost:3000` to see the application.
+Visit `http://localhost:3000` to see the application.
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js app directory
+├── components/
+│   ├── glassmorphism/     # Glassmorphism UI components
+│   │   ├── GlassCard.tsx
+│   │   ├── GlassButton.tsx
+│   │   ├── GlassDropdown.tsx
+│   │   ├── GlassChart.tsx
+│   │   ├── GlassSummaryCard.tsx
+│   │   ├── GlassSidebar.tsx
+│   │   └── GlassHeader.tsx
+│   └── sections/          # Main application sections
+├── styles/
+│   ├── glassmorphism.css  # Core glassmorphism styles
+│   └── animations.css     # Animation definitions
+└── constants/
+    └── colors.ts          # Brand color palette
+```
+
+## 🎯 Using Glassmorphism Components
+
+### Glass Card
+```tsx
+import { GlassCard } from '@/components/glassmorphism';
+
+<GlassCard className="p-6">
+  <h2>Your Content</h2>
+</GlassCard>
+```
+
+### Glass Dropdown
+```tsx
+import { GlassDropdown } from '@/components/glassmorphism';
+
+<GlassDropdown
+  label="Select Option"
+  options={[
+    { value: '1', label: 'Option 1' },
+    { value: '2', label: 'Option 2' }
+  ]}
+  value={selectedValue}
+  onChange={setSelectedValue}
+/>
+```
+
+### Glass Chart
+```tsx
+import { GlassChart } from '@/components/glassmorphism';
+
+<GlassChart title="Performance Metrics" subtitle="Monthly data">
+  <LineChart data={data}>
+    {/* Chart content */}
+  </LineChart>
+</GlassChart>
+```
+
+### Glass Summary Card
+```tsx
+import { GlassSummaryCard } from '@/components/glassmorphism';
+
+<GlassSummaryCard
+  title="Total Consumption"
+  value="46,039"
+  unit="kWh"
+  icon={Zap}
+  trend="↑ 5% from last month"
+  trendColor="text-green-600"
+  iconBgColor={COLORS.primary}
+/>
+```
+
+## 🎨 Color Palette
+
+The application uses Muscat Bay's brand colors:
+
+- **Primary**: `#5f5168` (Deep muted purple)
+- **Primary Light**: `#7E708A`
+- **Primary Dark**: `#3B3241`
+- **Accent**: `#A8D5E3` (Soft teal)
+- **Success**: `#10B981`
+- **Warning**: `#BFA181` (Muted gold)
+- **Info**: `#0A1828` (Deep blue)
+- **Error**: `#EF4444`
+
+## 📱 Responsive Design
+
+The glassmorphism components are fully responsive and optimized for:
+- Desktop (1920px+)
+- Laptop (1024px - 1919px)
+- Tablet (768px - 1023px)
+- Mobile (320px - 767px)
+
+## 🌟 Showcase
+
+Visit `/showcase` to see all glassmorphism components in action with interactive examples.
+
+## 🔧 Technologies Used
+
+- **Next.js 14**: React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first CSS framework
+- **Recharts**: Data visualization library
+- **Lucide Icons**: Modern icon library
+- **Supabase**: Database integration (optional)
+
+## 📈 Main Sections
+
+1. **Electricity Analysis**: Monitor electricity consumption across zones
+2. **Water Analysis**: Track water distribution and loss analysis
+3. **STP Plant**: Sewage treatment plant performance metrics
+4. **Contractor Tracker**: Manage contractor activities and contracts
+
+## 🚀 Performance Optimizations
+
+- Lazy loading of chart components
+- Optimized glassmorphism effects for smooth performance
+- Efficient data parsing and caching
+- Smooth animations with GPU acceleration
+
+## 🗃️ Database Integration (Optional)
+
+The application supports Supabase integration for live data:
+
+```bash
+# Add to .env.local
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+The app works with mock data when database is not configured.
 
 ## 🌐 Deployment
 
-### **Vercel Deployment**
+### Vercel Deployment
+```bash
+# Deploy to Vercel
+vercel
+```
 
-The app is configured for automatic deployment on Vercel. For production deployment with Supabase:
+### Environment Variables
+Configure the following in your deployment platform:
+- `NEXT_PUBLIC_SUPABASE_URL` (optional)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` (optional)
 
-1. **Fork/Clone this repository**
-2. **Connect to Vercel**
-3. **Configure Environment Variables in Vercel Dashboard**:
-   - Go to your project settings in Vercel
-   - Navigate to **Environment Variables**
-   - Add the following variables:
-     \`\`\`
-     NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-     \`\`\`
-4. **Redeploy** the application
+## 📝 License
 
-### **Troubleshooting Deployment Issues**
+This project is proprietary to Muscat Bay Operations.
 
-If you encounter the error `Missing Supabase environment variables` during deployment:
+## 👥 Contact
 
-1. **Check Environment Variables**: Ensure both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set in your deployment platform
-2. **Use Mock Data**: The app is designed to work without Supabase by falling back to mock data
-3. **Clear Build Cache**: Try clearing your deployment platform's build cache and redeploying
-
-## 🗃️ Database Schema
-
-### **Electricity System Tables**
-\`\`\`typescript
-interface ElectricityConsumption {
-  id: number
-  name: string
-  type: string  // PS, LS, IRR, DB, Street Light, D_Building, Retail
-  meter_account_no: string
-  apr_2024_kwh: number
-  may_2024_kwh: number
-  // ... monthly columns through apr_2025_kwh
-  total_kwh: number (computed)
-  total_cost_omr: number (computed)
-  created_at: timestamp
-}
-\`\`\`
-
-### **Available API Endpoints**
-\`\`\`typescript
-// Fetch all electricity data
-const { data } = await supabase
-  .from('electricity_consumption')
-  .select('*')
-
-// Get monthly trends
-const { data } = await supabase
-  .from('electricity_monthly_summary')
-  .select('*')
-
-// Get top consumers
-const { data } = await supabase
-  .from('electricity_high_consumption')
-  .select('*')
-  .limit(10)
-\`\`\`
-
-## 📊 Dashboard Modules
-
-### **1. Electricity System Analytics**
-- **Charts & Analytics**: Interactive consumption trends, cost analysis
-- **System Details**: Complete equipment inventory with filtering
-- **Category Analysis**: Performance breakdown by system types
-- **Performance Metrics**: Rankings and efficiency comparisons
-
-### **2. Water Analysis**
-- Multi-zone consumption monitoring
-- Loss percentage calculations
-- Direct connection vs individual meter analysis
-- Monthly comparison and trends
-
-### **3. STP Plant Operations**
-- Daily sewage processing records
-- Treatment efficiency tracking
-- Water recovery performance
-- Operational analytics
-
-### **4. Contractor Management**
-- Project progress tracking
-- Resource allocation
-- Performance monitoring
-- Timeline management
-
-## 🎯 Key Performance Indicators
-
-### **Electricity System KPIs**
-- **Active Systems**: 56 units across multiple categories
-- **Monthly Consumption**: Up to 166,207 KWH peak month
-- **Cost Efficiency**: 0.025 OMR per KWH
-- **Top Consumer**: Beachwell (287,749+ KWH total)
-- **System Categories**: 8 different equipment types
-
-### **Operational Metrics**
-- Real-time data refresh capabilities
-- Advanced filtering and search functionality
-- Export capabilities for reporting
-- Mobile-responsive design
-
-## 🔗 Live Deployment
-
-**Primary Deployment**: [https://vercel.com/arahim900s-projects/v0-muscat-bay-design](https://vercel.com/arahim900s-projects/v0-muscat-bay-design)
-
-## 📚 Documentation
-
-- **Integration Guide**: [ELECTRICITY_INTEGRATION.md](./ELECTRICITY_INTEGRATION.md)
-- **Quick Start Guide**: [QUICK_START.md](./QUICK_START.md)
-- **Supabase Dashboard**: [Database Management](https://supabase.com/dashboard/project/hkmazjdexunxsnogadhb)
-- **v0.dev Project**: [Continue Building](https://v0.dev/chat/projects/0JZ62ExbE2V)
-
-## 🔄 Development Workflow
-
-1. **Frontend Development**: Make changes using [v0.dev](https://v0.dev) or local development
-2. **Database Updates**: Manage data through Supabase dashboard or API
-3. **Automatic Sync**: Changes from v0.dev automatically sync to this repository
-4. **Auto Deploy**: Vercel automatically deploys latest changes
-
-## 🛡️ Security & Access
-
-- **Database**: Row Level Security (RLS) enabled where appropriate
-- **API Keys**: Environment variables secured
-- **Authentication**: Supabase anonymous key for read-only access
-- **CORS**: Configured for web application access
-- **Fallback Mode**: App works offline with mock data when database is unavailable
-
-## 📈 Future Enhancements
-
-- **Real-time Subscriptions**: Live data updates using Supabase real-time
-- **Mobile Application**: React Native version
-- **Advanced Analytics**: Predictive modeling and alerts
-- **User Management**: Role-based access control
-- **Report Generation**: Automated PDF/Excel exports
-
-## 🤝 Contributing
-
-This project is primarily managed through [v0.dev](https://v0.dev) with database integration via Supabase. For database schema changes or major feature additions, please coordinate through the appropriate channels.
-
-## 📞 Support
-
-For technical support or database access issues:
-- **Database Management**: Supabase Dashboard
-- **Application Issues**: GitHub Issues
-- **Feature Requests**: v0.dev project chat
-- **Deployment Issues**: Check environment variables configuration
+For questions or support, please contact the Muscat Bay IT department.
 
 ---
 
-**Last Updated**: June 2025 - Live Supabase Integration Deployed with Fallback Support
+*Built with ❤️ for Muscat Bay Operations Management*
