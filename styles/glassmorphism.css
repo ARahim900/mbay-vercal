@@ -431,3 +431,110 @@
     transform: scale(1.5);
   }
 }
+
+/* Liquid Glass Animations */
+@keyframes liquid-wave {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes glass-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-glass-slide-down {
+  animation: glass-slide-down 0.3s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(40);
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 0.6s ease-out;
+}
+
+/* Filter Bar Fixed Positioning */
+.filter-bar-fixed {
+  position: fixed;
+  z-index: 30;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-bar-fixed.scrolled {
+  transform: translateY(0);
+  box-shadow: 0 8px 32px rgba(95, 81, 104, 0.12);
+}
+
+/* Ensure z-index hierarchy */
+.glass-sidebar {
+  z-index: 50;
+}
+
+.glass-header {
+  z-index: 40;
+}
+
+.glass-dropdown {
+  z-index: 60;
+}
+
+/* Additional utility classes */
+.text-primary {
+  color: var(--mb-primary);
+}
+
+.text-primary-light {
+  color: var(--mb-primary-light);
+}
+
+.text-primary-dark {
+  color: var(--mb-primary-dark);
+}
+
+.bg-primary {
+  background-color: var(--mb-primary);
+}
+
+.bg-primary-light {
+  background-color: var(--mb-primary-light);
+}
+
+.bg-primary-dark {
+  background-color: var(--mb-primary-dark);
+}
+
+.border-primary {
+  border-color: var(--mb-primary);
+}
+
+.border-primary-light {
+  border-color: var(--mb-primary-light);
+}
+
+.ring-primary {
+  --tw-ring-color: var(--mb-primary);
+}
