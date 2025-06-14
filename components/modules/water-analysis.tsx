@@ -517,29 +517,7 @@ const WaterLossAnalysis = () => {
     setTimeout(() => {
       const currentData = processedData.overview.find((d) => d.month === selectedMonth)
 
-      setAiAnalysisResult(`🔬 AI Water Loss Analysis Results for ${selectedMonth}:
-
-📊 PERFORMANCE SUMMARY:
-• Main Bulk Supply (A1): ${currentData.A1.toLocaleString()} m³
-• Billed Bulk (A2): ${currentData.A2.toLocaleString()} m³
-• Individual Consumption (A3): ${currentData.A3.toLocaleString()} m³
-• Total System Loss: ${currentData.TotalLoss.toLocaleString()} m³ (${currentData.TotalLossPercent.toFixed(1)}%)
-
-🎯 LOSS ANALYSIS:
-• Stage 1 Loss (A1-A2): ${currentData.Loss1.toLocaleString()} m³ - ${currentData.Loss1Percent.toFixed(1)}%
-• Stage 2 Loss (A2-A3): ${currentData.Loss2.toLocaleString()} m³ - ${currentData.Loss2Percent.toFixed(1)}%
-• Financial Impact: ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR in apparent losses
-
-⚡ SYSTEM INSIGHTS:
-• ${currentData.TotalLossPercent < 10 ? "EXCELLENT" : currentData.TotalLossPercent < 20 ? "GOOD" : "NEEDS ATTENTION"} - Total loss percentage is ${currentData.TotalLossPercent < 10 ? "within acceptable limits" : currentData.TotalLossPercent < 20 ? "manageable but monitoring required" : "above industry standards"}
-• Stage 1 losses suggest ${currentData.Loss1Percent < 5 ? "good transmission efficiency" : "potential transmission system issues"}
-• Stage 2 losses indicate ${currentData.Loss2Percent < 15 ? "efficient distribution" : "distribution system optimization needed"}
-
-💡 STRATEGIC RECOMMENDATIONS:
-• PRIORITY: ${currentData.TotalLossPercent > 20 ? "URGENT - Comprehensive system audit required" : currentData.TotalLossPercent > 10 ? "MEDIUM - Regular monitoring and maintenance" : "LOW - Continue current practices"}
-• FINANCIAL: Monthly loss cost of ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR represents ${(((currentData.TotalLoss * 1.32) / (currentData.A1 * 1.32)) * 100).toFixed(1)}% of total water costs
-• TECHNICAL: ${currentData.Loss1 > currentData.Loss2 ? "Focus on transmission infrastructure improvements" : "Prioritize distribution network optimization"}
-• MONITORING: Track loss trends monthly and investigate any increases >5%`)
+      setAiAnalysisResult(`🔬 AI Water Loss Analysis Results for ${selectedMonth}:\n\n📊 PERFORMANCE SUMMARY:\n• Main Bulk Supply (A1): ${currentData.A1.toLocaleString()} m³\n• Billed Bulk (A2): ${currentData.A2.toLocaleString()} m³\n• Individual Consumption (A3): ${currentData.A3.toLocaleString()} m³\n• Total System Loss: ${currentData.TotalLoss.toLocaleString()} m³ (${currentData.TotalLossPercent.toFixed(1)}%)\n\n🎯 LOSS ANALYSIS:\n• Stage 1 Loss (A1-A2): ${currentData.Loss1.toLocaleString()} m³ - ${currentData.Loss1Percent.toFixed(1)}%\n• Stage 2 Loss (A2-A3): ${currentData.Loss2.toLocaleString()} m³ - ${currentData.Loss2Percent.toFixed(1)}%\n• Financial Impact: ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR in apparent losses\n\n⚡ SYSTEM INSIGHTS:\n• ${currentData.TotalLossPercent < 10 ? "EXCELLENT" : currentData.TotalLossPercent < 20 ? "GOOD" : "NEEDS ATTENTION"} - Total loss percentage is ${currentData.TotalLossPercent < 10 ? "within acceptable limits" : currentData.TotalLossPercent < 20 ? "manageable but monitoring required" : "above industry standards"}\n• Stage 1 losses suggest ${currentData.Loss1Percent < 5 ? "good transmission efficiency" : "potential transmission system issues"}\n• Stage 2 losses indicate ${currentData.Loss2Percent < 15 ? "efficient distribution" : "distribution system optimization needed"}\n\n💡 STRATEGIC RECOMMENDATIONS:\n• PRIORITY: ${currentData.TotalLossPercent > 20 ? "URGENT - Comprehensive system audit required" : currentData.TotalLossPercent > 10 ? "MEDIUM - Regular monitoring and maintenance" : "LOW - Continue current practices"}\n• FINANCIAL: Monthly loss cost of ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR represents ${(((currentData.TotalLoss * 1.32) / (currentData.A1 * 1.32)) * 100).toFixed(1)}% of total water costs\n• TECHNICAL: ${currentData.Loss1 > currentData.Loss2 ? "Focus on transmission infrastructure improvements" : "Prioritize distribution network optimization"}\n• MONITORING: Track loss trends monthly and investigate any increases >5%`)
       setIsAiLoading(false)
     }, 2500)
   }
@@ -804,7 +782,7 @@ const WaterLossAnalysis = () => {
     )
   }
 
-  // Filter Bar
+  // REDESIGNED Filter Bar - Now truly stationary
   const FilterBar = () => {
     const monthOptions = months.map((m) => ({ value: m, label: m }))
     const zoneOptions = [
@@ -817,47 +795,49 @@ const WaterLossAnalysis = () => {
     ]
 
     return (
-      <div className="bg-white shadow p-4 rounded-lg mb-6 print:hidden sticky top-[110px] md:top-[88px] z-10 border border-slate-200">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-          <StyledSelect
-            id="waterMonthFilter"
-            label="Select Month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            options={monthOptions}
-            icon={CalendarDays}
-          />
-          {activeSection === "zones" && (
+      <div className="bg-white shadow-lg border-b border-slate-200 mb-6 print:hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <StyledSelect
-              id="zoneFilter"
-              label="Filter by Zone"
-              value={selectedZone}
-              onChange={(e) => setSelectedZone(e.target.value)}
-              options={zoneOptions}
-              icon={Building}
+              id="waterMonthFilter"
+              label="Select Month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              options={monthOptions}
+              icon={CalendarDays}
             />
-          )}
-          {activeSection === "types" && (
-            <StyledSelect
-              id="typeFilter"
-              label="Filter by Type"
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              options={typeOptions}
-              icon={List}
-            />
-          )}
-          <button
-            onClick={handleAiAnalysis}
-            className="text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 h-[46px] w-full lg:w-auto hover:shadow-lg"
-            style={{ backgroundColor: "#4e4456" }}
-            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = COLORS.primary)}
-            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = COLORS.accent)}
-            disabled={isAiLoading}
-          >
-            <Sparkles size={16} />
-            <span>{isAiLoading ? "Analyzing..." : "🧠 AI Analysis"}</span>
-          </button>
+            {activeSection === "zones" && (
+              <StyledSelect
+                id="zoneFilter"
+                label="Filter by Zone"
+                value={selectedZone}
+                onChange={(e) => setSelectedZone(e.target.value)}
+                options={zoneOptions}
+                icon={Building}
+              />
+            )}
+            {activeSection === "types" && (
+              <StyledSelect
+                id="typeFilter"
+                label="Filter by Type"
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                options={typeOptions}
+                icon={List}
+              />
+            )}
+            <button
+              onClick={handleAiAnalysis}
+              className="text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 h-[46px] w-full lg:w-auto hover:shadow-lg"
+              style={{ backgroundColor: "#4e4456" }}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = COLORS.primary)}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = COLORS.accent)}
+              disabled={isAiLoading}
+            >
+              <Sparkles size={16} />
+              <span>{isAiLoading ? "Analyzing..." : "🧠 AI Analysis"}</span>
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -1254,83 +1234,85 @@ const WaterLossAnalysis = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full">
       <WaterSubNav />
       <FilterBar />
 
-      <main className="mt-6">{renderSection()}</main>
+      <div className="flex-1 overflow-y-auto">
+        <main className="mt-6 p-4 md:p-6">{renderSection()}</main>
 
-      {/* AI Analysis Modal */}
-      {isAiModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold" style={{ color: COLORS.primary }}>
-                🧠 AI Water Analysis
-              </h3>
-              <button onClick={() => setIsAiModalOpen(false)} className="p-1 rounded-full hover:bg-slate-200">
-                <X size={20} className="text-slate-600" />
-              </button>
-            </div>
-            {isAiLoading ? (
-              <div className="text-center py-8">
-                <div className="flex justify-center items-center space-x-3 mb-4">
-                  <Droplets size={48} className="animate-pulse" style={{ color: COLORS.primary }} />
-                  <Sparkles size={48} className="animate-bounce" style={{ color: COLORS.accent }} />
-                </div>
-                <p className="mt-2 text-slate-600">AI is analyzing water system data...</p>
-                <p className="text-sm text-slate-500 mt-1">
-                  Evaluating flow patterns, loss analysis, and performance metrics
-                </p>
+        {/* AI Analysis Modal */}
+        {isAiModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold" style={{ color: COLORS.primary }}>
+                  🧠 AI Water Analysis
+                </h3>
+                <button onClick={() => setIsAiModalOpen(false)} className="p-1 rounded-full hover:bg-slate-200">
+                  <X size={20} className="text-slate-600" />
+                </button>
               </div>
-            ) : (
-              <div className="text-sm text-slate-700 space-y-3 whitespace-pre-wrap font-mono">
-                {aiAnalysisResult ? (
-                  aiAnalysisResult.split("\n").map((line, index) => {
-                    if (
-                      line.startsWith("📊") ||
-                      line.startsWith("🎯") ||
-                      line.startsWith("⚡") ||
-                      line.startsWith("💡")
-                    ) {
+              {isAiLoading ? (
+                <div className="text-center py-8">
+                  <div className="flex justify-center items-center space-x-3 mb-4">
+                    <Droplets size={48} className="animate-pulse" style={{ color: COLORS.primary }} />
+                    <Sparkles size={48} className="animate-bounce" style={{ color: COLORS.accent }} />
+                  </div>
+                  <p className="mt-2 text-slate-600">AI is analyzing water system data...</p>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Evaluating flow patterns, loss analysis, and performance metrics
+                  </p>
+                </div>
+              ) : (
+                <div className="text-sm text-slate-700 space-y-3 whitespace-pre-wrap font-mono">
+                  {aiAnalysisResult ? (
+                    aiAnalysisResult.split("\n").map((line, index) => {
+                      if (
+                        line.startsWith("📊") ||
+                        line.startsWith("🎯") ||
+                        line.startsWith("⚡") ||
+                        line.startsWith("💡")
+                      ) {
+                        return (
+                          <h4 key={index} className="font-bold text-lg mt-4 mb-2" style={{ color: COLORS.primary }}>
+                            {line}
+                          </h4>
+                        )
+                      }
+                      if (line.startsWith("•")) {
+                        return (
+                          <p key={index} className="ml-4 text-slate-700">
+                            {line}
+                          </p>
+                        )
+                      }
                       return (
-                        <h4 key={index} className="font-bold text-lg mt-4 mb-2" style={{ color: COLORS.primary }}>
-                          {line}
-                        </h4>
-                      )
-                    }
-                    if (line.startsWith("•")) {
-                      return (
-                        <p key={index} className="ml-4 text-slate-700">
+                        <p key={index} className="text-slate-700">
                           {line}
                         </p>
                       )
-                    }
-                    return (
-                      <p key={index} className="text-slate-700">
-                        {line}
-                      </p>
-                    )
-                  })
-                ) : (
-                  <p>No analysis available or an error occurred.</p>
-                )}
+                    })
+                  ) : (
+                    <p>No analysis available or an error occurred.</p>
+                  )}
+                </div>
+              )}
+              <div className="mt-6 text-right">
+                <button
+                  onClick={() => setIsAiModalOpen(false)}
+                  className="text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+                  style={{ backgroundColor: COLORS.primary }}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryDark)}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = COLORS.primary)}
+                >
+                  Close Analysis
+                </button>
               </div>
-            )}
-            <div className="mt-6 text-right">
-              <button
-                onClick={() => setIsAiModalOpen(false)}
-                className="text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                style={{ backgroundColor: COLORS.primary }}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryDark)}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = COLORS.primary)}
-              >
-                Close Analysis
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
