@@ -144,6 +144,31 @@
   z-index: 40;
 }
 
+/* Fixed filter bar specific styles */
+.filter-bar-fixed {
+  background-color: transparent;
+  pointer-events: none;
+}
+
+.filter-bar-fixed > * {
+  pointer-events: auto;
+}
+
+.filter-bar-fixed.scrolled {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Z-index hierarchy for proper layering */
 .z-header {
   z-index: 40;
@@ -165,22 +190,14 @@
   z-index: 35;
 }
 
-/* Sticky positioning for filter bars */
-.sticky-filter-bar {
-  position: sticky;
-  top: 80px; /* Below header */
-  z-index: 30;
-  transition: all 0.3s ease;
-}
-
-/* Ensure header is always on top */
+/* Header should be fixed */
 .sticky-header {
   position: sticky;
   top: 0;
   z-index: 40;
 }
 
-/* Glass sidebar styles */
+/* Sidebar fixed positioning */
 .glass-sidebar {
   background: rgba(59, 50, 65, 0.95);
   backdrop-filter: blur(20px) saturate(180%);
@@ -190,6 +207,16 @@
   top: 0;
   height: 100vh;
   z-index: 50;
+}
+
+/* Main content area adjustment for fixed sidebar */
+.main-content-with-sidebar {
+  margin-left: 256px; /* Default sidebar width */
+  transition: margin-left 0.3s ease;
+}
+
+.main-content-with-sidebar.collapsed {
+  margin-left: 64px; /* Collapsed sidebar width */
 }
 
 /* Gradient text */
@@ -216,8 +243,14 @@
     backdrop-filter: blur(12px);
   }
   
-  .sticky-filter-bar {
-    top: 60px; /* Adjust for smaller header on mobile */
+  .filter-bar-fixed {
+    left: 0 !important;
+    width: 100% !important;
+  }
+  
+  .main-content-with-sidebar,
+  .main-content-with-sidebar.collapsed {
+    margin-left: 0;
   }
 }
 
@@ -245,5 +278,12 @@
     backdrop-filter: none;
     background: white !important;
     border: 1px solid #e5e7eb !important;
+  }
+  
+  .filter-bar-fixed {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: auto !important;
   }
 }
