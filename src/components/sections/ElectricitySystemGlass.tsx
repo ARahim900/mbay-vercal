@@ -1,757 +1,877 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, ScatterChart, Scatter, RadialBarChart, RadialBar } from 'recharts';
-import { Zap, TrendingUp, BarChart2, Activity, DollarSign, AlertTriangle, CheckCircle, Calculator, Target, TrendingDown, Battery, Gauge, FlashOff, Power, Clock, Calendar, Award, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
-import { GlassCard, GlassSummaryCard, GlassChart, GlassFilterBar, GlassSubNav } from '@/components/glassmorphism';
+import React, { useState, useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Label, Area, ComposedChart, ReferenceLine } from 'recharts';
+import { 
+  Zap, BarChart2, List, TrendingUp, Users2, DollarSign, Filter, 
+  CalendarDays, Sparkles, X, Target, Clock, TrendingDown, Brain,
+  Battery, Gauge, AlertTriangle, CheckCircle2, ArrowUp, ArrowDown
+} from 'lucide-react';
+import { GlassCard, GlassButton, GlassSelect, GlassModal, GlassSubNav } from '../glassmorphism';
 
-// ===============================
-// DESIGN SYSTEM & CONSTANTS
-// ===============================
-
+// Constants
 const OMR_PER_KWH = 0.025;
-const COLORS = {
-  primary: '#5f5168',
-  primaryLight: '#7E708A',
-  primaryDark: '#3B3241',
-  accent: '#A8D5E3',
-  success: '#10B981',
-  warning: '#BFA181',
-  info: '#0A1828',
-  error: '#EF4444',
-  chart: ['#5f5168', '#A8D5E3', '#BFA181', '#0A1828', '#7E708A', '#C3FBF4', '#F2F0EA', '#10B981', '#EF4444', '#6A5ACD']
-};
 
-// ===============================
-// MOCK DATA (Based on your Supabase schema)
-// ===============================
-
+// Mock data based on your actual database structure
 const mockElectricityData = [
-  {
-    id: 1,
-    name: "Beachwell",
-    type: "D_Building",
-    meter_account_no: "R51903",
-    total_kwh: 311962,
-    total_cost_omr: 7799.05,
-    recent_trend: 'increasing',
-    efficiency_score: 85,
-    category: 'Beachwell'
-  },
-  {
-    id: 2,
-    name: "Central Park",
-    type: "D_Building", 
-    meter_account_no: "R54672",
-    total_kwh: 267022,
-    total_cost_omr: 6675.55,
-    recent_trend: 'stable',
-    efficiency_score: 78,
-    category: 'Central Park'
-  },
-  {
-    id: 3,
-    name: "CIF Kitchen",
-    type: "Retail",
-    meter_account_no: "MISSING_METER",
-    total_kwh: 184293,
-    total_cost_omr: 4607.325,
-    recent_trend: 'stable',
-    efficiency_score: 92,
-    category: 'Commercial'
-  },
-  {
-    id: 4,
-    name: "Pumping Station 01",
-    type: "PS",
-    meter_account_no: "R52330",
-    total_kwh: 36786,
-    total_cost_omr: 919.65,
-    recent_trend: 'increasing',
-    efficiency_score: 75,
-    category: 'Pumping Station'
-  },
-  {
-    id: 5,
-    name: "Street Light FP 01 (Z8)",
-    type: "Street Light",
-    meter_account_no: "R53197",
-    total_kwh: 41586,
-    total_cost_omr: 1039.65,
-    recent_trend: 'stable',
-    efficiency_score: 68,
-    category: 'Street Light'
-  }
+  { id: 1, name: 'Beachwell', type: 'Infrastructure', meter_account_no: 'R51903', apr_24: 20245, may_24: 25680, jun_24: 28945, jul_24: 32110, aug_24: 35620, sep_24: 31890, oct_24: 28450, nov_24: 24383, dec_24: 37236, jan_25: 38168, feb_25: 18422, mar_25: 40, apr_26: 27749 },
+  { id: 2, name: 'Central Park', type: 'Amenity', meter_account_no: 'R54672', apr_24: 8500, may_24: 9200, jun_24: 10800, jul_24: 12400, aug_24: 13900, sep_24: 12100, oct_24: 10600, nov_24: 9604, dec_24: 19032, jan_25: 22819, feb_25: 19974, mar_25: 14190, apr_26: 13846 },
+  { id: 3, name: 'CIF Kitchen', type: 'Commercial', meter_account_no: 'MISSING_METER', apr_24: 14200, may_24: 15100, jun_24: 15800, jul_24: 16200, aug_24: 16800, sep_24: 16100, oct_24: 15900, nov_24: 16742, dec_24: 15554, jan_25: 16788, feb_25: 16154, mar_25: 14971, apr_26: 18446 },
+  { id: 4, name: 'Pumping Station 01', type: 'Infrastructure', meter_account_no: 'R52330', apr_24: 1200, may_24: 1350, jun_24: 1450, jul_24: 1580, aug_24: 1720, sep_24: 1650, oct_24: 1480, nov_24: 1629, dec_24: 1640, jan_25: 1903, feb_25: 2095, mar_25: 3032, apr_26: 3940 },
+  { id: 5, name: 'Security Building', type: 'Ancillary', meter_account_no: 'R53649', apr_24: 4800, may_24: 5100, jun_24: 5400, jul_24: 5600, aug_24: 5900, sep_24: 5700, oct_24: 5300, nov_24: 5702, dec_24: 5131, jan_25: 5559, feb_25: 5417, mar_25: 4504, apr_26: 5978 }
 ];
 
-const mockMonthlyData = [
-  { month_year: "Apr 2024", total_consumption_kwh: 72781, total_cost_omr: 1819.525, efficiency: 85 },
-  { month_year: "May 2024", total_consumption_kwh: 116032, total_cost_omr: 2900.800, efficiency: 87 },
-  { month_year: "Jun 2024", total_consumption_kwh: 116998, total_cost_omr: 2924.950, efficiency: 89 },
-  { month_year: "Jul 2024", total_consumption_kwh: 149968, total_cost_omr: 3749.200, efficiency: 82 },
-  { month_year: "Aug 2024", total_consumption_kwh: 166207, total_cost_omr: 4155.175, efficiency: 78 },
-  { month_year: "Sep 2024", total_consumption_kwh: 141470, total_cost_omr: 3536.750, efficiency: 84 },
-  { month_year: "Oct 2024", total_consumption_kwh: 129772, total_cost_omr: 3244.300, efficiency: 86 },
-  { month_year: "Nov 2024", total_consumption_kwh: 124691, total_cost_omr: 3117.275, efficiency: 88 },
-  { month_year: "Dec 2024", total_consumption_kwh: 124619, total_cost_omr: 3115.475, efficiency: 90 },
-  { month_year: "Jan 2025", total_consumption_kwh: 120631, total_cost_omr: 3015.775, efficiency: 91 },
-  { month_year: "Feb 2025", total_consumption_kwh: 107031, total_cost_omr: 2675.775, efficiency: 89 },
-  { month_year: "Mar 2025", total_consumption_kwh: 78479, total_cost_omr: 1961.975, efficiency: 93 },
-  { month_year: "Apr 2025", total_consumption_kwh: 133986, total_cost_omr: 3349.663, efficiency: 85 },
-  { month_year: "May 2025", total_consumption_kwh: 155367, total_cost_omr: 3884.172, efficiency: 83 }
+const mockMonthlySummary = [
+  { month: 'Apr 2024', total_consumption: 89240, total_cost: 2231.0, active_meters: 25, avg_consumption: 3569.6 },
+  { month: 'May 2024', total_consumption: 95420, total_cost: 2385.5, active_meters: 25, avg_consumption: 3816.8 },
+  { month: 'Jun 2024', total_consumption: 108650, total_cost: 2716.25, active_meters: 25, avg_consumption: 4346.0 },
+  { month: 'Jul 2024', total_consumption: 118890, total_cost: 2972.25, active_meters: 25, avg_consumption: 4755.6 },
+  { month: 'Aug 2024', total_consumption: 130240, total_cost: 3256.0, active_meters: 25, avg_consumption: 5209.6 },
+  { month: 'Sep 2024', total_consumption: 119380, total_cost: 2984.5, active_meters: 25, avg_consumption: 4775.2 },
+  { month: 'Oct 2024', total_consumption: 106850, total_cost: 2671.25, active_meters: 25, avg_consumption: 4274.0 },
+  { month: 'Nov 2024', total_consumption: 98670, total_cost: 2466.75, active_meters: 25, avg_consumption: 3946.8 },
+  { month: 'Dec 2024', total_consumption: 115420, total_cost: 2885.5, active_meters: 25, avg_consumption: 4616.8 },
+  { month: 'Jan 2025', total_consumption: 125890, total_cost: 3147.25, active_meters: 25, avg_consumption: 5035.6 },
+  { month: 'Feb 2025', total_consumption: 108760, total_cost: 2719.0, active_meters: 25, avg_consumption: 4350.4 },
+  { month: 'Mar 2025', total_consumption: 95230, total_cost: 2380.75, active_meters: 25, avg_consumption: 3809.2 }
 ];
 
-// ===============================
-// MAIN COMPONENT
-// ===============================
-
-export const ElectricitySystemModule = () => {
+const ElectricitySystemGlass = () => {
   const [activeSubSection, setActiveSubSection] = useState('Dashboard');
-  const [selectedMonth, setSelectedMonth] = useState('All Months'); 
+  const [selectedMonth, setSelectedMonth] = useState('All Months');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
-  const [aiAnalysisResult, setAiAnalysisResult] = useState("");
+  const [aiAnalysisResult, setAiAnalysisResult] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate loading
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+  // Extract categories
+  const categories = useMemo(() => {
+    return [...new Set(mockElectricityData.map(item => item.type))].sort();
   }, []);
+
+  const monthOptions = [
+    { value: 'All Months', label: 'All Months' },
+    ...mockMonthlySummary.map(item => ({ value: item.month, label: item.month }))
+  ];
+
+  const categoryOptions = [
+    { value: 'All Categories', label: 'All Categories' },
+    ...categories.map(cat => ({ value: cat, label: cat }))
+  ];
 
   // KPI Calculations
   const kpiData = useMemo(() => {
-    const totalConsumption = mockElectricityData.reduce((acc, curr) => acc + curr.total_kwh, 0);
-    const totalCost = mockElectricityData.reduce((acc, curr) => acc + curr.total_cost_omr, 0);
-    const avgConsumptionPerUnit = totalConsumption / mockElectricityData.length;
-    const activeMeters = mockElectricityData.filter(d => d.total_kwh > 0).length;
+    if (selectedMonth === 'All Months') {
+      const totalConsumption = mockMonthlySummary.reduce((acc, curr) => acc + curr.total_consumption, 0);
+      const totalCost = totalConsumption * OMR_PER_KWH;
+      return {
+        totalConsumption,
+        totalCost,
+        avgConsumption: Math.round(totalConsumption / mockMonthlySummary.length),
+        activeMeters: 25
+      };
+    } else {
+      const monthData = mockMonthlySummary.find(item => item.month === selectedMonth);
+      return {
+        totalConsumption: monthData?.total_consumption || 0,
+        totalCost: (monthData?.total_consumption || 0) * OMR_PER_KWH,
+        avgConsumption: monthData?.avg_consumption || 0,
+        activeMeters: monthData?.active_meters || 0
+      };
+    }
+  }, [selectedMonth]);
 
-    // Find peak month
-    const peakMonth = mockMonthlyData.reduce((prev, current) => 
-      prev.total_consumption_kwh > current.total_consumption_kwh ? prev : current
-    );
-
-    // Calculate load factor
-    const avgMonthlyLoad = mockMonthlyData.reduce((acc, month) => acc + month.total_consumption_kwh, 0) / mockMonthlyData.length;
-    const loadFactor = (avgMonthlyLoad / peakMonth.total_consumption_kwh) * 100;
-
-    return {
-      totalConsumption: Math.round(totalConsumption),
-      totalCost: Math.round(totalCost * 100) / 100,
-      avgConsumptionPerUnit: Math.round(avgConsumptionPerUnit),
-      activeMeters,
-      peakMonth: peakMonth.month_year,
-      peakDemand: Math.round(peakMonth.total_consumption_kwh),
-      loadFactor: Math.round(loadFactor * 10) / 10,
-      avgMonthlyCost: Math.round((totalCost / 14) * 100) / 100
-    };
-  }, []);
-
-  // Performance metrics
-  const performanceMetrics = useMemo(() => {
-    const latestMonth = mockMonthlyData[mockMonthlyData.length - 1];
-    const previousMonth = mockMonthlyData[mockMonthlyData.length - 2];
-    const monthlyGrowth = ((latestMonth.total_consumption_kwh - previousMonth.total_consumption_kwh) / previousMonth.total_consumption_kwh) * 100;
-
-    const avgEfficiency = mockMonthlyData.reduce((acc, month) => acc + month.efficiency, 0) / mockMonthlyData.length;
-    
-    return {
-      efficiencyScore: Math.round(avgEfficiency),
-      monthlyGrowth: Math.round(monthlyGrowth * 10) / 10,
-      demandStability: Math.round(kpiData.loadFactor),
-      seasonalVariation: 42.8, // Based on your actual data patterns
-      costPerformanceIndex: 25.0,
-      summerPeakRatio: 85
-    };
-  }, [kpiData, mockMonthlyData]);
-
-  // Chart data for trends
-  const monthlyTrendData = useMemo(() => {
-    return mockMonthlyData.map(month => ({
-      name: month.month_year.replace('2024', '24').replace('2025', '25'),
-      consumption: Math.round(month.total_consumption_kwh),
-      cost: Math.round(month.total_cost_omr),
-      efficiency: month.efficiency
+  // Chart data
+  const trendData = useMemo(() => {
+    return mockMonthlySummary.map(item => ({
+      month: item.month.split(' ')[0],
+      consumption: item.total_consumption,
+      cost: item.total_cost
     }));
   }, []);
 
-  // Top consumers data
-  const topConsumersData = useMemo(() => {
-    return mockElectricityData
-      .sort((a, b) => b.total_kwh - a.total_kwh)
-      .map((item, index) => ({
-        rank: index + 1,
-        name: item.name,
-        type: item.type,
-        consumption: item.total_kwh,
-        cost: item.total_cost_omr,
-        trend: item.recent_trend,
-        efficiency: item.efficiency_score
-      }));
-  }, []);
-
-  // Category breakdown for pie chart
-  const categoryBreakdownData = useMemo(() => {
-    const categoryMap = {};
+  const categoryData = useMemo(() => {
+    const categoryTotals = {};
     mockElectricityData.forEach(item => {
-      if (!categoryMap[item.category]) {
-        categoryMap[item.category] = { name: item.category, value: 0 };
-      }
-      categoryMap[item.category].value += item.total_kwh;
+      const total = item.apr_24 + item.may_24 + item.jun_24 + item.jul_24 + 
+                   item.aug_24 + item.sep_24 + item.oct_24 + item.nov_24 + 
+                   item.dec_24 + item.jan_25 + item.feb_25 + item.mar_25 + item.apr_26;
+      categoryTotals[item.type] = (categoryTotals[item.type] || 0) + total;
     });
     
-    return Object.values(categoryMap)
-      .map(category => ({
-        ...category,
-        value: Math.round(category.value)
-      }))
-      .sort((a, b) => b.value - a.value);
+    return Object.entries(categoryTotals).map(([name, value]) => ({
+      name,
+      value: Math.round(value),
+      percentage: Math.round((value / Object.values(categoryTotals).reduce((a, b) => a + b, 0)) * 100)
+    }));
   }, []);
 
-  // AI Analysis function
+  const topConsumers = useMemo(() => {
+    return mockElectricityData.map(item => {
+      const total = item.apr_24 + item.may_24 + item.jun_24 + item.jul_24 + 
+                   item.aug_24 + item.sep_24 + item.oct_24 + item.nov_24 + 
+                   item.dec_24 + item.jan_25 + item.feb_25 + item.mar_25 + item.apr_26;
+      return {
+        name: item.name,
+        consumption: total,
+        type: item.type,
+        efficiency: Math.round(Math.random() * 40 + 60) // Mock efficiency score
+      };
+    }).sort((a, b) => b.consumption - a.consumption).slice(0, 5);
+  }, []);
+
   const handleAiAnalysis = async () => {
     setIsAiModalOpen(true);
     setIsAiLoading(true);
-    setAiAnalysisResult("");
+    setAiAnalysisResult('');
     
     setTimeout(() => {
-      setAiAnalysisResult(`🔋 AI ELECTRICITY SYSTEM ANALYSIS
+      setAiAnalysisResult(`🤖 AI Analysis Results for Electricity System (${selectedMonth}):
 
-📊 PERFORMANCE SUMMARY:
-• Total System Consumption: ${kpiData.totalConsumption.toLocaleString()} kWh
-• Total System Cost: ${kpiData.totalCost.toLocaleString()} OMR  
-• Peak Demand Month: ${kpiData.peakMonth} (${kpiData.peakDemand.toLocaleString()} kWh)
-• Load Factor: ${kpiData.loadFactor}% (${kpiData.loadFactor > 70 ? 'EFFICIENT' : 'NEEDS IMPROVEMENT'})
-• Active Metering Points: ${kpiData.activeMeters} units
+📊 CONSUMPTION ANALYSIS:
+• Total Consumption: ${kpiData.totalConsumption.toLocaleString()} kWh
+• Total Cost: ${kpiData.totalCost.toLocaleString()} OMR
+• System Efficiency: 83/100 (Good Performance)
+• Peak Usage: August 2024 (130,240 kWh - Summer cooling demand)
+• Lowest Usage: March 2025 (95,230 kWh - Mild weather conditions)
 
-⚡ EFFICIENCY ANALYSIS:
-• Energy Efficiency Score: ${performanceMetrics.efficiencyScore}/100 (${performanceMetrics.efficiencyScore > 80 ? 'EXCELLENT' : 'GOOD'})
-• Monthly Growth Rate: ${performanceMetrics.monthlyGrowth > 0 ? '+' : ''}${performanceMetrics.monthlyGrowth}%
-• Demand Stability: ${performanceMetrics.demandStability}%
-• Seasonal Variation: ${performanceMetrics.seasonalVariation}%
+⚡ TOP CONSUMERS INSIGHTS:
+• Beachwell: 311,962 kWh (19.1% of total) - High pumping demand
+• Central Park: 267,022 kWh (16.4% of total) - Irrigation & lighting
+• CIF Kitchen: 184,293 kWh (11.3% of total) - Consistent commercial usage
+• Infrastructure category dominates with 58% of total consumption
 
-🎯 TOP CONSUMERS INSIGHTS:
-• Beachwell: ${((311962/(kpiData.totalConsumption || 1))*100).toFixed(1)}% of total consumption - CRITICAL infrastructure
-• Central Park: ${((267022/(kpiData.totalConsumption || 1))*100).toFixed(1)}% of total - High irrigation/lighting loads
-• CIF Kitchen: ${((184293/(kpiData.totalConsumption || 1))*100).toFixed(1)}% of total - Consistent commercial operation
+📈 EFFICIENCY OPPORTUNITIES:
+• Load Factor Analysis: 76.4% system efficiency
+• Peak Demand Optimization: 18% reduction potential during 10am-4pm
+• Seasonal Variation: 42.8% difference between summer/winter consumption
+• Equipment Efficiency: 3 units showing >90% load factor (optimal)
 
-💰 OPTIMIZATION OPPORTUNITIES:
-• Potential Annual Savings: 8,240+ OMR identified
-• ROI Period: 12-18 months for efficiency upgrades
-• Priority Targets: Infrastructure units with >200,000 kWh/year
+💡 STRATEGIC RECOMMENDATIONS:
+• IMMEDIATE (0-3 months): Install smart meters on 5 highest consumers
+• SHORT-TERM (3-6 months): Implement demand response program
+• MEDIUM-TERM (6-12 months): Solar PV installation (estimated 15% reduction)
+• LONG-TERM (1-2 years): Energy storage system for peak shaving
 
-🔧 STRATEGIC RECOMMENDATIONS:
-• IMMEDIATE: Implement demand response for Beachwell and Central Park
-• SHORT-TERM: Install smart meters on high-consumption infrastructure
-• MEDIUM-TERM: Consider solar integration for 30-40% of daytime loads
-• LONG-TERM: Develop energy storage strategy for load balancing`);
+💰 COST OPTIMIZATION POTENTIAL:
+• Energy Efficiency Upgrades: 8,240 OMR annual savings potential
+• Peak Demand Management: 3,120 OMR annual savings
+• Renewable Energy Integration: 12,500 OMR annual savings
+• Total Annual Optimization: 23,860 OMR (22% cost reduction)
+
+🎯 PERFORMANCE TARGETS:
+• Reduce peak demand by 15% within 6 months
+• Achieve 85/100 efficiency score by year-end
+• Implement real-time monitoring on all critical infrastructure
+• Establish energy baseline for new development phases`);
       setIsAiLoading(false);
     }, 2500);
   };
 
-  // Sub-navigation configuration
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <GlassCard className="p-6">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="text-white/80 font-semibold text-sm">Total Consumption</h3>
+            <div className="p-3 rounded-full bg-blue-500/20 text-blue-400">
+              <Zap size={22} />
+            </div>
+          </div>
+          <p className="text-2xl font-bold text-white mb-1">
+            {kpiData.totalConsumption.toLocaleString()}
+            <span className="text-base font-medium text-white/60 ml-2">kWh</span>
+          </p>
+          <p className="text-xs text-green-400">
+            {selectedMonth === 'All Months' ? 'Total System' : `For ${selectedMonth}`}
+          </p>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="text-white/80 font-semibold text-sm">Total Cost</h3>
+            <div className="p-3 rounded-full bg-green-500/20 text-green-400">
+              <DollarSign size={22} />
+            </div>
+          </div>
+          <p className="text-2xl font-bold text-white mb-1">
+            {kpiData.totalCost.toLocaleString(undefined, {minimumFractionDigits: 2})}
+            <span className="text-base font-medium text-white/60 ml-2">OMR</span>
+          </p>
+          <p className="text-xs text-white/60">@ 0.025 OMR/kWh</p>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="text-white/80 font-semibold text-sm">Avg Consumption</h3>
+            <div className="p-3 rounded-full bg-yellow-500/20 text-yellow-400">
+              <BarChart2 size={22} />
+            </div>
+          </div>
+          <p className="text-2xl font-bold text-white mb-1">
+            {Math.round(kpiData.avgConsumption).toLocaleString()}
+            <span className="text-base font-medium text-white/60 ml-2">kWh</span>
+          </p>
+          <p className="text-xs text-white/60">Per period</p>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="text-white/80 font-semibold text-sm">Active Meters</h3>
+            <div className="p-3 rounded-full bg-purple-500/20 text-purple-400">
+              <Users2 size={22} />
+            </div>
+          </div>
+          <p className="text-2xl font-bold text-white mb-1">
+            {kpiData.activeMeters}
+            <span className="text-base font-medium text-white/60 ml-2">units</span>
+          </p>
+          <p className="text-xs text-green-400">All operational</p>
+        </GlassCard>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GlassCard className="p-6">
+          <h3 className="text-xl font-semibold text-white mb-4">Monthly Consumption Trend</h3>
+          <div style={{ height: '300px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#fff' }} />
+                <YAxis tick={{ fontSize: 12, fill: '#fff' }} />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    color: '#fff'
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="consumption" 
+                  stroke="#3B82F6" 
+                  strokeWidth={3}
+                  dot={{ fill: '#3B82F6', r: 4 }}
+                  name="Consumption (kWh)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <h3 className="text-xl font-semibold text-white mb-4">Consumption by Category</h3>
+          <div style={{ height: '300px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={2}
+                >
+                  {categoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][index % 5]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    color: '#fff'
+                  }}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Top Consumers Table */}
+      <GlassCard className="p-6">
+        <h3 className="text-xl font-semibold text-white mb-4">Top Energy Consumers</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/20">
+                <th className="text-left p-3 text-white/80 font-medium">Rank</th>
+                <th className="text-left p-3 text-white/80 font-medium">Consumer</th>
+                <th className="text-left p-3 text-white/80 font-medium">Type</th>
+                <th className="text-right p-3 text-white/80 font-medium">Consumption (kWh)</th>
+                <th className="text-center p-3 text-white/80 font-medium">Efficiency</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topConsumers.map((consumer, index) => (
+                <tr key={index} className="border-b border-white/10 hover:bg-white/5">
+                  <td className="p-3">
+                    <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                      index < 3 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400'
+                    }`}>
+                      {index + 1}
+                    </span>
+                  </td>
+                  <td className="p-3 font-medium text-white">{consumer.name}</td>
+                  <td className="p-3 text-white/60">{consumer.type}</td>
+                  <td className="p-3 text-right font-semibold text-white">{consumer.consumption.toLocaleString()}</td>
+                  <td className="p-3 text-center">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      consumer.efficiency >= 80 ? 'bg-green-500/20 text-green-400' :
+                      consumer.efficiency >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
+                    }`}>
+                      {consumer.efficiency}%
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassCard>
+    </div>
+  );
+
+  const renderPerformance = () => (
+    <div className="space-y-6">
+      {/* Performance Indicators */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-semibold">Energy Efficiency Score</h3>
+            <Battery className="text-green-400" size={24} />
+          </div>
+          <div className="flex items-end space-x-3">
+            <span className="text-3xl font-bold text-white">83</span>
+            <span className="text-lg text-white/60">/100</span>
+          </div>
+          <div className="mt-3 w-full bg-white/10 rounded-full h-2">
+            <div className="bg-green-400 h-2 rounded-full" style={{ width: '83%' }}></div>
+          </div>
+          <p className="text-xs text-green-400 mt-2">Good Performance</p>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-semibold">Load Factor</h3>
+            <Gauge className="text-blue-400" size={24} />
+          </div>
+          <div className="flex items-end space-x-3">
+            <span className="text-3xl font-bold text-white">76.4</span>
+            <span className="text-lg text-white/60">%</span>
+          </div>
+          <div className="mt-3 w-full bg-white/10 rounded-full h-2">
+            <div className="bg-blue-400 h-2 rounded-full" style={{ width: '76.4%' }}></div>
+          </div>
+          <p className="text-xs text-blue-400 mt-2">Optimal Range</p>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-semibold">Peak Demand</h3>
+            <TrendingUp className="text-yellow-400" size={24} />
+          </div>
+          <div className="flex items-end space-x-3">
+            <span className="text-3xl font-bold text-white">4,251</span>
+            <span className="text-lg text-white/60">kW</span>
+          </div>
+          <div className="flex items-center mt-2">
+            <ArrowUp className="text-red-400 w-4 h-4 mr-1" />
+            <span className="text-xs text-red-400">+15% vs last month</span>
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Performance Chart */}
+      <GlassCard className="p-6">
+        <h3 className="text-xl font-semibold text-white mb-4">Monthly Performance Metrics</h3>
+        <div style={{ height: '400px' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#fff' }} />
+              <YAxis yAxisId="left" tick={{ fontSize: 12, fill: '#fff' }} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12, fill: '#fff' }} />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '8px',
+                  color: '#fff'
+                }}
+              />
+              <Legend />
+              <Bar yAxisId="left" dataKey="consumption" fill="#3B82F6" name="Consumption (kWh)" />
+              <Line yAxisId="right" type="monotone" dataKey="cost" stroke="#10B981" strokeWidth={3} name="Cost (OMR)" />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </GlassCard>
+
+      {/* Performance Indicators Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GlassCard className="p-6">
+          <h3 className="text-xl font-semibold text-white mb-4">System Health Indicators</h3>
+          <div className="space-y-4">
+            {[
+              { name: 'Power Quality', value: 98.5, target: 95, status: 'excellent' },
+              { name: 'Equipment Uptime', value: 99.2, target: 98, status: 'excellent' },
+              { name: 'Energy Utilization', value: 76.4, target: 80, status: 'good' },
+              { name: 'Peak Optimization', value: 68.3, target: 75, status: 'needs_improvement' },
+              { name: 'Cost Efficiency', value: 82.1, target: 85, status: 'good' }
+            ].map((indicator, index) => (
+              <div key={index} className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                <div>
+                  <h4 className="font-medium text-white">{indicator.name}</h4>
+                  <p className="text-xs text-white/60">Target: {indicator.target}%</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-white">{indicator.value}%</p>
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    indicator.status === 'excellent' ? 'bg-green-500/20 text-green-400' :
+                    indicator.status === 'good' ? 'bg-blue-500/20 text-blue-400' :
+                    'bg-yellow-500/20 text-yellow-400'
+                  }`}>
+                    {indicator.status === 'excellent' ? 'EXCELLENT' :
+                     indicator.status === 'good' ? 'GOOD' : 'NEEDS FOCUS'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <h3 className="text-xl font-semibold text-white mb-4">Efficiency Breakdown</h3>
+          <div style={{ height: '300px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Optimal Efficiency', value: 83, color: '#10B981' },
+                    { name: 'Improvement Potential', value: 17, color: '#F59E0B' }
+                  ]}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  startAngle={90}
+                  endAngle={450}
+                >
+                  <Cell fill="#10B981" />
+                  <Cell fill="#F59E0B" />
+                  <Label 
+                    value="83%" 
+                    position="center" 
+                    className="text-2xl font-bold fill-white"
+                  />
+                </Pie>
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    color: '#fff'
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </GlassCard>
+      </div>
+    </div>
+  );
+
+  const renderAnalytics = () => (
+    <div className="space-y-6">
+      {/* Analytics Header */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <GlassCard className="p-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-blue-500/20">
+              <Brain className="text-blue-400" size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-white/60">Predictive Accuracy</p>
+              <p className="text-lg font-bold text-white">94.2%</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-green-500/20">
+              <Target className="text-green-400" size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-white/60">Optimization Potential</p>
+              <p className="text-lg font-bold text-white">23,860 OMR</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-yellow-500/20">
+              <TrendingUp className="text-yellow-400" size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-white/60">Growth Rate</p>
+              <p className="text-lg font-bold text-white">+16.0%</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-purple-500/20">
+              <AlertTriangle className="text-purple-400" size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-white/60">High Consumers</p>
+              <p className="text-lg font-bold text-white">8 Units</p>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Forecasting Chart */}
+      <GlassCard className="p-6">
+        <h3 className="text-xl font-semibold text-white mb-4">3-Month Consumption Forecast</h3>
+        <div style={{ height: '400px' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={[
+              ...trendData,
+              { month: 'Jun', consumption: 118500, cost: 2962.5, forecast: true },
+              { month: 'Jul', consumption: 124200, cost: 3105, forecast: true },
+              { month: 'Aug', consumption: 129800, cost: 3245, forecast: true }
+            ]}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#fff' }} />
+              <YAxis tick={{ fontSize: 12, fill: '#fff' }} />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '8px',
+                  color: '#fff'
+                }}
+              />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="consumption" 
+                stroke="#3B82F6" 
+                strokeWidth={3}
+                dot={{ fill: '#3B82F6', r: 4 }}
+                name="Historical (kWh)"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="consumption" 
+                stroke="#F59E0B" 
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={{ fill: '#F59E0B', r: 3 }}
+                name="Forecast (kWh)"
+                connectNulls={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </GlassCard>
+
+      {/* Analytics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GlassCard className="p-6">
+          <h3 className="text-xl font-semibold text-white mb-4">Cost Optimization Analysis</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+              <span className="text-white">Energy Efficiency Upgrades</span>
+              <span className="text-green-400 font-bold">8,240 OMR/year</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+              <span className="text-white">Peak Demand Management</span>
+              <span className="text-green-400 font-bold">3,120 OMR/year</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+              <span className="text-white">Renewable Integration</span>
+              <span className="text-green-400 font-bold">12,500 OMR/year</span>
+            </div>
+            <div className="border-t border-white/20 pt-3">
+              <div className="flex justify-between items-center">
+                <span className="text-white font-semibold">Total Potential</span>
+                <span className="text-green-400 font-bold text-lg">23,860 OMR/year</span>
+              </div>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <h3 className="text-xl font-semibold text-white mb-4">High Consumer Analysis</h3>
+          <div className="space-y-3">
+            {topConsumers.slice(0, 4).map((consumer, index) => (
+              <div key={index} className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                <div>
+                  <p className="text-white font-medium">{consumer.name}</p>
+                  <p className="text-xs text-white/60">{consumer.type}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-white font-bold">{(consumer.consumption * 0.025).toLocaleString()} OMR</p>
+                  <p className="text-xs text-white/60">{consumer.consumption.toLocaleString()} kWh</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+    </div>
+  );
+
+  const renderOptimization = () => (
+    <div className="space-y-6">
+      <GlassCard className="p-6">
+        <h3 className="text-xl font-semibold text-white mb-6">Energy Optimization Roadmap</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              phase: 'Phase 1: Immediate',
+              timeline: '0-3 months',
+              items: ['Smart meter installation', 'Real-time monitoring', 'Energy audits'],
+              investment: '15,000 OMR',
+              savings: '2,400 OMR/year',
+              roi: '6.25 years'
+            },
+            {
+              phase: 'Phase 2: Short-term',
+              timeline: '3-6 months',
+              items: ['Demand response program', 'Equipment optimization', 'Staff training'],
+              investment: '25,000 OMR',
+              savings: '5,800 OMR/year',
+              roi: '4.3 years'
+            },
+            {
+              phase: 'Phase 3: Medium-term',
+              timeline: '6-12 months',
+              items: ['Solar PV installation', 'Energy storage', 'HVAC upgrades'],
+              investment: '180,000 OMR',
+              savings: '18,200 OMR/year',
+              roi: '9.9 years'
+            },
+            {
+              phase: 'Phase 4: Long-term',
+              timeline: '1-2 years',
+              items: ['Smart grid integration', 'EV charging stations', 'Building automation'],
+              investment: '320,000 OMR',
+              savings: '35,600 OMR/year',
+              roi: '9.0 years'
+            }
+          ].map((phase, index) => (
+            <GlassCard key={index} className="p-4">
+              <div className="mb-4">
+                <h4 className="font-semibold text-white mb-1">{phase.phase}</h4>
+                <p className="text-xs text-white/60">{phase.timeline}</p>
+              </div>
+              
+              <div className="space-y-2 mb-4">
+                {phase.items.map((item, itemIndex) => (
+                  <div key={itemIndex} className="flex items-center text-xs text-white/80">
+                    <CheckCircle2 className="w-3 h-3 text-green-400 mr-2" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="border-t border-white/20 pt-3 space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-white/60">Investment:</span>
+                  <span className="text-white">{phase.investment}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-white/60">Annual Savings:</span>
+                  <span className="text-green-400">{phase.savings}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-white/60">ROI Period:</span>
+                  <span className="text-blue-400">{phase.roi}</span>
+                </div>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      </GlassCard>
+
+      {/* Quick Wins */}
+      <GlassCard className="p-6">
+        <h3 className="text-xl font-semibold text-white mb-4">Quick Wins & Immediate Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-3">
+            <h4 className="font-semibold text-white">Energy Monitoring</h4>
+            <div className="space-y-2">
+              <div className="flex items-center text-sm text-white/80">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2" />
+                Install smart meters on top 5 consumers
+              </div>
+              <div className="flex items-center text-sm text-white/80">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2" />
+                Set up real-time dashboards
+              </div>
+              <div className="flex items-center text-sm text-white/80">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2" />
+                Implement automated alerts
+              </div>
+            </div>
+            <p className="text-xs text-green-400">Potential: 1,200 OMR/year savings</p>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="font-semibold text-white">Operational Efficiency</h4>
+            <div className="space-y-2">
+              <div className="flex items-center text-sm text-white/80">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2" />
+                Optimize equipment schedules
+              </div>
+              <div className="flex items-center text-sm text-white/80">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2" />
+                Regular maintenance programs
+              </div>
+              <div className="flex items-center text-sm text-white/80">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2" />
+                Staff energy awareness training
+              </div>
+            </div>
+            <p className="text-xs text-green-400">Potential: 2,800 OMR/year savings</p>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="font-semibold text-white">Peak Management</h4>
+            <div className="space-y-2">
+              <div className="flex items-center text-sm text-white/80">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2" />
+                Implement load scheduling
+              </div>
+              <div className="flex items-center text-sm text-white/80">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2" />
+                Demand response protocols
+              </div>
+              <div className="flex items-center text-sm text-white/80">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2" />
+                Critical equipment prioritization
+              </div>
+            </div>
+            <p className="text-xs text-green-400">Potential: 3,120 OMR/year savings</p>
+          </div>
+        </div>
+      </GlassCard>
+    </div>
+  );
+
   const subSections = [
     { name: 'Dashboard', id: 'Dashboard', icon: BarChart2 },
     { name: 'Performance', id: 'Performance', icon: TrendingUp },
-    { name: 'Analytics', id: 'Analytics', icon: Calculator },
+    { name: 'Analytics', id: 'Analytics', icon: Brain },
     { name: 'Optimization', id: 'Optimization', icon: Target },
   ];
 
-  // Filter options
-  const monthOptions = [
-    { value: 'All Months', label: 'All Months' },
-    { value: 'May 2025', label: 'May 2025' },
-    { value: 'Apr 2025', label: 'Apr 2025' },
-    { value: 'Mar 2025', label: 'Mar 2025' },
-  ];
-  
-  const categoryOptions = [
-    { value: 'All Categories', label: 'All Categories' },
-    { value: 'Infrastructure', label: 'Infrastructure' },
-    { value: 'Commercial', label: 'Commercial' },
-    { value: 'Residential', label: 'Residential' },
-  ];
+  const renderContent = () => {
+    switch(activeSubSection) {
+      case 'Dashboard': return renderDashboard();
+      case 'Performance': return renderPerformance();
+      case 'Analytics': return renderAnalytics();
+      case 'Optimization': return renderOptimization();
+      default: return renderDashboard();
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Sub Navigation */}
       <GlassSubNav
         sections={subSections}
         activeSection={activeSubSection}
-        setActiveSection={setActiveSubSection}
+        onSectionChange={setActiveSubSection}
       />
-
+      
       {/* Filter Bar */}
-      {activeSubSection === 'Dashboard' && (
-        <GlassFilterBar
-          filters={[
-            {
-              id: 'month',
-              label: 'Month',
-              value: selectedMonth,
-              onChange: (value) => setSelectedMonth(value),
-              options: monthOptions
-            },
-            {
-              id: 'category',
-              label: 'Category',
-              value: selectedCategory,
-              onChange: (value) => setSelectedCategory(value),
-              options: categoryOptions
-            }
-          ]}
-          actions={[
-            {
-              label: '🧠 AI Analysis',
-              onClick: handleAiAnalysis,
-              loading: isAiLoading,
-              loadingText: 'Analyzing...'
-            }
-          ]}
-        />
-      )}
+      <GlassCard className="p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <GlassSelect
+            label="Filter by Month"
+            value={selectedMonth}
+            onChange={setSelectedMonth}
+            options={monthOptions}
+          />
+          <GlassSelect
+            label="Filter by Category"
+            value={selectedCategory}
+            onChange={setSelectedCategory}
+            options={categoryOptions}
+          />
+          <GlassButton
+            onClick={() => {
+              setSelectedMonth('All Months');
+              setSelectedCategory('All Categories');
+            }}
+            className="h-[46px] flex items-center justify-center space-x-2"
+          >
+            <Filter size={16} />
+            <span>Reset Filters</span>
+          </GlassButton>
+          <GlassButton
+            onClick={handleAiAnalysis}
+            disabled={isAiLoading}
+            className="h-[46px] flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20"
+          >
+            <Sparkles size={16} />
+            <span>{isAiLoading ? 'Analyzing...' : 'AI Analysis'}</span>
+          </GlassButton>
+        </div>
+      </GlassCard>
 
-      {/* Dashboard Section */}
-      {activeSubSection === 'Dashboard' && (
-        <>
-          {/* KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <GlassSummaryCard
-              title="Total Consumption"
-              value={kpiData.totalConsumption.toLocaleString()}
-              unit="kWh"
-              icon={Zap}
-              trend="System-wide total"
-              trendColor="text-slate-500"
-              iconBgColor={COLORS.primary}
-              isLoading={isLoading}
-            />
-            <GlassSummaryCard
-              title="Total Cost"
-              value={kpiData.totalCost.toLocaleString()}
-              unit="OMR"
-              icon={DollarSign}
-              trend={`Avg ${kpiData.avgMonthlyCost} OMR/month`}
-              trendColor="text-slate-500"
-              iconBgColor={COLORS.success}
-              isLoading={isLoading}
-            />
-            <GlassSummaryCard
-              title="Peak Demand"
-              value={kpiData.peakDemand.toLocaleString()}
-              unit="kWh"
-              icon={TrendingUp}
-              trend={`${kpiData.peakMonth}`}
-              trendColor="text-orange-600"
-              iconBgColor={COLORS.warning}
-              isLoading={isLoading}
-            />
-            <GlassSummaryCard
-              title="Active Meters"
-              value={kpiData.activeMeters}
-              unit="units"
-              icon={Activity}
-              trend={`Load Factor: ${kpiData.loadFactor}%`}
-              trendColor={kpiData.loadFactor > 70 ? "text-green-600" : "text-orange-600"}
-              iconBgColor={COLORS.info}
-              isLoading={isLoading}
-            />
-          </div>
-
-          {/* Main Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <GlassChart title="Monthly Consumption Trends" subtitle="14-month performance overview">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={monthlyTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} />
-                    <YAxis yAxisId="left" tick={{ fontSize: 12, fill: '#64748b' }} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12, fill: '#64748b' }} />
-                    <Tooltip 
-                      contentStyle={{backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '12px', border: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.1)'}}
-                      formatter={(value, name) => [
-                        name === 'consumption' ? `${value.toLocaleString()} kWh` :
-                        name === 'cost' ? `${value.toLocaleString()} OMR` :
-                        name === 'efficiency' ? `${value}%` : value,
-                        name === 'consumption' ? 'Consumption' :
-                        name === 'cost' ? 'Cost' :
-                        name === 'efficiency' ? 'Efficiency' : name
-                      ]}
-                    />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="consumption" fill={COLORS.chart[0]} name="Consumption (kWh)" />
-                    <Line yAxisId="right" type="monotone" dataKey="efficiency" stroke={COLORS.success} strokeWidth={3} name="Efficiency %" />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </GlassChart>
-            </div>
-
-            <GlassChart title="Consumption by Category" subtitle="System breakdown">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryBreakdownData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                  >
-                    {categoryBreakdownData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS.chart[index % COLORS.chart.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value, name) => [`${value.toLocaleString()} kWh`, name]}
-                    contentStyle={{backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '12px', border: 'none'}}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </GlassChart>
-          </div>
-
-          {/* Top Consumers Table */}
-          <GlassChart title="Top Electricity Consumers" subtitle="Highest consumption units">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50/50">
-                  <tr>
-                    <th className="text-left p-3 font-semibold">Rank</th>
-                    <th className="text-left p-3 font-semibold">Unit Name</th>
-                    <th className="text-left p-3 font-semibold">Type</th>
-                    <th className="text-right p-3 font-semibold">Consumption (kWh)</th>
-                    <th className="text-right p-3 font-semibold">Cost (OMR)</th>
-                    <th className="text-center p-3 font-semibold">Trend</th>
-                    <th className="text-center p-3 font-semibold">Efficiency</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topConsumersData.map((consumer) => (
-                    <tr key={consumer.rank} className="border-b border-slate-100/50 hover:bg-slate-50/30">
-                      <td className="p-3">
-                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold text-white ${
-                          consumer.rank <= 3 ? 'bg-yellow-500' : 'bg-slate-400'
-                        }`}>
-                          {consumer.rank}
-                        </span>
-                      </td>
-                      <td className="p-3 font-medium">{consumer.name}</td>
-                      <td className="p-3 text-slate-600">{consumer.type}</td>
-                      <td className="p-3 text-right font-semibold">{consumer.consumption.toLocaleString()}</td>
-                      <td className="p-3 text-right font-semibold">{consumer.cost.toLocaleString()}</td>
-                      <td className="p-3 text-center">
-                        <span className={`inline-flex items-center space-x-1 ${
-                          consumer.trend === 'increasing' ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          {consumer.trend === 'increasing' ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-                          <span className="text-xs font-medium">
-                            {consumer.trend === 'increasing' ? 'Rising' : 'Stable'}
-                          </span>
-                        </span>
-                      </td>
-                      <td className="p-3 text-center">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          consumer.efficiency > 85 ? 'bg-green-100 text-green-800' :
-                          consumer.efficiency > 75 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {consumer.efficiency}%
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </GlassChart>
-        </>
-      )}
-
-      {/* Performance Section */}
-      {activeSubSection === 'Performance' && (
-        <>
-          {/* Performance KPIs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <GlassSummaryCard
-              title="Efficiency Score"
-              value={performanceMetrics.efficiencyScore}
-              unit="/100"
-              icon={Award}
-              trend={performanceMetrics.efficiencyScore > 80 ? "Excellent performance" : "Good performance"}
-              trendColor={performanceMetrics.efficiencyScore > 80 ? "text-green-600" : "text-blue-600"}
-              iconBgColor={COLORS.success}
-            />
-            <GlassSummaryCard
-              title="Load Factor"
-              value={performanceMetrics.demandStability}
-              unit="%"
-              icon={Gauge}
-              trend={performanceMetrics.demandStability > 70 ? "Optimal load distribution" : "Room for improvement"}
-              trendColor={performanceMetrics.demandStability > 70 ? "text-green-600" : "text-orange-600"}
-              iconBgColor={COLORS.info}
-            />
-            <GlassSummaryCard
-              title="Monthly Growth"
-              value={performanceMetrics.monthlyGrowth > 0 ? '+' : ''}
-              unit={`${Math.abs(performanceMetrics.monthlyGrowth)}%`}
-              icon={TrendingUp}
-              trend="Latest month vs previous"
-              trendColor={performanceMetrics.monthlyGrowth > 5 ? "text-red-600" : "text-green-600"}
-              iconBgColor={COLORS.warning}
-            />
-          </div>
-
-          {/* Performance Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <GlassChart title="Energy Efficiency Trend" subtitle="Monthly efficiency analysis">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[75, 95]} />
-                  <Tooltip />
-                  <Area 
-                    type="monotone" 
-                    dataKey="efficiency" 
-                    stroke={COLORS.success} 
-                    fill={COLORS.success}
-                    fillOpacity={0.3}
-                    name="Efficiency %"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </GlassChart>
-
-            <GlassChart title="Peak Demand Analysis" subtitle="Load pattern identification">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar 
-                    dataKey="consumption" 
-                    fill={COLORS.chart[0]}
-                    name="Consumption (kWh)"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </GlassChart>
-          </div>
-
-          {/* Performance Metrics */}
-          <GlassCard className="p-6">
-            <h3 className="text-xl font-semibold mb-6">Key Performance Indicators</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  name: 'Energy Efficiency',
-                  value: performanceMetrics.efficiencyScore,
-                  target: 85,
-                  unit: '%',
-                  status: performanceMetrics.efficiencyScore >= 85 ? 'excellent' : 'good'
-                },
-                {
-                  name: 'Load Factor',
-                  value: performanceMetrics.demandStability,
-                  target: 75,
-                  unit: '%',
-                  status: performanceMetrics.demandStability >= 75 ? 'excellent' : 'good'
-                },
-                {
-                  name: 'Cost Performance',
-                  value: performanceMetrics.costPerformanceIndex,
-                  target: 25,
-                  unit: 'OMR/MWh',
-                  status: 'excellent'
-                },
-                {
-                  name: 'System Stability',
-                  value: 92,
-                  target: 90,
-                  unit: '%',
-                  status: 'excellent'
-                },
-                {
-                  name: 'Peak Management',
-                  value: performanceMetrics.summerPeakRatio,
-                  target: 85,
-                  unit: '%',
-                  status: 'excellent'
-                },
-                {
-                  name: 'Growth Control',
-                  value: Math.abs(performanceMetrics.monthlyGrowth) < 5 ? 95 : 75,
-                  target: 90,
-                  unit: '%',
-                  status: Math.abs(performanceMetrics.monthlyGrowth) < 5 ? 'excellent' : 'good'
-                }
-              ].map((indicator, index) => (
-                <div key={index} className="bg-slate-50/50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-slate-700">{indicator.name}</h4>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      indicator.status === 'excellent' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {indicator.status === 'excellent' ? 'EXCELLENT' : 'GOOD'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl font-bold text-slate-800">
-                      {indicator.value}{indicator.unit}
-                    </span>
-                    <span className="text-sm text-slate-500">
-                      Target: {indicator.target}{indicator.unit}
-                    </span>
-                  </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-500 ${
-                        indicator.status === 'excellent' ? 'bg-green-500' : 'bg-blue-500'
-                      }`}
-                      style={{ 
-                        width: `${Math.min(100, Math.max(0, (indicator.value / (indicator.target * 1.2)) * 100))}%` 
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
-        </>
-      )}
-
-      {/* Analytics Section */}
-      {activeSubSection === 'Analytics' && (
-        <GlassCard className="p-8 text-center">
-          <Calculator size={64} className="mx-auto mb-4 text-slate-400" />
-          <h2 className="text-2xl font-bold text-slate-700 mb-4">Advanced Analytics</h2>
-          <p className="text-slate-600 mb-6">Comprehensive analytics with predictive forecasting, cost optimization, and growth analysis</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div className="bg-blue-50/50 p-6 rounded-lg">
-              <h3 className="font-semibold text-slate-700 mb-2">Predictive Forecasting</h3>
-              <p className="text-2xl font-bold text-blue-600">3-Month</p>
-              <p className="text-sm text-slate-600">AI-powered predictions</p>
-            </div>
-            <div className="bg-green-50/50 p-6 rounded-lg">
-              <h3 className="font-semibold text-slate-700 mb-2">Cost Optimization</h3>
-              <p className="text-2xl font-bold text-green-600">8,240 OMR</p>
-              <p className="text-sm text-slate-600">Potential annual savings</p>
-            </div>
-            <div className="bg-purple-50/50 p-6 rounded-lg">
-              <h3 className="font-semibold text-slate-700 mb-2">Growth Analysis</h3>
-              <p className="text-2xl font-bold text-purple-600">+16.0%</p>
-              <p className="text-sm text-slate-600">Monthly growth rate</p>
-            </div>
-          </div>
-        </GlassCard>
-      )}
-
-      {/* Optimization Section */}
-      {activeSubSection === 'Optimization' && (
-        <GlassCard className="p-8 text-center">
-          <Target size={64} className="mx-auto mb-4 text-slate-400" />
-          <h2 className="text-2xl font-bold text-slate-700 mb-4">Energy Optimization</h2>
-          <p className="text-slate-600 mb-6">Strategic energy optimization with 4-phase implementation roadmap</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-            <div className="bg-red-50/50 p-6 rounded-lg">
-              <h3 className="font-semibold text-slate-700 mb-2">Phase 1: Immediate</h3>
-              <p className="text-2xl font-bold text-red-600">0-3</p>
-              <p className="text-sm text-slate-600">Months</p>
-            </div>
-            <div className="bg-yellow-50/50 p-6 rounded-lg">
-              <h3 className="font-semibold text-slate-700 mb-2">Phase 2: Short-term</h3>
-              <p className="text-2xl font-bold text-yellow-600">3-12</p>
-              <p className="text-sm text-slate-600">Months</p>
-            </div>
-            <div className="bg-blue-50/50 p-6 rounded-lg">
-              <h3 className="font-semibold text-slate-700 mb-2">Phase 3: Medium-term</h3>
-              <p className="text-2xl font-bold text-blue-600">1-2</p>
-              <p className="text-sm text-slate-600">Years</p>
-            </div>
-            <div className="bg-green-50/50 p-6 rounded-lg">
-              <h3 className="font-semibold text-slate-700 mb-2">Phase 4: Long-term</h3>
-              <p className="text-2xl font-bold text-green-600">2-5</p>
-              <p className="text-sm text-slate-600">Years</p>
-            </div>
-          </div>
-        </GlassCard>
-      )}
+      {renderContent()}
 
       {/* AI Analysis Modal */}
-      {isAiModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"> 
-          <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-y-auto border border-white/20"> 
-            <div className="flex justify-between items-center mb-6"> 
-              <div className="flex items-center space-x-3">
-                <div className="p-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full">
-                  <Sparkles size={24} className="text-white" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-slate-800">AI Electricity Analysis</h3>
-                  <p className="text-slate-600">Comprehensive system performance insights</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setIsAiModalOpen(false)} 
-                className="p-2 rounded-full hover:bg-slate-200/50 transition-colors"
-              > 
-                <Power size={20} className="text-slate-600"/> 
-              </button> 
-            </div> 
-            
-            {isAiLoading ? ( 
-              <div className="text-center py-12"> 
-                <div className="flex justify-center items-center space-x-4 mb-6">
-                  <Zap size={48} className="animate-pulse text-purple-500" /> 
-                  <Calculator size={48} className="animate-bounce text-blue-500" />
-                  <TrendingUp size={48} className="animate-pulse text-green-500" />
-                </div>
-                <h4 className="text-xl font-semibold text-slate-700 mb-2">Analyzing Electricity System Performance</h4>
-                <p className="text-slate-600 mb-4">Processing consumption patterns, efficiency metrics, and optimization opportunities...</p>
-                <div className="w-64 mx-auto bg-slate-200 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full animate-pulse" style={{width: '75%'}}></div>
-                </div>
-              </div> 
-            ) : ( 
-              <div className="prose max-w-none">
-                <div className="bg-gradient-to-r from-slate-50 to-blue-50/50 p-6 rounded-xl font-mono text-sm whitespace-pre-wrap leading-relaxed">
-                  {aiAnalysisResult ? ( 
-                    aiAnalysisResult.split('\n').map((line, index) => {
-                      if (line.startsWith('🔋') || line.startsWith('📊') || line.startsWith('⚡') || line.startsWith('🎯') || line.startsWith('💰') || line.startsWith('🔧')) {
-                        return <h4 key={index} className="font-bold text-lg mt-6 mb-3 text-slate-800 border-l-4 border-purple-500 pl-3 bg-white/50 py-2 rounded">{line}</h4>;
-                      }
-                      if (line.startsWith('•')) {
-                        return <p key={index} className="ml-6 text-slate-700 my-1 hover:bg-white/30 p-1 rounded transition-colors">{line}</p>;
-                      }
-                      return <p key={index} className="text-slate-700 my-1">{line}</p>;
-                    })
-                  ) : ( 
-                    <p className="text-center text-slate-500">Analysis not available.</p> 
-                  )} 
-                </div>
-              </div> 
-            )} 
-            
-            <div className="mt-6 flex justify-end space-x-3"> 
-              <button 
-                onClick={() => setIsAiModalOpen(false)} 
-                className="px-6 py-2 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-lg font-medium transition-all hover:from-slate-600 hover:to-slate-700 hover:shadow-lg"
-              > 
-                Close Analysis
-              </button> 
-            </div> 
-          </div> 
-        </div>
-      )}
+      <GlassModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        title="🤖 AI Electricity System Analysis"
+      >
+        {isAiLoading ? (
+          <div className="text-center py-8">
+            <div className="flex justify-center items-center space-x-3 mb-4">
+              <Zap size={48} className="animate-pulse text-blue-400" />
+              <Brain size={48} className="animate-bounce text-purple-400" />
+            </div>
+            <p className="text-white/80">AI is analyzing electricity system data...</p>
+            <p className="text-sm text-white/60 mt-1">Processing consumption patterns, efficiency metrics, and optimization opportunities</p>
+          </div>
+        ) : (
+          <div className="text-sm text-white/80 space-y-3 whitespace-pre-wrap font-mono max-h-96 overflow-y-auto">
+            {aiAnalysisResult.split('\n').map((line, index) => {
+              if (line.startsWith('📊') || line.startsWith('⚡') || line.startsWith('📈') || line.startsWith('💡') || line.startsWith('💰') || line.startsWith('🎯')) {
+                return <h4 key={index} className="font-bold text-lg mt-4 mb-2 text-blue-400">{line}</h4>;
+              }
+              if (line.startsWith('•')) {
+                return <p key={index} className="ml-4 text-white/80">{line}</p>;
+              }
+              return <p key={index} className="text-white/80">{line}</p>;
+            })}
+          </div>
+        )}
+      </GlassModal>
     </div>
   );
 };
 
-export default ElectricitySystemModule;
+export default ElectricitySystemGlass;
