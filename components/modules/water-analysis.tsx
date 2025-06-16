@@ -33,6 +33,7 @@ import {
   CalendarDays,
   Building,
   Sparkles,
+  Tag,
   X,
   Gauge,
 } from "lucide-react"
@@ -802,6 +803,7 @@ const WaterLossAnalysis = () => {
               consumption: zone.individuals[meterName].data[monthIndex] || 0,
               cost: (zone.individuals[meterName].data[monthIndex] || 0) * 1.32,
               type: zone.individuals[meterName].type,
+              zone: zoneName.replace(/_/g, " "),
             }))
             .sort((a, b) => b.consumption - a.consumption),
         }
@@ -841,12 +843,34 @@ const WaterLossAnalysis = () => {
         .sort((a, b) => b.consumption - a.consumption)
     })()
 
+    // Get all meters across all zones and direct connections for the type filter
+    const allMeters = [
+      ...Object.entries(directConnectionData).map(([name, meter]) => ({
+        name,
+        consumption: meter.data[monthIndex] || 0,
+        cost: (meter.data[monthIndex] || 0) * 1.32,
+        type: meter.type,
+        zone: "Direct Connection",
+      })),
+      ...Object.entries(zoneData).flatMap(([zoneName, zone]) =>
+        Object.entries(zone.individuals).map(([name, meter]) => ({
+          name,
+          consumption: meter.data[monthIndex] || 0,
+          cost: (meter.data[monthIndex] || 0) * 1.32,
+          type: meter.type,
+          zone: zoneName.replace(/_/g, " "),
+        }))
+      ),
+    ].filter(meter => selectedType === "all" || meter.type === selectedType)
+      .sort((a, b) => b.consumption - a.consumption)
+
     return {
       overview: overviewTimeline,
       zones: zonesForSelectedMonth,
       types: typesForSelectedMonth,
+      allMeters,
     }
-  }, [selectedMonth, selectedZone])
+  }, [selectedMonth, selectedZone, selectedType])
 
   // --- UI COMPONENTS ---
 
@@ -1335,58 +1359,144 @@ const WaterLossAnalysis = () => {
 
   const TypeDetailsSection = () => {
     const totalConsumption = processedData.types.reduce((sum, t) => sum + t.consumption, 0)
+    
+    // Filter types if a specific type is selected for display
+    const displayTypes = selectedType === "all" 
+      ? processedData.types 
+      : processedData.types.filter(t => t.type === selectedType)
+    
+    // Get the currently selected type's name for display purposes
+    const selectedTypeName = selectedType === "all" 
+      ? "All Types" 
+      : processedData.types.find(t => t.type === selectedType)?.name || selectedType
 
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-2">
-          <ChartWrapper title="Consumption by Type" subtitle={`Breakdown for ${selectedMonth}`}>
-            <div className="space-y-3">
-              {processedData.types.map((type) => (
-                <div key={type.type}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium" style={{ color: type.color }}>
-                      {type.name}
-                    </span>
-                    <span className="text-sm font-semibold text-slate-700">{type.consumption.toLocaleString()} m³</span>
-                  </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2.5">
-                    <div
-                      className="h-2.5 rounded-full"
-                      style={{
-                        width: `${totalConsumption > 0 ? (type.consumption / totalConsumption) * 100 : 0}%`,
-                        backgroundColor: type.color,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
+      <div className="space-y-6">
+        {/* Type Filter Info Banner */}
+        {selectedType !== "all" && (
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex items-center justify-between">
+            <div className="flex items-center">
+              <Tag className="text-slate-500 mr-2" size={18} />
+              <span>Filtered by type: <strong style={{ color: getTypeColor(selectedType) }}>{selectedTypeName}</strong></span>
             </div>
-          </ChartWrapper>
+            <button 
+              onClick={() => setSelectedType("all")} 
+              className="px-3 py-1 text-xs bg-white border border-slate-300 rounded-md hover:bg-slate-100 flex items-center"
+            >
+              <X size={14} className="mr-1" />
+              Clear filter
+            </button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-2">
+            <ChartWrapper title="Consumption by Type" subtitle={`Breakdown for ${selectedMonth}`}>
+              <div className="space-y-3">
+                {displayTypes.map((type) => (
+                  <div key={type.type}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium" style={{ color: type.color }}>
+                        {type.name}
+                      </span>
+                      <span className="text-sm font-semibold text-slate-700">{type.consumption.toLocaleString()} m³</span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-2.5">
+                      <div
+                        className="h-2.5 rounded-full"
+                        style={{
+                          width: `${totalConsumption > 0 ? (type.consumption / totalConsumption) * 100 : 0}%`,
+                          backgroundColor: type.color,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ChartWrapper>
+          </div>
+          <div className="lg:col-span-3">
+            <ChartWrapper title="Type Distribution" subtitle="Percentage breakdown by category">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={displayTypes}
+                    dataKey="consumption"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    labelLine={false}
+                    label={renderCustomizedLabel}
+                  >
+                    {displayTypes.map((entry) => (
+                      <Cell key={`cell-${entry.type}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value.toLocaleString()} m³`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartWrapper>
+          </div>
         </div>
-        <div className="lg:col-span-3">
-          <ChartWrapper title="Type Distribution" subtitle="Percentage breakdown by category">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={processedData.types}
-                  dataKey="consumption"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  labelLine={false}
-                  label={renderCustomizedLabel}
-                >
-                  {processedData.types.map((entry) => (
-                    <Cell key={`cell-${entry.type}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value.toLocaleString()} m³`} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartWrapper>
-        </div>
+
+        {/* Meter Details Table */}
+        <ChartWrapper 
+          title={`Meter Details - ${selectedTypeName}`} 
+          subtitle={`Showing all meters for the selected type (${processedData.allMeters.length} meters)`}
+        >
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Meter Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Zone
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Consumption
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-200">
+                {processedData.allMeters.map((meter, index) => (
+                  <tr key={index} className="hover:bg-slate-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
+                      {meter.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                      {meter.zone}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        style={{ backgroundColor: getTypeColor(meter.type) + "20", color: getTypeColor(meter.type) }}
+                        className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                      >
+                        {meter.type.replace(/_/g, " ")}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-700">
+                      {meter.consumption.toLocaleString()} m³
+                    </td>
+                  </tr>
+                ))}
+                {processedData.allMeters.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-4 text-center text-sm text-slate-500">
+                      No meters found for the selected filter.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </ChartWrapper>
       </div>
     )
   }
