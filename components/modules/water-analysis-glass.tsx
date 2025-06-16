@@ -23,7 +23,7 @@ import {
 
 const WaterAnalysisGlass = () => {
   const [activeTab, setActiveTab] = useState('Overview');
-  const [selectedMonth, setSelectedMonth] = useState('Mar-25');
+  const [selectedMonth, setSelectedMonth] = useState('May-25'); // UPDATED: Default to May-25
   const [selectedZone, setSelectedZone] = useState('All Zones');
 
   // Tab configuration
@@ -33,20 +33,22 @@ const WaterAnalysisGlass = () => {
     { name: 'Quality', id: 'Quality', icon: CheckCircle }
   ];
 
-  // Sample data for water analysis
+  // UPDATED: Added May 2025 data from your database
   const waterFlowData = [
     { month: 'Jan', supply: 32580, consumption: 31200, loss: 1380 },
     { month: 'Feb', supply: 44043, consumption: 42100, loss: 1943 },
     { month: 'Mar', supply: 34915, consumption: 33500, loss: 1415 },
     { month: 'Apr', supply: 46039, consumption: 44200, loss: 1839 },
+    { month: 'May', supply: 58425, consumption: 56250, loss: 2175 }, // CORRECTED May-25 data
   ];
 
+  // UPDATED: Zone consumption data for May 2025
   const zoneConsumptionData = [
-    { name: 'Zone 3A', value: 4545, color: '#4E4456' },
-    { name: 'Zone 3B', value: 4277, color: '#A8D5E3' },
-    { name: 'Zone 5', value: 3082, color: '#BFA181' },
-    { name: 'Zone 8', value: 2010, color: '#0A1828' },
-    { name: 'Village Square', value: 873, color: '#5f5168' },
+    { name: 'Zone 3A', value: 8893, color: '#4E4456' }, // CORRECTED
+    { name: 'Zone 3B', value: 5177, color: '#A8D5E3' }, // CORRECTED
+    { name: 'Zone 5', value: 7511, color: '#BFA181' }, // CORRECTED
+    { name: 'Zone 8', value: 6075, color: '#0A1828' }, // CORRECTED
+    { name: 'Village Square', value: 28, color: '#5f5168' }, // CORRECTED
   ];
 
   const waterQualityData = [
@@ -57,11 +59,13 @@ const WaterAnalysisGlass = () => {
     { parameter: 'Temperature', value: 24.5, unit: '°C', status: 'normal', range: '20-30' },
   ];
 
+  // UPDATED: Added May 2025 to month options
   const monthOptions = [
     { value: 'Jan-25', label: 'January 2025' },
     { value: 'Feb-25', label: 'February 2025' },
     { value: 'Mar-25', label: 'March 2025' },
     { value: 'Apr-25', label: 'April 2025' },
+    { value: 'May-25', label: 'May 2025 (UPDATED)' }, // ADDED May-25
   ];
 
   const zoneOptions = [
@@ -72,8 +76,60 @@ const WaterAnalysisGlass = () => {
     { value: 'Zone 8', label: 'Zone 8' },
   ];
 
+  // Dynamic KPI values based on selected month
+  const getMonthlyData = () => {
+    if (selectedMonth === 'May-25') {
+      return {
+        supply: '58,425', // CORRECTED from your database
+        consumption: '56,250',
+        loss: '2,175',
+        efficiency: '96.3',
+        lossPercentage: 3.7,
+        trendVsLastMonth: 26.8,
+        stage1Loss: 989,
+        stage2Loss: 1186,
+        a2Distribution: '57,436'
+      };
+    } else if (selectedMonth === 'Apr-25') {
+      return {
+        supply: '46,039',
+        consumption: '44,200',
+        loss: '1,839',
+        efficiency: '96.0',
+        lossPercentage: 4.0,
+        trendVsLastMonth: 31.8,
+        stage1Loss: 756,
+        stage2Loss: 1083,
+        a2Distribution: '45,283'
+      };
+    }
+    // Add other months as needed
+    return {
+      supply: '46,039',
+      consumption: '44,200',
+      loss: '1,839',
+      efficiency: '96.0',
+      lossPercentage: 4.0,
+      trendVsLastMonth: 31.8,
+      stage1Loss: 756,
+      stage2Loss: 1083,
+      a2Distribution: '45,283'
+    };
+  };
+
+  const monthlyData = getMonthlyData();
+
   return (
     <div className="min-h-screen p-6 space-y-6">
+      {/* Updated Banner for May 2025 */}
+      {selectedMonth === 'May-25' && (
+        <div className="bg-gradient-to-r from-green-500/20 to-green-600/20 border border-green-500/30 rounded-2xl p-4 text-center">
+          <p className="text-green-800 font-semibold">
+            🎉 UPDATED with CORRECTED May 2025 Data from Database
+          </p>
+        </div>
+      )}
+
       {/* Sub Navigation */}
       <GlassTabNavigation 
         tabs={tabs}
@@ -114,15 +170,15 @@ const WaterAnalysisGlass = () => {
 
       {activeTab === 'Overview' && (
         <>
-          {/* KPI Cards */}
+          {/* KPI Cards - UPDATED with dynamic values */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <GlassMetricCard
               title="Total Water Supply"
-              value="46,039"
+              value={monthlyData.supply}
               unit="m³"
               icon={<Droplets size={20} />}
               trend={{
-                value: 31.8,
+                value: monthlyData.trendVsLastMonth,
                 label: 'vs last month',
                 positive: true
               }}
@@ -131,11 +187,11 @@ const WaterAnalysisGlass = () => {
             
             <GlassMetricCard
               title="Total Consumption"
-              value="44,200"
+              value={monthlyData.consumption}
               unit="m³"
               icon={<Activity size={20} />}
               trend={{
-                value: 28.5,
+                value: 27.3,
                 label: 'vs last month',
                 positive: true
               }}
@@ -144,11 +200,11 @@ const WaterAnalysisGlass = () => {
             
             <GlassMetricCard
               title="Water Loss"
-              value="1,839"
+              value={monthlyData.loss}
               unit="m³"
               icon={<AlertCircle size={20} />}
               trend={{
-                value: 4.0,
+                value: monthlyData.lossPercentage,
                 label: 'loss rate',
                 positive: false
               }}
@@ -157,11 +213,11 @@ const WaterAnalysisGlass = () => {
             
             <GlassMetricCard
               title="System Efficiency"
-              value="96.0"
+              value={monthlyData.efficiency}
               unit="%"
               icon={<CheckCircle size={20} />}
               trend={{
-                value: 0.5,
+                value: 0.3,
                 label: 'improvement',
                 positive: true
               }}
@@ -173,7 +229,7 @@ const WaterAnalysisGlass = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <GlassChartCard
               title="Water Supply & Consumption Trend"
-              subtitle="Monthly water flow analysis"
+              subtitle="Monthly water flow analysis (including May 2025)"
             >
               <ResponsiveContainer width="100%" height={350}>
                 <AreaChart data={waterFlowData}>
@@ -207,7 +263,7 @@ const WaterAnalysisGlass = () => {
 
             <GlassChartCard
               title="Zone-wise Consumption"
-              subtitle="Water usage by zone"
+              subtitle={`Water usage by zone - ${selectedMonth}`}
             >
               <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
@@ -245,13 +301,13 @@ const WaterAnalysisGlass = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GlassChartCard
             title="Water Loss Analysis"
-            subtitle="Stage-wise water loss breakdown"
+            subtitle={`Stage-wise water loss breakdown - ${selectedMonth}`}
           >
             <div className="space-y-6 mt-4">
               <div className="text-center">
                 <div className="bg-gradient-to-r from-blue-500/10 to-blue-600/10 p-6 rounded-2xl">
                   <h4 className="font-semibold text-blue-800 mb-2">A1 - Main Source</h4>
-                  <p className="text-3xl font-bold text-blue-900">46,039 m³</p>
+                  <p className="text-3xl font-bold text-blue-900">{monthlyData.supply} m³</p>
                   <p className="text-sm text-blue-700 mt-1">Total Water Supply</p>
                 </div>
               </div>
@@ -259,14 +315,16 @@ const WaterAnalysisGlass = () => {
               <div className="flex justify-center">
                 <div className="text-center">
                   <div className="text-2xl text-slate-400">↓</div>
-                  <GlassBadge variant="warning">Stage 1 Loss: 756 m³ (1.6%)</GlassBadge>
+                  <GlassBadge variant="warning">
+                    Stage 1 Loss: {monthlyData.stage1Loss} m³ ({(monthlyData.stage1Loss / parseFloat(monthlyData.supply.replace(',', '')) * 100).toFixed(1)}%)
+                  </GlassBadge>
                 </div>
               </div>
 
               <div className="text-center">
                 <div className="bg-gradient-to-r from-amber-500/10 to-amber-600/10 p-6 rounded-2xl">
                   <h4 className="font-semibold text-amber-800 mb-2">A2 - Primary Distribution</h4>
-                  <p className="text-3xl font-bold text-amber-900">45,283 m³</p>
+                  <p className="text-3xl font-bold text-amber-900">{monthlyData.a2Distribution} m³</p>
                   <p className="text-sm text-amber-700 mt-1">Zone Bulk Meters</p>
                 </div>
               </div>
@@ -274,14 +332,16 @@ const WaterAnalysisGlass = () => {
               <div className="flex justify-center">
                 <div className="text-center">
                   <div className="text-2xl text-slate-400">↓</div>
-                  <GlassBadge variant="warning">Stage 2 Loss: 1,083 m³ (2.4%)</GlassBadge>
+                  <GlassBadge variant="warning">
+                    Stage 2 Loss: {monthlyData.stage2Loss} m³ ({(monthlyData.stage2Loss / parseFloat(monthlyData.a2Distribution.replace(',', '')) * 100).toFixed(1)}%)
+                  </GlassBadge>
                 </div>
               </div>
 
               <div className="text-center">
                 <div className="bg-gradient-to-r from-green-500/10 to-green-600/10 p-6 rounded-2xl">
                   <h4 className="font-semibold text-green-800 mb-2">A3 - End Users</h4>
-                  <p className="text-3xl font-bold text-green-900">44,200 m³</p>
+                  <p className="text-3xl font-bold text-green-900">{monthlyData.consumption} m³</p>
                   <p className="text-sm text-green-700 mt-1">Total Consumption</p>
                 </div>
               </div>
@@ -298,6 +358,7 @@ const WaterAnalysisGlass = () => {
                 { month: 'Feb', loss: 4.4 },
                 { month: 'Mar', loss: 4.1 },
                 { month: 'Apr', loss: 4.0 },
+                { month: 'May', loss: 3.7 }, // ADDED May-25 loss percentage
               ]}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                 <XAxis dataKey="month" />
@@ -328,7 +389,7 @@ const WaterAnalysisGlass = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GlassChartCard
             title="Water Quality Parameters"
-            subtitle="Current quality metrics"
+            subtitle={`Current quality metrics - ${selectedMonth}`}
           >
             <div className="space-y-4 mt-4">
               {waterQualityData.map((param, index) => (
