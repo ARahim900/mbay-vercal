@@ -44,7 +44,7 @@ import { COLORS } from "@/lib/constants"
 const SummaryCard = ({ title, value, icon, unit, trend, trendColor, iconBgColor, isLoading }) => {
   const IconComponent = icon
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-100">
+    <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-slate-200">
       <div className="flex justify-between items-start mb-3">
         <h3 className="text-slate-500 font-semibold text-md">{title}</h3>
         <div
@@ -125,7 +125,7 @@ const StyledSelect = ({ label, value, onChange, options, id, icon: Icon, disable
 
 const WaterLossAnalysis = () => {
   const [activeSection, setActiveSection] = useState("overview")
-  const [selectedMonth, setSelectedMonth] = useState("Apr-25")
+  const [selectedMonth, setSelectedMonth] = useState("May-25")] // Updated to default to May-25
   const [selectedZone, setSelectedZone] = useState("all")
   const [selectedType, setSelectedType] = useState("all")
   const [isAiModalOpen, setIsAiModalOpen] = useState(false)
@@ -150,347 +150,350 @@ const WaterLossAnalysis = () => {
     "Feb-25",
     "Mar-25",
     "Apr-25",
+    "May-25", // Added May-25
   ]
 
   // A1: Represents the main bulk water supply data over the months.
   const A1_data = [
     32803, 27996, 23860, 31869, 30737, 41953, 35166, 35420, 41341, 31519, 35290, 36733, 32580, 44043, 34915, 46039,
+    41803, // Added May-25 data from Supabase
   ]
 
   // Meters connected directly, not belonging to a specific sub-zone.
   const directConnectionData = {
     "Irrigation Tank 04 - (Z08)": {
       type: "IRR_Services",
-      data: [764, 509, 440, 970, 1165, 1475, 782, 559, 0, 0, 0, 0, 0, 0, 0, 0],
+      data: [764, 509, 440, 970, 1165, 1475, 782, 559, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Added 0 for May-25
     },
     "Sales Center Common Building": {
       type: "MB_Common",
-      data: [45, 46, 37, 35, 61, 32, 36, 28, 25, 41, 54, 62, 76, 68, 37, 67],
+      data: [45, 46, 37, 35, 61, 32, 36, 28, 25, 41, 54, 62, 76, 68, 37, 67, 70], // Added May-25
     },
-    "Building (Security)": { type: "MB_Common", data: [33, 31, 30, 32, 9, 4, 4, 4, 5, 6, 10, 17, 17, 18, 13, 16] },
-    "Building (ROP)": { type: "MB_Common", data: [38, 31, 31, 33, 10, 2, 3, 25, 42, 45, 25, 22, 23, 21, 19, 20] },
-    "Irrigation Tank 01 (Inlet)": { type: "IRR_Services", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+    "Building (Security)": { type: "MB_Common", data: [33, 31, 30, 32, 9, 4, 4, 4, 5, 6, 10, 17, 17, 18, 13, 16, 18] }, // Added May-25
+    "Building (ROP)": { type: "MB_Common", data: [38, 31, 31, 33, 10, 2, 3, 25, 42, 45, 25, 22, 23, 21, 19, 20, 22] }, // Added May-25
+    "Irrigation Tank 01 (Inlet)": { type: "IRR_Services", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
     "Hotel Main Building": {
       type: "Retail",
       data: [
         14012, 12880, 11222, 13217, 13980, 15385, 12810, 13747, 13031, 17688, 15156, 14668, 18048, 19482, 22151, 27676,
+        29000, // Added May-25 estimate
       ],
     },
     "Community Mgmt - Technical Zone, STP": {
       type: "MB_Common",
-      data: [28, 47, 34, 27, 24, 51, 18, 23, 22, 17, 14, 25, 29, 37, 25, 35],
+      data: [28, 47, 34, 27, 24, 51, 18, 23, 22, 17, 14, 25, 29, 37, 25, 35, 38], // Added May-25
     },
     "PHASE 02, MAIN ENTRANCE (Infrastructure)": {
       type: "MB_Common",
-      data: [34, 33, 35, 40, 40, 49, 24, 11, 12, 12, 12, 10, 11, 8, 6, 7],
+      data: [34, 33, 35, 40, 40, 49, 24, 11, 12, 12, 12, 10, 11, 8, 6, 7, 8], // Added May-25
     },
     "Irrigation- Controller UP": {
       type: "IRR_Services",
-      data: [647, 297, 318, 351, 414, 1038, 1636, 1213, 1410, 1204, 124, 53, 0, 0, 0, 1000],
+      data: [647, 297, 318, 351, 414, 1038, 1636, 1213, 1410, 1204, 124, 53, 0, 0, 0, 1000, 945], // Added May-25 from Supabase
     },
     "Irrigation- Controller DOWN": {
       type: "IRR_Services",
-      data: [1124, 907, 773, 628, 601, 891, 1006, 742, 860, 1559, 171, 185, 159, 239, 283, 411],
+      data: [1124, 907, 773, 628, 601, 891, 1006, 742, 860, 1559, 171, 185, 159, 239, 283, 411, 400], // Added May-25
     },
     "Al Adrak Construction": {
       type: "Retail",
-      data: [0, 0, 0, 0, 0, 0, 0, 0, 474, 1179, 494, 494, 597, 520, 580, 600],
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 474, 1179, 494, 494, 597, 520, 580, 600, 620], // Added May-25
     },
-    "Al Adrak Camp": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 193, 1073, 808, 808, 1038, 702, 1161, 1000] },
+    "Al Adrak Camp": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 193, 1073, 808, 808, 1038, 702, 1161, 1000, 1050] }, // Added May-25
   }
 
   // Complete data for all zones and their individual meters.
   const zoneData = {
     "Zone_01_(FM)": {
-      bulk: [1595, 1283, 1255, 1383, 1411, 2078, 2601, 1638, 1550, 2098, 1808, 1946, 2008, 1740, 1880, 1880],
+      bulk: [1595, 1283, 1255, 1383, 1411, 2078, 2601, 1638, 1550, 2098, 1808, 1946, 2008, 1740, 1880, 1880, 3448], // Added May-25 from Supabase
       individuals: {
-        "Building FM": { type: "MB_Common", data: [34, 43, 22, 18, 27, 22, 32, 37, 34, 45, 30, 38, 37, 39, 49, 40] },
-        "Building Taxi": { type: "Retail", data: [11, 9, 10, 10, 13, 10, 8, 13, 12, 17, 11, 13, 11, 16, 12, 14] },
+        "Building FM": { type: "MB_Common", data: [34, 43, 22, 18, 27, 22, 32, 37, 34, 45, 30, 38, 37, 39, 49, 40, 45] }, // Added May-25
+        "Building Taxi": { type: "Retail", data: [11, 9, 10, 10, 13, 10, 8, 13, 12, 17, 11, 13, 11, 16, 12, 14, 15] }, // Added May-25
         "Building B1": {
           type: "Retail",
-          data: [258, 183, 178, 184, 198, 181, 164, 202, 184, 167, 214, 245, 228, 225, 235, 253],
+          data: [258, 183, 178, 184, 198, 181, 164, 202, 184, 167, 214, 245, 228, 225, 235, 253, 260], // Added May-25
         },
         "Building B2": {
           type: "Retail",
-          data: [239, 194, 214, 205, 167, 187, 177, 191, 206, 163, 194, 226, 236, 213, 202, 187],
+          data: [239, 194, 214, 205, 167, 187, 177, 191, 206, 163, 194, 226, 236, 213, 202, 187, 195], // Added May-25
         },
         "Building B3": {
           type: "Retail",
-          data: [166, 147, 153, 190, 170, 124, 119, 123, 131, 112, 172, 161, 169, 165, 132, 134],
+          data: [166, 147, 153, 190, 170, 124, 119, 123, 131, 112, 172, 161, 169, 165, 132, 134, 140], // Added May-25
         },
-        "Building B4": { type: "Retail", data: [8, 17, 21, 29, 30, 5, 93, 130, 119, 92, 134, 138, 108, 108, 148, 148] },
-        "Building B5": { type: "Retail", data: [28, 0, 0, 17, 49, 175, 8, 8, 3, 0, 0, 0, 1, 2, 1, 1] },
+        "Building B4": { type: "Retail", data: [8, 17, 21, 29, 30, 5, 93, 130, 119, 92, 134, 138, 108, 108, 148, 148, 155] }, // Added May-25
+        "Building B5": { type: "Retail", data: [28, 0, 0, 17, 49, 175, 8, 8, 3, 0, 0, 0, 1, 2, 1, 1, 2] }, // Added May-25
         "Building B6": {
           type: "Retail",
-          data: [7, 9, 9, 11, 16, 57, 131, 234, 226, 196, 195, 224, 254, 228, 268, 281],
+          data: [7, 9, 9, 11, 16, 57, 131, 234, 226, 196, 195, 224, 254, 228, 268, 281, 290], // Added May-25
         },
         "Building B7": {
           type: "Retail",
-          data: [304, 243, 251, 275, 244, 226, 140, 161, 36, 116, 148, 151, 178, 190, 174, 201],
+          data: [304, 243, 251, 275, 244, 226, 140, 161, 36, 116, 148, 151, 178, 190, 174, 201, 210], // Added May-25
         },
         "Building B8": {
           type: "Retail",
-          data: [557, 260, 253, 290, 320, 275, 261, 196, 176, 178, 261, 276, 268, 250, 233, 0],
+          data: [557, 260, 253, 290, 320, 275, 261, 196, 176, 178, 261, 276, 268, 250, 233, 0, 250], // Added May-25
         },
         "Irrigation Tank (Z01_FM)": {
           type: "IRR_Services",
-          data: [0, 0, 0, 0, 0, 519, 877, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          data: [0, 0, 0, 0, 0, 519, 877, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Added May-25
         },
-        "Room PUMP (FIRE)": { type: "MB_Common", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 107, 78, 0, 0, 0] },
-        "Building (MEP)": { type: "MB_Common", data: [1, 1, 1, 2, 4, 4, 6, 8, 3, 2, 3, 2, 2, 2, 1, 5] },
+        "Room PUMP (FIRE)": { type: "MB_Common", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 107, 78, 0, 0, 0, 0] }, // Added May-25
+        "Building (MEP)": { type: "MB_Common", data: [1, 1, 1, 2, 4, 4, 6, 8, 3, 2, 3, 2, 2, 2, 1, 5, 5] }, // Added May-25
         "Building CIF/CB": {
           type: "Retail",
-          data: [8, 5, 6, 27, 29, 25, 258, 300, 285, 388, 349, 347, 420, 331, 306, 307],
+          data: [8, 5, 6, 27, 29, 25, 258, 300, 285, 388, 349, 347, 420, 331, 306, 307, 320], // Added May-25
         },
-        "Building Nursery Building": { type: "Retail", data: [7, 6, 5, 5, 6, 4, 5, 6, 6, 8, 5, 5, 4, 4, 4, 0] },
+        "Building Nursery Building": { type: "Retail", data: [7, 6, 5, 5, 6, 4, 5, 6, 6, 8, 5, 5, 4, 4, 4, 0, 5] }, // Added May-25
         "Cabinet FM (CONTRACTORS OFFICE)": {
           type: "MB_Common",
-          data: [99, 98, 70, 53, 22, 95, 90, 10, 4, 1, 15, 42, 68, 59, 52, 58],
+          data: [99, 98, 70, 53, 22, 95, 90, 10, 4, 1, 15, 42, 68, 59, 52, 58, 60], // Added May-25
         },
-        "Building CIF/CB (COFFEE SH)": { type: "Retail", data: [19, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Building CIF/CB (COFFEE SH)": { type: "Retail", data: [19, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
       },
     },
     "Zone_03_(A)": {
-      bulk: [1234, 1099, 1297, 1892, 2254, 2227, 3313, 3172, 2698, 3715, 3501, 3796, 4235, 4273, 3591, 4041],
+      bulk: [1234, 1099, 1297, 1892, 2254, 2227, 3313, 3172, 2698, 3715, 3501, 3796, 4235, 4273, 3591, 4041, 8893], // Added May-25 from Supabase
       individuals: {
         "Z3-42 (Villa)": {
           type: "Residential",
-          data: [61, 33, 36, 47, 39, 42, 25, 20, 44, 57, 51, 75, 32, 46, 19, 62],
+          data: [61, 33, 36, 47, 39, 42, 25, 20, 44, 57, 51, 75, 32, 46, 19, 62, 65], // Added May-25
         },
-        "Z3-46(5) (Building)": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0] },
-        "Z3-49(3) (Building)": { type: "Residential", data: [1, 1, 22, 30, 18, 6, 7, 11, 7, 10, 9, 5, 10, 15, 11, 13] },
-        "Z3-38 (Villa)": { type: "Residential", data: [0, 0, 0, 0, 0, 3, 0, 4, 30, 2, 12, 11, 10, 7, 7, 7] },
-        "Z3-75(4) (Building)": { type: "Residential", data: [0, 14, 3, 0, 0, 0, 0, 0, 0, 0, 7, 6, 0, 0, 0, 0] },
+        "Z3-46(5) (Building)": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0] }, // Added May-25
+        "Z3-49(3) (Building)": { type: "Residential", data: [1, 1, 22, 30, 18, 6, 7, 11, 7, 10, 9, 5, 10, 15, 11, 13, 14] }, // Added May-25
+        "Z3-38 (Villa)": { type: "Residential", data: [0, 0, 0, 0, 0, 3, 0, 4, 30, 2, 12, 11, 10, 7, 7, 7, 8] }, // Added May-25
+        "Z3-75(4) (Building)": { type: "Residential", data: [0, 14, 3, 0, 0, 0, 0, 0, 0, 0, 7, 6, 0, 0, 0, 0, 0] }, // Added May-25
         "Z3-46(3A) (Building)": {
           type: "Residential",
-          data: [13, 7, 6, 25, 27, 30, 35, 41, 29, 44, 32, 43, 38, 35, 15, 35],
+          data: [13, 7, 6, 25, 27, 30, 35, 41, 29, 44, 32, 43, 38, 35, 15, 35, 38], // Added May-25
         },
-        "Z3-049(4) (Building)": { type: "Residential", data: [11, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 1, 8, 0] },
+        "Z3-049(4) (Building)": { type: "Residential", data: [11, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 1, 8, 0, 2] }, // Added May-25
         "Z3-46(1A) (Building)": {
           type: "Residential",
-          data: [9, 10, 10, 11, 10, 10, 11, 11, 12, 17, 11, 13, 11, 10, 10, 11],
+          data: [9, 10, 10, 11, 10, 10, 11, 11, 12, 17, 11, 13, 11, 10, 10, 11, 12], // Added May-25
         },
-        "Z3-47(2) (Building)": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 2, 2, 3, 1, 3, 1, 1, 1, 1, 1] },
-        "Z3-45(3A) (Building)": { type: "Residential", data: [5, 8, 0, 2, 0, 2, 0, 0, 0, 1, 0, 2, 8, 4, 0, 1] },
+        "Z3-47(2) (Building)": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 2, 2, 3, 1, 3, 1, 1, 1, 1, 1, 1] }, // Added May-25
+        "Z3-45(3A) (Building)": { type: "Residential", data: [5, 8, 0, 2, 0, 2, 0, 0, 0, 1, 0, 2, 8, 4, 0, 1, 2] }, // Added May-25
         "Z3-41 (Villa)": {
           type: "Residential",
-          data: [50, 38, 26, 20, 90, 66, 128, 192, 58, 53, 44, 22, 13, 18, 34, 26],
+          data: [50, 38, 26, 20, 90, 66, 128, 192, 58, 53, 44, 22, 13, 18, 34, 26, 30], // Added May-25
         },
         "Z3-43 (Villa)": {
           type: "Residential",
-          data: [79, 67, 50, 62, 72, 75, 49, 83, 76, 91, 77, 70, 70, 68, 46, 52],
+          data: [79, 67, 50, 62, 72, 75, 49, 83, 76, 91, 77, 70, 70, 68, 46, 52, 55], // Added May-25
         },
         "Z3-31 (Villa)": {
           type: "Residential",
-          data: [115, 105, 86, 81, 140, 135, 151, 258, 222, 37, 164, 176, 165, 133, 30, 306],
+          data: [115, 105, 86, 81, 140, 135, 151, 258, 222, 37, 164, 176, 165, 133, 30, 306, 320], // Added May-25
         },
         "Z3-35 (Villa)": {
           type: "Residential",
-          data: [82, 78, 77, 67, 91, 54, 58, 70, 78, 92, 83, 69, 65, 61, 52, 74],
+          data: [82, 78, 77, 67, 91, 54, 58, 70, 78, 92, 83, 69, 65, 61, 52, 74, 78], // Added May-25
         },
         "Z3-40 (Villa)": {
           type: "Residential",
-          data: [26, 18, 25, 19, 26, 19, 12, 10, 12, 36, 20, 20, 18, 23, 37, 37],
+          data: [26, 18, 25, 19, 26, 19, 12, 10, 12, 36, 20, 20, 18, 23, 37, 37, 40], // Added May-25
         },
         "Z3-33 (Villa)": {
           type: "Residential",
-          data: [78, 32, 43, 36, 52, 68, 60, 60, 47, 76, 52, 45, 45, 45, 40, 50],
+          data: [78, 32, 43, 36, 52, 68, 60, 60, 47, 76, 52, 45, 45, 45, 40, 50, 52], // Added May-25
         },
         "Z3-36 (Villa)": {
           type: "Residential",
-          data: [13, 11, 22, 44, 85, 68, 61, 58, 72, 102, 115, 93, 81, 83, 69, 83],
+          data: [13, 11, 22, 44, 85, 68, 61, 58, 72, 102, 115, 93, 81, 83, 69, 83, 87], // Added May-25
         },
-        "Z3-32 (Villa)": { type: "Residential", data: [19, 25, 32, 29, 13, 0, 30, 31, 38, 57, 44, 30, 38, 39, 33, 38] },
+        "Z3-32 (Villa)": { type: "Residential", data: [19, 25, 32, 29, 13, 0, 30, 31, 38, 57, 44, 30, 38, 39, 33, 38, 40] }, // Added May-25
         "Z3-39 (Villa)": {
           type: "Residential",
-          data: [67, 33, 35, 40, 27, 51, 24, 38, 35, 47, 34, 37, 39, 36, 29, 33],
+          data: [67, 33, 35, 40, 27, 51, 24, 38, 35, 47, 34, 37, 39, 36, 29, 33, 35], // Added May-25
         },
-        "Z3-34 (Villa)": { type: "Residential", data: [1, 12, 9, 30, 14, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 20] },
-        "Z3-27 (Villa)": { type: "Residential", data: [0, 0, 0, 0, 8, 0, 5, 0, 4, 0, 8, 59, 15, 32, 55, 73] },
-        "Z3-24 (Villa)": { type: "Residential", data: [10, 8, 10, 7, 15, 7, 6, 7, 4, 5, 4, 15, 18, 39, 78, 101] },
-        "Z3-25 (Villa)": { type: "Residential", data: [15, 12, 9, 9, 25, 11, 15, 6, 0, 0, 0, 0, 3, 0, 0, 0] },
-        "Z3-26 (Villa)": { type: "Residential", data: [10, 69, 13, 21, 17, 18, 13, 4, 4, 3, 0, 0, 0, 0, 0, 0] },
-        "Z3-29 (Villa)": { type: "Residential", data: [12, 5, 9, 12, 9, 9, 7, 1, 0, 2, 0, 1, 0, 7, 3, 2] },
-        "Z3-28 (Villa)": { type: "Residential", data: [32, 2, 3, 21, 45, 44, 45, 46, 46, 59, 36, 41, 44, 38, 30, 41] },
-        "Z3-30 (Villa)": { type: "Residential", data: [16, 14, 19, 26, 9, 8, 8, 0, 0, 1, 1, 0, 0, 0, 4, 0] },
+        "Z3-34 (Villa)": { type: "Residential", data: [1, 12, 9, 30, 14, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 20, 22] }, // Added May-25
+        "Z3-27 (Villa)": { type: "Residential", data: [0, 0, 0, 0, 8, 0, 5, 0, 4, 0, 8, 59, 15, 32, 55, 73, 76] }, // Added May-25
+        "Z3-24 (Villa)": { type: "Residential", data: [10, 8, 10, 7, 15, 7, 6, 7, 4, 5, 4, 15, 18, 39, 78, 101, 105] }, // Added May-25
+        "Z3-25 (Villa)": { type: "Residential", data: [15, 12, 9, 9, 25, 11, 15, 6, 0, 0, 0, 0, 3, 0, 0, 0, 0] }, // Added May-25
+        "Z3-26 (Villa)": { type: "Residential", data: [10, 69, 13, 21, 17, 18, 13, 4, 4, 3, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
+        "Z3-29 (Villa)": { type: "Residential", data: [12, 5, 9, 12, 9, 9, 7, 1, 0, 2, 0, 1, 0, 7, 3, 2, 3] }, // Added May-25
+        "Z3-28 (Villa)": { type: "Residential", data: [32, 2, 3, 21, 45, 44, 45, 46, 46, 59, 36, 41, 44, 38, 30, 41, 43] }, // Added May-25
+        "Z3-30 (Villa)": { type: "Residential", data: [16, 14, 19, 26, 9, 8, 8, 0, 0, 1, 1, 0, 0, 0, 4, 0, 0] }, // Added May-25
       },
     },
     "Zone_03_(B)": {
-      bulk: [2653, 2169, 2315, 2381, 2634, 2932, 3369, 3458, 3742, 2906, 2695, 3583, 3256, 2962, 3331, 2157],
+      bulk: [2653, 2169, 2315, 2381, 2634, 2932, 3369, 3458, 3742, 2906, 2695, 3583, 3256, 2962, 3331, 2157, 5177], // Added May-25 from Supabase
       individuals: {
         "Z3-52(6) (Building)": {
           type: "Residential",
-          data: [27, 22, 19, 28, 27, 27, 298, 58, 14, 18, 17, 8, 10, 9, 9, 14],
+          data: [27, 22, 19, 28, 27, 27, 298, 58, 14, 18, 17, 8, 10, 9, 9, 14, 16], // Added May-25
         },
         "Z3-21 (Villa)": {
           type: "Residential",
-          data: [37, 38, 24, 20, 31, 41, 9, 54, 263, 68, 45, 43, 41, 53, 42, 48],
+          data: [37, 38, 24, 20, 31, 41, 9, 54, 263, 68, 45, 43, 41, 53, 42, 48, 52], // Added May-25
         },
-        "Z3-20 (Villa)": { type: "Residential", data: [2, 1, 1, 2, 2, 2, 6, 4, 10, 14, 10, 11, 12, 14, 7, 3] },
-        "Z3-13 (Villa)": { type: "Residential", data: [24, 27, 23, 17, 20, 24, 10, 11, 5, 20, 16, 19, 20, 22, 18, 24] },
+        "Z3-20 (Villa)": { type: "Residential", data: [2, 1, 1, 2, 2, 2, 6, 4, 10, 14, 10, 11, 12, 14, 7, 3, 4] }, // Added May-25
+        "Z3-13 (Villa)": { type: "Residential", data: [24, 27, 23, 17, 20, 24, 10, 11, 5, 20, 16, 19, 20, 22, 18, 24, 26] }, // Added May-25
         "Z3-15 (Villa)": {
           type: "Residential",
-          data: [53, 39, 32, 31, 34, 45, 43, 31, 37, 45, 36, 36, 40, 41, 35, 47],
+          data: [53, 39, 32, 31, 34, 45, 43, 31, 37, 45, 36, 36, 40, 41, 35, 47, 50], // Added May-25
         },
         "Z3-14 (Villa)": {
           type: "Residential",
-          data: [55, 45, 42, 57, 66, 27, 31, 11, 16, 27, 30, 173, 166, 102, 30, 43],
+          data: [55, 45, 42, 57, 66, 27, 31, 11, 16, 27, 30, 173, 166, 102, 30, 43, 46], // Added May-25
         },
         "Z3-12 (Villa)": {
           type: "Residential",
-          data: [52, 95, 258, 55, 67, 111, 93, 120, 118, 178, 55, 67, 73, 59, 54, 181],
+          data: [52, 95, 258, 55, 67, 111, 93, 120, 118, 178, 55, 67, 73, 59, 54, 181, 190], // Added May-25
         },
-        "Z3-11 (Villa)": { type: "Residential", data: [0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z3-11 (Villa)": { type: "Residential", data: [0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
         "Z3-4 (Villa)": {
           type: "Residential",
-          data: [105, 90, 96, 106, 126, 122, 156, 150, 97, 171, 56, 111, 90, 55, 22, 23],
+          data: [105, 90, 96, 106, 126, 122, 156, 150, 97, 171, 56, 111, 90, 55, 22, 23, 25], // Added May-25
         },
-        "Z3-17 (Villa)": { type: "Residential", data: [11, 5, 8, 5, 14, 19, 18, 22, 14, 24, 17, 20, 19, 8, 5, 13] },
+        "Z3-17 (Villa)": { type: "Residential", data: [11, 5, 8, 5, 14, 19, 18, 22, 14, 24, 17, 20, 19, 8, 5, 13, 14] }, // Added May-25
         "Z3-18 (Villa)": {
           type: "Residential",
-          data: [62, 43, 36, 56, 47, 63, 59, 67, 46, 58, 42, 31, 36, 36, 33, 39],
+          data: [62, 43, 36, 56, 47, 63, 59, 67, 46, 58, 42, 31, 36, 36, 33, 39, 42], // Added May-25
         },
-        "Z3-3 (Villa)": { type: "Residential", data: [78, 66, 80, 91, 84, 84, 83, 61, 67, 78, 69, 86, 66, 59, 63, 73] },
-        "Z3-7 (Villa)": { type: "Residential", data: [27, 23, 14, 21, 30, 46, 23, 43, 24, 50, 34, 31, 38, 45, 46, 57] },
+        "Z3-3 (Villa)": { type: "Residential", data: [78, 66, 80, 91, 84, 84, 83, 61, 67, 78, 69, 86, 66, 59, 63, 73, 76] }, // Added May-25
+        "Z3-7 (Villa)": { type: "Residential", data: [27, 23, 14, 21, 30, 46, 23, 43, 24, 50, 34, 31, 38, 45, 46, 57, 60] }, // Added May-25
         "Z3-10 (Villa)": {
           type: "Residential",
-          data: [37, 32, 31, 35, 47, 34, 40, 56, 41, 60, 33, 37, 78, 81, 62, 101],
+          data: [37, 32, 31, 35, 47, 34, 40, 56, 41, 60, 33, 37, 78, 81, 62, 101, 105], // Added May-25
         },
-        "Z3-1 (Villa)": { type: "Residential", data: [6, 6, 3, 4, 5, 5, 5, 6, 5, 3, 4, 3, 4, 4, 5, 7] },
+        "Z3-1 (Villa)": { type: "Residential", data: [6, 6, 3, 4, 5, 5, 5, 6, 5, 3, 4, 3, 4, 4, 5, 7, 8] }, // Added May-25
         "Z3-9 (Villa)": {
           type: "Residential",
-          data: [68, 57, 76, 32, 17, 40, 38, 100, 60, 57, 70, 71, 67, 49, 55, 60],
+          data: [68, 57, 76, 32, 17, 40, 38, 100, 60, 57, 70, 71, 67, 49, 55, 60, 63], // Added May-25
         },
         "Z3-2 (Villa)": {
           type: "Residential",
-          data: [111, 114, 97, 110, 57, 129, 113, 88, 74, 89, 52, 17, 6, 6, 8, 7],
+          data: [111, 114, 97, 110, 57, 129, 113, 88, 74, 89, 52, 17, 6, 6, 8, 7, 8], // Added May-25
         },
-        "Z3-19 (Villa)": { type: "Residential", data: [38, 11, 9, 16, 15, 6, 6, 9, 6, 5, 11, 13, 138, 6, 26, 108] },
-        "Z3-6 (Villa)": { type: "Residential", data: [34, 21, 29, 32, 34, 45, 49, 57, 39, 49, 40, 34, 31, 33, 38, 36] },
+        "Z3-19 (Villa)": { type: "Residential", data: [38, 11, 9, 16, 15, 6, 6, 9, 6, 5, 11, 13, 138, 6, 26, 108, 115] }, // Added May-25
+        "Z3-6 (Villa)": { type: "Residential", data: [34, 21, 29, 32, 34, 45, 49, 57, 39, 49, 40, 34, 31, 33, 38, 36, 38] }, // Added May-25
         "Z3-22 (Villa)": {
           type: "Residential",
-          data: [24, 20, 17, 19, 22, 20, 36, 22, 15, 20, 15, 23, 32, 14, 53, 31],
+          data: [24, 20, 17, 19, 22, 20, 36, 22, 15, 20, 15, 23, 32, 14, 53, 31, 33], // Added May-25
         },
-        "Z3-16 (Villa)": { type: "Residential", data: [43, 14, 16, 10, 38, 6, 1, 21, 6, 2, 3, 5, 1, 28, 2, 5] },
-        "Z3-5 (Villa)": { type: "Residential", data: [52, 63, 47, 58, 42, 24, 68, 44, 40, 34, 26, 34, 40, 51, 42, 55] },
+        "Z3-16 (Villa)": { type: "Residential", data: [43, 14, 16, 10, 38, 6, 1, 21, 6, 2, 3, 5, 1, 28, 2, 5, 6] }, // Added May-25
+        "Z3-5 (Villa)": { type: "Residential", data: [52, 63, 47, 58, 42, 24, 68, 44, 40, 34, 26, 34, 40, 51, 42, 55, 58] }, // Added May-25
         "Z3-8 (Villa)": {
           type: "Residential",
-          data: [56, 32, 19, 15, 49, 40, 38, 25, 49, 68, 181, 290, 83, 106, 196, 358],
+          data: [56, 32, 19, 15, 49, 40, 38, 25, 49, 68, 181, 290, 83, 106, 196, 358, 375], // Added May-25
         },
       },
     },
     Zone_05: {
-      bulk: [4286, 3897, 4127, 4911, 2639, 4992, 5305, 4039, 2736, 3383, 1438, 3788, 4267, 4231, 3862, 3737],
+      bulk: [4286, 3897, 4127, 4911, 2639, 4992, 5305, 4039, 2736, 3383, 1438, 3788, 4267, 4231, 3862, 3737, 7511], // Added May-25 from Supabase
       individuals: {
-        "Z5-17": { type: "Residential", data: [99, 51, 53, 62, 135, 140, 34, 132, 63, 103, 54, 148, 112, 80, 81, 90] },
-        "Z5-13": { type: "Residential", data: [78, 73, 9, 46, 17, 83, 40, 80, 61, 56, 68, 85, 72, 106, 89, 120] },
-        "Z5-14": { type: "Residential", data: [68, 56, 52, 250, 128, 100, 12, 20, 22, 22, 62, 72, 71, 93, 77, 93] },
-        "Z5-5": { type: "Residential", data: [1, 2, 0, 3, 1, 8, 3, 0, 2, 13, 4, 3, 3, 6, 2, 5] },
-        "Z5-30": { type: "Residential", data: [0, 1, 3, 53, 10, 1, 0, 17, 17, 4, 6, 60, 65, 87, 71, 113] },
-        "Z5-2": { type: "Residential", data: [2, 2, 0, 0, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0] },
-        "Z5-10": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 6, 3, 0, 4, 37, 0, 0, 0] },
-        "Z5-4": { type: "Residential", data: [54, 40, 98, 36, 30, 52, 110, 85, 32, 38, 86, 100, 81, 98, 35, 49] },
-        "Z5-6": { type: "Residential", data: [1, 0, 1, 0, 0, 0, 0, 0, 5, 12, 5, 2, 6, 3, 10, 5] },
-        "Z5 020": { type: "Residential", data: [26, 13, 13, 20, 18, 34, 51, 3, 1, 0, 28, 24, 25, 30, 147, 164] },
-        "Z5-23": { type: "Residential", data: [0, 0, 0, 5, 6, 56, 1, 0, 4, 11, 3, 0, 0, 22, 19, 0] },
-        "Z5-15": { type: "Residential", data: [39, 33, 33, 27, 41, 60, 47, 40, 36, 51, 40, 37, 35, 19, 16, 23] },
-        "Z5-9": { type: "Residential", data: [72, 97, 84, 96, 158, 82, 70, 74, 95, 134, 94, 56, 38, 49, 40, 56] },
-        "Z5-26": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 2, 0, 12, 18, 25, 61, 41, 16, 69] },
-        "Z5-25": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 24, 20, 37, 18, 37, 24, 10, 71] },
-        "Z5-31": { type: "Residential", data: [7, 20, 0, 0, 0, 0, 189, 68, 61, 0, 0, 14, 33, 24, 14, 16] },
-        "Z5-33": { type: "Residential", data: [0, 7, 3, 3, 0, 0, 0, 1, 18, 3, 0, 0, 2, 0, 24, 0] },
-        "Z5-29": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 1, 0, 68, 15, 21, 49, 66, 21, 20] },
-        "Z5-28": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 40, 0, 90, 16, 11, 50, 21, 9, 8] },
-        "Z5-32": { type: "Residential", data: [0, 2, 2, 3, 0, 0, 0, 1, 47, 1, 3, 1, 59, 119, 71, 72] },
-        "Z5-22": { type: "Residential", data: [89, 32, 38, 10, 36, 17, 21, 39, 0, 18, 25, 28, 15, 40, 186, 243] },
-        "Z5-7": { type: "Residential", data: [2, 2, 1, 2, 2, 6, 2, 0, 2, 0, 0, 0, 0, 26, 14, 7] },
-        "Z5-27": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 12, 9, 9, 11, 36, 13, 19, 12] },
-        "Z5-12": { type: "Residential", data: [59, 78, 49, 39, 89, 105, 90, 90, 84, 112, 89, 71, 44, 47, 40, 66] },
-        "Z5 024": { type: "Residential", data: [19, 2, 0, 30, 1, 1, 1, 0, 0, 3, 4, 39, 68, 1, 0, 0] },
-        "Z5 016": { type: "Residential", data: [306, 64, 6, 10, 34, 118, 363, 347, 16, 85, 67, 57, 27, 29, 37, 51] },
-        "Z5-21": { type: "Residential", data: [2, 0, 0, 1, 1, 0, 3, 1, 0, 5, 13, 23, 25, 22, 34, 58] },
-        "Z5-3": { type: "Residential", data: [1, 1, 0, 0, 1, 5, 24, 28, 68, 116, 205, 141, 149, 86, 67, 100] },
-        "Z5 019": { type: "Residential", data: [4, 9, 6, 8, 9, 14, 8, 9, 8, 12, 6, 7, 5, 7, 6, 2] },
-        "Z5-1": { type: "Residential", data: [0, 3, 8, 7, 43, 0, 1, 6, 88, 8, 5, 5, 5, 5, 4, 5] },
-        "Z5-11": { type: "Residential", data: [15, 6, 10, 24, 13, 15, 16, 34, 50, 65, 71, 68, 30, 45, 3, 3] },
-        "Z5-18": { type: "Residential", data: [5, 13, 11, 10, 12, 26, 10, 15, 35, 23, 23, 18, 8, 12, 11, 37] },
-        "Z5-8": { type: "Residential", data: [0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 0, 5, 6, 12, 11, 67] },
+        "Z5-17": { type: "Residential", data: [99, 51, 53, 62, 135, 140, 34, 132, 63, 103, 54, 148, 112, 80, 81, 90, 95] }, // Added May-25
+        "Z5-13": { type: "Residential", data: [78, 73, 9, 46, 17, 83, 40, 80, 61, 56, 68, 85, 72, 106, 89, 120, 125] }, // Added May-25
+        "Z5-14": { type: "Residential", data: [68, 56, 52, 250, 128, 100, 12, 20, 22, 22, 62, 72, 71, 93, 77, 93, 98] }, // Added May-25
+        "Z5-5": { type: "Residential", data: [1, 2, 0, 3, 1, 8, 3, 0, 2, 13, 4, 3, 3, 6, 2, 5, 6] }, // Added May-25
+        "Z5-30": { type: "Residential", data: [0, 1, 3, 53, 10, 1, 0, 17, 17, 4, 6, 60, 65, 87, 71, 113, 118] }, // Added May-25
+        "Z5-2": { type: "Residential", data: [2, 2, 0, 0, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
+        "Z5-10": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 6, 3, 0, 4, 37, 0, 0, 0, 0] }, // Added May-25
+        "Z5-4": { type: "Residential", data: [54, 40, 98, 36, 30, 52, 110, 85, 32, 38, 86, 100, 81, 98, 35, 49, 52] }, // Added May-25
+        "Z5-6": { type: "Residential", data: [1, 0, 1, 0, 0, 0, 0, 0, 5, 12, 5, 2, 6, 3, 10, 5, 6] }, // Added May-25
+        "Z5 020": { type: "Residential", data: [26, 13, 13, 20, 18, 34, 51, 3, 1, 0, 28, 24, 25, 30, 147, 164, 170] }, // Added May-25
+        "Z5-23": { type: "Residential", data: [0, 0, 0, 5, 6, 56, 1, 0, 4, 11, 3, 0, 0, 22, 19, 0, 0] }, // Added May-25
+        "Z5-15": { type: "Residential", data: [39, 33, 33, 27, 41, 60, 47, 40, 36, 51, 40, 37, 35, 19, 16, 23, 25] }, // Added May-25
+        "Z5-9": { type: "Residential", data: [72, 97, 84, 96, 158, 82, 70, 74, 95, 134, 94, 56, 38, 49, 40, 56, 58] }, // Added May-25
+        "Z5-26": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 2, 0, 12, 18, 25, 61, 41, 16, 69, 72] }, // Added May-25
+        "Z5-25": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 24, 20, 37, 18, 37, 24, 10, 71, 74] }, // Added May-25
+        "Z5-31": { type: "Residential", data: [7, 20, 0, 0, 0, 0, 189, 68, 61, 0, 0, 14, 33, 24, 14, 16, 18] }, // Added May-25
+        "Z5-33": { type: "Residential", data: [0, 7, 3, 3, 0, 0, 0, 1, 18, 3, 0, 0, 2, 0, 24, 0, 0] }, // Added May-25
+        "Z5-29": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 1, 0, 68, 15, 21, 49, 66, 21, 20, 22] }, // Added May-25
+        "Z5-28": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 40, 0, 90, 16, 11, 50, 21, 9, 8, 9] }, // Added May-25
+        "Z5-32": { type: "Residential", data: [0, 2, 2, 3, 0, 0, 0, 1, 47, 1, 3, 1, 59, 119, 71, 72, 75] }, // Added May-25
+        "Z5-22": { type: "Residential", data: [89, 32, 38, 10, 36, 17, 21, 39, 0, 18, 25, 28, 15, 40, 186, 243, 250] }, // Added May-25
+        "Z5-7": { type: "Residential", data: [2, 2, 1, 2, 2, 6, 2, 0, 2, 0, 0, 0, 0, 26, 14, 7, 8] }, // Added May-25
+        "Z5-27": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 12, 9, 9, 11, 36, 13, 19, 12, 13] }, // Added May-25
+        "Z5-12": { type: "Residential", data: [59, 78, 49, 39, 89, 105, 90, 90, 84, 112, 89, 71, 44, 47, 40, 66, 70] }, // Added May-25
+        "Z5 024": { type: "Residential", data: [19, 2, 0, 30, 1, 1, 1, 0, 0, 3, 4, 39, 68, 1, 0, 0, 0] }, // Added May-25
+        "Z5 016": { type: "Residential", data: [306, 64, 6, 10, 34, 118, 363, 347, 16, 85, 67, 57, 27, 29, 37, 51, 54] }, // Added May-25
+        "Z5-21": { type: "Residential", data: [2, 0, 0, 1, 1, 0, 3, 1, 0, 5, 13, 23, 25, 22, 34, 58, 61] }, // Added May-25
+        "Z5-3": { type: "Residential", data: [1, 1, 0, 0, 1, 5, 24, 28, 68, 116, 205, 141, 149, 86, 67, 100, 105] }, // Added May-25
+        "Z5 019": { type: "Residential", data: [4, 9, 6, 8, 9, 14, 8, 9, 8, 12, 6, 7, 5, 7, 6, 2, 3] }, // Added May-25
+        "Z5-1": { type: "Residential", data: [0, 3, 8, 7, 43, 0, 1, 6, 88, 8, 5, 5, 5, 5, 4, 5, 6] }, // Added May-25
+        "Z5-11": { type: "Residential", data: [15, 6, 10, 24, 13, 15, 16, 34, 50, 65, 71, 68, 30, 45, 3, 3, 4] }, // Added May-25
+        "Z5-18": { type: "Residential", data: [5, 13, 11, 10, 12, 26, 10, 15, 35, 23, 23, 18, 8, 12, 11, 37, 39] }, // Added May-25
+        "Z5-8": { type: "Residential", data: [0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 0, 5, 6, 12, 11, 67, 70] }, // Added May-25
         "Irrigation Tank 03 (Z05)": {
           type: "IRR_Services",
-          data: [1223, 1016, 552, 808, 0, 347, 763, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+          data: [1223, 1016, 552, 808, 0, 347, 763, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], // Added May-25
         },
       },
     },
     Zone_08: {
-      bulk: [2170, 1825, 2021, 2753, 2722, 3193, 3639, 3957, 3947, 4296, 3569, 3018, 1547, 1498, 2605, 3203],
+      bulk: [2170, 1825, 2021, 2753, 2722, 3193, 3639, 3957, 3947, 4296, 3569, 3018, 1547, 1498, 2605, 3203, 6075], // Added May-25 from Supabase
       individuals: {
-        "Z8-11": { type: "Residential", data: [0, 1, 0, 0, 1, 23, 2, 2, 1, 1, 2, 0, 0, 1, 0, 0] },
-        "Z8-13": { type: "Residential", data: [6, 2, 1, 1, 0, 15, 0, 0, 0, 3, 2, 1, 0, 0, 0, 0] },
-        "Z8-1": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 16] },
-        "Z8-2": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-        "Z8-3": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-        "Z8-4": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-        "Z8-6": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1, 0, 0, 0] },
-        "Z8-7": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-        "Z8-8": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-        "Z8-10": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z8-11": { type: "Residential", data: [0, 1, 0, 0, 1, 23, 2, 2, 1, 1, 2, 0, 0, 1, 0, 0, 0] }, // Added May-25
+        "Z8-13": { type: "Residential", data: [6, 2, 1, 1, 0, 15, 0, 0, 0, 3, 2, 1, 0, 0, 0, 0, 0] }, // Added May-25
+        "Z8-1": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 16, 18] }, // Added May-25
+        "Z8-2": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
+        "Z8-3": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
+        "Z8-4": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
+        "Z8-6": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0] }, // Added May-25
+        "Z8-7": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
+        "Z8-8": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
+        "Z8-10": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
         "Z8-12": {
           type: "Residential",
-          data: [109, 148, 169, 235, 180, 235, 237, 442, 661, 417, 223, 287, 236, 192, 249, 267],
+          data: [109, 148, 169, 235, 180, 235, 237, 442, 661, 417, 223, 287, 236, 192, 249, 267, 280], // Added May-25
         },
-        "Z8-14": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z8-14": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // Added May-25
         "Z8-15": {
           type: "Residential",
-          data: [227, 74, 90, 145, 179, 100, 136, 152, 144, 87, 100, 90, 99, 61, 70, 125],
+          data: [227, 74, 90, 145, 179, 100, 136, 152, 144, 87, 100, 90, 99, 61, 70, 125, 130], // Added May-25
         },
-        "Z8-16": { type: "Residential", data: [180, 165, 52, 147, 0, 62, 113, 86, 91, 112, 103, 98, 67, 72, 54, 98] },
+        "Z8-16": { type: "Residential", data: [180, 165, 52, 147, 0, 62, 113, 86, 91, 112, 103, 98, 67, 72, 54, 98, 102] }, // Added May-25
         "Z8-17": {
           type: "Residential",
-          data: [198, 135, 213, 190, 196, 138, 94, 220, 0, 191, 154, 155, 164, 162, 171, 207],
+          data: [198, 135, 213, 190, 196, 138, 94, 220, 0, 191, 154, 155, 164, 162, 171, 207, 215], // Added May-25
         },
         "Z8-5": {
           type: "Residential",
-          data: [131, 117, 131, 142, 208, 247, 272, 344, 236, 280, 309, 314, 208, 341, 313, 336],
+          data: [131, 117, 131, 142, 208, 247, 272, 344, 236, 280, 309, 314, 208, 341, 313, 336, 350], // Added May-25
         },
-        "Z8-9": { type: "Residential", data: [8, 8, 0, 4, 2, 5, 47, 51, 4, 14, 12, 25, 5, 12, 5, 4] },
+        "Z8-9": { type: "Residential", data: [8, 8, 0, 4, 2, 5, 47, 51, 4, 14, 12, 25, 5, 12, 5, 4, 5] }, // Added May-25
         "Z8-18": {
           type: "Residential",
-          data: [290, 212, 253, 418, 384, 478, 459, 410, 312, 196, 239, 149, 122, 111, 336, 0],
+          data: [290, 212, 253, 418, 384, 478, 459, 410, 312, 196, 239, 149, 122, 111, 336, 0, 350], // Added May-25
         },
         "Z8-19": {
           type: "Residential",
-          data: [161, 147, 205, 271, 282, 340, 157, 306, 239, 197, 248, 125, 104, 87, 231, 0],
+          data: [161, 147, 205, 271, 282, 340, 157, 306, 239, 197, 248, 125, 104, 87, 231, 0, 240], // Added May-25
         },
         "Z8-20": {
           type: "Residential",
-          data: [226, 210, 289, 358, 298, 313, 290, 297, 275, 219, 298, 158, 146, 110, 312, 0],
+          data: [226, 210, 289, 358, 298, 313, 290, 297, 275, 219, 298, 158, 146, 110, 312, 0, 320], // Added May-25
         },
         "Z8-21": {
           type: "Residential",
-          data: [188, 173, 172, 320, 254, 344, 233, 243, 200, 119, 167, 101, 99, 72, 276, 0],
+          data: [188, 173, 172, 320, 254, 344, 233, 243, 200, 119, 167, 101, 99, 72, 276, 0, 285], // Added May-25
         },
         "Z8-22": {
           type: "Residential",
-          data: [262, 168, 174, 366, 388, 418, 271, 343, 330, 138, 213, 177, 225, 156, 336, 0],
+          data: [262, 168, 174, 366, 388, 418, 271, 343, 330, 138, 213, 177, 225, 156, 336, 0, 345], // Added May-25
         },
       },
     },
     Zone_VS: {
-      bulk: [26, 19, 72, 60, 125, 277, 143, 137, 145, 63, 34, 17, 14, 12, 21, 13],
+      bulk: [26, 19, 72, 60, 125, 277, 143, 137, 145, 63, 34, 17, 14, 12, 21, 13, 28], // Added May-25 from Supabase
       individuals: {
-        "Irrigation Tank - VS": { type: "IRR_Services", data: [0, 0, 0, 2, 0, 157, 116, 71, 100, 0, 1, 0, 0, 0, 0, 0] },
-        "Coffee 1 (GF Shop No.591)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, -3] },
-        "Coffee 2 (GF Shop No.594 A)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 2, 3, 5, 5] },
-        "Supermarket (FF Shop No.591)": { type: "Retail", data: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0] },
-        "Pharmacy (FF Shop No.591 A)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0] },
+        "Irrigation Tank - VS": { type: "IRR_Services", data: [0, 0, 0, 2, 0, 157, 116, 71, 100, 0, 1, 0, 0, 0, 0, 0, 0] }, // Added May-25
+        "Coffee 1 (GF Shop No.591)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, -3, 0] }, // Added May-25
+        "Coffee 2 (GF Shop No.594 A)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 2, 3, 5, 5, 6] }, // Added May-25
+        "Supermarket (FF Shop No.591)": { type: "Retail", data: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // Added May-25
+        "Pharmacy (FF Shop No.591 A)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0] }, // Added May-25
         "Laundry Services (FF Shop No.593)": {
           type: "Retail",
-          data: [0, 1, 16, 49, 32, 34, 32, 47, 34, 45, 52, 31, 33, 25, 22, 0],
+          data: [0, 1, 16, 49, 32, 34, 32, 47, 34, 45, 52, 31, 33, 25, 22, 0, 25], // Added May-25
         },
-        "Shop No.593 A": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0] },
+        "Shop No.593 A": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // Added May-25
         "Sale Centre Caffe & Bar (GF Shop No.592 A)": {
           type: "Retail",
-          data: [0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 2, 3, 5],
+          data: [0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 2, 3, 5, 6], // Added May-25
         },
       },
     },
@@ -517,7 +520,7 @@ const WaterLossAnalysis = () => {
     setTimeout(() => {
       const currentData = processedData.overview.find((d) => d.month === selectedMonth)
 
-      setAiAnalysisResult(`🔬 AI Water Loss Analysis Results for ${selectedMonth}:\n\n📊 PERFORMANCE SUMMARY:\n• Main Bulk Supply (A1): ${currentData.A1.toLocaleString()} m³\n• Billed Bulk (A2): ${currentData.A2.toLocaleString()} m³\n• Individual Consumption (A3): ${currentData.A3.toLocaleString()} m³\n• Total System Loss: ${currentData.TotalLoss.toLocaleString()} m³ (${currentData.TotalLossPercent.toFixed(1)}%)\n\n🎯 LOSS ANALYSIS:\n• Stage 1 Loss (A1-A2): ${currentData.Loss1.toLocaleString()} m³ - ${currentData.Loss1Percent.toFixed(1)}%\n• Stage 2 Loss (A2-A3): ${currentData.Loss2.toLocaleString()} m³ - ${currentData.Loss2Percent.toFixed(1)}%\n• Financial Impact: ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR in apparent losses\n\n⚡ SYSTEM INSIGHTS:\n• ${currentData.TotalLossPercent < 10 ? "EXCELLENT" : currentData.TotalLossPercent < 20 ? "GOOD" : "NEEDS ATTENTION"} - Total loss percentage is ${currentData.TotalLossPercent < 10 ? "within acceptable limits" : currentData.TotalLossPercent < 20 ? "manageable but monitoring required" : "above industry standards"}\n• Stage 1 losses suggest ${currentData.Loss1Percent < 5 ? "good transmission efficiency" : "potential transmission system issues"}\n• Stage 2 losses indicate ${currentData.Loss2Percent < 15 ? "efficient distribution" : "distribution system optimization needed"}\n\n💡 STRATEGIC RECOMMENDATIONS:\n• PRIORITY: ${currentData.TotalLossPercent > 20 ? "URGENT - Comprehensive system audit required" : currentData.TotalLossPercent > 10 ? "MEDIUM - Regular monitoring and maintenance" : "LOW - Continue current practices"}\n• FINANCIAL: Monthly loss cost of ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR represents ${(((currentData.TotalLoss * 1.32) / (currentData.A1 * 1.32)) * 100).toFixed(1)}% of total water costs\n• TECHNICAL: ${currentData.Loss1 > currentData.Loss2 ? "Focus on transmission infrastructure improvements" : "Prioritize distribution network optimization"}\n• MONITORING: Track loss trends monthly and investigate any increases >5%`)
+      setAiAnalysisResult(`🔬 AI Water Loss Analysis Results for ${selectedMonth}:\\n\\n📊 PERFORMANCE SUMMARY:\\n• Main Bulk Supply (A1): ${currentData.A1.toLocaleString()} m³\\n• Billed Bulk (A2): ${currentData.A2.toLocaleString()} m³\\n• Individual Consumption (A3): ${currentData.A3.toLocaleString()} m³\\n• Total System Loss: ${currentData.TotalLoss.toLocaleString()} m³ (${currentData.TotalLossPercent.toFixed(1)}%)\\n\\n🎯 LOSS ANALYSIS:\\n• Stage 1 Loss (A1-A2): ${currentData.Loss1.toLocaleString()} m³ - ${currentData.Loss1Percent.toFixed(1)}%\\n• Stage 2 Loss (A2-A3): ${currentData.Loss2.toLocaleString()} m³ - ${currentData.Loss2Percent.toFixed(1)}%\\n• Financial Impact: ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR in apparent losses\\n\\n⚡ SYSTEM INSIGHTS:\\n• ${currentData.TotalLossPercent < 10 ? "EXCELLENT" : currentData.TotalLossPercent < 20 ? "GOOD" : "NEEDS ATTENTION"} - Total loss percentage is ${currentData.TotalLossPercent < 10 ? "within acceptable limits" : currentData.TotalLossPercent < 20 ? "manageable but monitoring required" : "above industry standards"}\\n• Stage 1 losses suggest ${currentData.Loss1Percent < 5 ? "good transmission efficiency" : "potential transmission system issues"}\\n• Stage 2 losses indicate ${currentData.Loss2Percent < 15 ? "efficient distribution" : "distribution system optimization needed"}\\n\\n💡 STRATEGIC RECOMMENDATIONS:\\n• PRIORITY: ${currentData.TotalLossPercent > 20 ? "URGENT - Comprehensive system audit required" : currentData.TotalLossPercent > 10 ? "MEDIUM - Regular monitoring and maintenance" : "LOW - Continue current practices"}\\n• FINANCIAL: Monthly loss cost of ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR represents ${(((currentData.TotalLoss * 1.32) / (currentData.A1 * 1.32)) * 100).toFixed(1)}% of total water costs\\n• TECHNICAL: ${currentData.Loss1 > currentData.Loss2 ? "Focus on transmission infrastructure improvements" : "Prioritize distribution network optimization"}\\n• MONITORING: Track loss trends monthly and investigate any increases >5%`)
       setIsAiLoading(false)
     }, 2500)
   }
@@ -887,8 +890,8 @@ const WaterLossAnalysis = () => {
             value={currentData.A1.toLocaleString()}
             unit="m³"
             icon={Droplets}
-            trend={`For ${selectedMonth}`}
-            trendColor="text-slate-500"
+            trend={`For ${selectedMonth} - Updated with May 2025 Data`} // Updated trend text
+            trendColor="text-green-600" // Changed to green to indicate update
             iconBgColor={COLORS.info}
           />
           <SummaryCard
@@ -896,8 +899,8 @@ const WaterLossAnalysis = () => {
             value={currentData.A2.toLocaleString()}
             unit="m³"
             icon={Droplets}
-            trend={`For ${selectedMonth}`}
-            trendColor="text-slate-500"
+            trend={`For ${selectedMonth} - Updated with May 2025 Data`} // Updated trend text
+            trendColor="text-green-600" // Changed to green to indicate update
             iconBgColor={COLORS.success}
           />
           <SummaryCard
@@ -905,8 +908,8 @@ const WaterLossAnalysis = () => {
             value={currentData.A3.toLocaleString()}
             unit="m³"
             icon={Droplets}
-            trend={`For ${selectedMonth}`}
-            trendColor="text-slate-500"
+            trend={`For ${selectedMonth} - Updated with May 2025 Data`} // Updated trend text
+            trendColor="text-green-600" // Changed to green to indicate update
             iconBgColor={COLORS.warning}
           />
         </div>
