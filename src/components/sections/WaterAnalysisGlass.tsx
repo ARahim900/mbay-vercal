@@ -18,34 +18,34 @@ interface WaterAnalysisModuleProps {
   isCollapsed?: boolean; // Pass this from parent component that knows sidebar state
 }
 
-// Water System Data - Updated with May 2025 data from Supabase
+// Water System Data - Updated with CORRECTED May 2025 data from user database
 const waterRawDataString = `Meter Label,Acct #,Zone,Type,Parent Meter,Label,Jan-24,Feb-24,Mar-24,Apr-24,May-24,Jun-24,Jul-24,Aug-24,Sep-24,Oct-24,Nov-24,Dec-24,Jan-25,Feb-25,Mar-25,Apr-25,May-25
-Main Bulk (NAMA),C43659,Main Bulk,Main BULK,NAMA,L1,32803,27996,23860,31869,30737,41953,35166,35420,41341,31519,35290,36733,32580,44043,34915,46039,41803
-Village Square (Zone Bulk),4300335,Zone_VS,Zone Bulk,Main Bulk (NAMA),L2,819,698,595,795,768,1049,879,885,1033,787,882,918,814,1101,873,1150,28
-ZONE 8 (Bulk Zone 8),4300342,Zone_08,Zone Bulk,Main Bulk (NAMA),L2,1891,1612,1373,1835,1769,2411,2023,2030,2371,1811,2026,2106,1871,2533,2010,2649,6075
-ZONE 3A (Bulk Zone 3A),4300343,Zone_03_(A),Zone Bulk,Main Bulk (NAMA),L2,4267,3637,3098,4142,3996,5449,4571,4592,5360,4095,4583,4765,4232,5728,4545,5994,8893
-ZONE 3B (Bulk Zone 3B),4300344,Zone_03_(B),Zone Bulk,Main Bulk (NAMA),L2,4016,3423,2916,3898,3760,5127,4299,4319,5044,3854,4313,4483,3982,5389,4277,5639,5177
-ZONE 5 (Bulk Zone 5),4300345,Zone_05,Zone Bulk,Main Bulk (NAMA),L2,2893,2465,2100,2807,2708,3693,3099,3114,3635,2777,3107,3230,2869,3883,3082,4063,7511
-ZONE FM ( BULK ZONE FM ),4300346,Zone_01_(FM),Zone Bulk,Main Bulk (NAMA),L2,1513,1289,1098,1468,1416,1931,1620,1627,1900,1452,1624,1688,1499,2029,1611,2124,3448
-Hotel Main Building,4300334,MAIN,Retail,Main Bulk (NAMA),DC,8451,7199,6131,8201,7908,10784,9046,9085,10609,8105,9070,9427,8370,11327,8996,11857,12458
-Al Adrak Construction,4300347,Zone_01_(FM),Retail,Main Bulk (NAMA),DC,1134,966,823,1100,1061,1447,1214,1220,1425,1089,1218,1266,1124,1521,1207,1591,1356
-Community Mgmt - Technical Zone STP,4300336,Zone_01_(FM),MB_Common,Main Bulk (NAMA),DC,2567,2187,1863,2492,2404,3280,2752,2764,3227,2467,2760,2870,2548,3447,2736,3606,3185
-Irrigation Tank 01 (Inlet),4300323,Zone_01_(FM),IRR_Servies,Main Bulk (NAMA),DC,3456,2943,2507,3353,3233,4409,3698,3715,4337,3314,3709,3856,3424,4633,3679,4849,4287
-PHASE 02 MAIN ENTRANCE,4300338,Zone_01_(FM),MB_Common,Main Bulk (NAMA),DC,567,483,412,551,531,724,607,610,713,545,610,634,563,762,605,798,684
-Irrigation Tank 04 Z08,4300294,Zone_08,IRR_Servies,Main Bulk (NAMA),DC,2789,2376,2024,2707,2609,3559,2985,2999,3502,2677,2995,3114,2765,3742,2970,3915,3456
-Sales Center Common Building,4300295,MAIN,MB_Common,Main Bulk (NAMA),DC,1234,1051,896,1199,1156,1576,1322,1328,1551,1186,1326,1379,1225,1657,1316,1734,1567
-Building (Security),4300297,MAIN,MB_Common,Main Bulk (NAMA),DC,678,577,492,658,635,866,726,730,852,651,728,757,673,910,723,953,856
-Building (ROP),4300299,MAIN,MB_Common,Main Bulk (NAMA),DC,456,388,331,442,427,582,488,490,573,438,490,509,452,612,486,641,578
-Irrigation Controller UP,4300340,Zone_03_(A),IRR_Servies,Main Bulk (NAMA),DC,1876,1598,1361,1821,1756,2395,2009,2018,2357,1801,2016,2095,1860,2518,1999,2635,2387
-Irrigation Controller DOWN,4300341,Zone_03_(B),IRR_Servies,Main Bulk (NAMA),DC,1567,1335,1137,1521,1467,2001,1679,1686,1969,1505,1684,1751,1555,2104,1671,2202,1989
-Al Adrak Camp,4300348,Zone_01_(FM),Retail,Main Bulk (NAMA),DC,789,672,573,766,739,1008,846,849,992,758,848,882,783,1059,841,1108,945
-Z5-17,4300001,Zone_05,Residential (Villa),ZONE 5 (Bulk Zone 5),L3,99,51,53,62,135,140,34,132,63,103,54,148,112,80,81,90,95
-Z3-42 (Villa),4300002,Zone_03_(A),Residential (Villa),ZONE 3A (BULK ZONE 3A),L3,61,33,36,47,39,42,25,20,44,57,51,75,32,46,19,62,58
+Main Bulk (NAMA),C43659,Main Bulk,Main BULK,NAMA,L1,32803,27996,23860,31869,30737,41953,35166,35420,41341,31519,35290,36733,32580,44043,34915,46039,58425
+Village Square (Zone Bulk),4300335,Zone_VS,Zone Bulk,Main Bulk (NAMA),L2,26,19,72,60,125,277,143,137,145,63,34,17,14,12,21,13,28
+ZONE 8 (Bulk Zone 8),4300342,Zone_08,Zone Bulk,Main Bulk (NAMA),L2,2170,1825,2021,2753,2722,3193,3639,3957,3947,4296,3569,3018,1547,1498,2605,3203,6075
+ZONE 3A (Bulk Zone 3A),4300343,Zone_03_(A),Zone Bulk,Main Bulk (NAMA),L2,1234,1099,1297,1892,2254,2227,3313,3172,2698,3715,3501,3796,4235,4273,3591,4041,8893
+ZONE 3B (Bulk Zone 3B),4300344,Zone_03_(B),Zone Bulk,Main Bulk (NAMA),L2,2653,2169,2315,2381,2634,2932,3369,3458,3742,2906,2695,3583,3256,2962,3331,2157,5177
+ZONE 5 (Bulk Zone 5),4300345,Zone_05,Zone Bulk,Main Bulk (NAMA),L2,4286,3897,4127,4911,2639,4992,5305,4039,2736,3383,1438,3788,4267,4231,3862,3737,7511
+ZONE FM ( BULK ZONE FM ),4300346,Zone_01_(FM),Zone Bulk,Main Bulk (NAMA),L2,1595,1283,1255,1383,1411,2078,2601,1638,1550,2098,1808,1946,2008,1740,1880,1880,3448
+Hotel Main Building,4300334,Direct Connection,Retail,Main Bulk (NAMA),DC,14012,12880,11222,13217,13980,15385,12810,13747,13031,17688,15156,14668,18048,19482,22151,27676,26963
+Al Adrak Construction,4300347,Direct Connection,Retail,Main Bulk (NAMA),DC,0,0,0,0,0,0,0,0,474,1179,494,494,597,520,580,600,2657
+Community Mgmt - Technical Zone STP,4300336,Direct Connection,MB_Common,Main Bulk (NAMA),DC,28,47,34,27,24,51,18,23,22,17,14,25,29,37,25,35,29
+Irrigation Tank 01 (Inlet),4300323,Direct Connection,IRR_Servies,Main Bulk (NAMA),DC,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2
+PHASE 02 MAIN ENTRANCE,4300338,Direct Connection,MB_Common,Main Bulk (NAMA),DC,34,33,35,40,40,49,24,11,12,12,12,10,11,8,6,7,6
+Irrigation Tank 04 Z08,4300294,Direct Connection,IRR_Servies,Main Bulk (NAMA),DC,764,509,440,970,1165,1475,782,559,0,0,0,0,0,0,0,0,0
+Sales Center Common Building,4300295,Direct Connection,MB_Common,Main Bulk (NAMA),DC,45,46,37,35,61,32,36,28,25,41,54,62,76,68,37,67,63
+Building (Security),4300297,Direct Connection,MB_Common,Main Bulk (NAMA),DC,33,31,30,32,9,4,4,4,5,6,10,17,17,18,13,16,16
+Building (ROP),4300299,Direct Connection,MB_Common,Main Bulk (NAMA),DC,38,31,31,33,10,2,3,25,42,45,25,22,23,21,19,20,20
+Irrigation Controller UP,4300340,Direct Connection,IRR_Servies,Main Bulk (NAMA),DC,647,297,318,351,414,1038,1636,1213,1410,1204,124,53,0,0,0,1000,33
+Irrigation Controller DOWN,4300341,Direct Connection,IRR_Servies,Main Bulk (NAMA),DC,1124,907,773,628,601,891,1006,742,860,1559,171,185,159,239,283,411,910
+Al Adrak Camp,4300348,Direct Connection,Retail,Main Bulk (NAMA),DC,0,0,0,0,0,0,0,0,193,1073,808,808,1038,702,1161,1000,1228
+Z5-17,4300001,Zone_05,Residential (Villa),ZONE 5 (Bulk Zone 5),L3,99,51,53,62,135,140,34,132,63,103,54,148,112,80,81,90,58
+Z3-42 (Villa),4300002,Zone_03_(A),Residential (Villa),ZONE 3A (BULK ZONE 3A),L3,61,33,36,47,39,42,25,20,44,57,51,75,32,46,19,62,87
 Z3-52 Villa,4300103,Zone_03_(A),Residential (Villa),ZONE 3A (BULK ZONE 3A),L3,67,64,66,70,75,72,73,76,70,73,72,69,73,70,75,78,82
 Z3-58(3B) Building,4300104,Zone_03_(B),Residential (Apart),ZONE 3B (BULK ZONE 3B),L3,156,150,153,164,175,168,171,178,164,171,169,162,171,164,175,181,189
-Z8-12 Villa,4300108,Zone_08,Residential (Villa),ZONE 8 (Bulk Zone 8),L3,134,128,131,140,149,143,146,152,140,146,144,138,146,140,149,154,158
-Coffee Shop VS,4300110,Village_Square,Retail,Village Square (Zone Bulk),L3,234,225,230,246,263,252,257,268,246,257,254,244,257,246,263,271,284
-Supermarket VS,4300111,Village_Square,Retail,Village Square (Zone Bulk),L3,456,438,447,478,511,491,501,523,478,501,494,474,501,478,511,527,542`.trim();
+Z8-12 Villa,4300196,Zone_08,Residential (Villa),BULK ZONE 8,L3,109,148,169,235,180,235,237,442,661,417,223,287,236,192,249,267,295
+Coffee Shop VS,4300327,Zone_VS,Retail,Village Square (Zone Bulk),L3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,-3,0
+Supermarket VS,4300330,Zone_VS,Retail,Village Square (Zone Bulk),L3,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0`.trim();
 
 // Parse water system data
 const parseWaterSystemData = (rawData: string) => {
@@ -94,7 +94,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
     return () => clearTimeout(timer);
   }, []);
 
-  // Water System Calculations with enhanced May 2025 data
+  // Water System Calculations with CORRECTED May 2025 data
   const waterCalculations = useMemo(() => {
     const monthData = selectedWaterMonth;
     
@@ -140,7 +140,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
     };
   }, [selectedWaterMonth]);
 
-  // Monthly trend data with May 2025 included
+  // Monthly trend data with CORRECTED May 2025 included
   const monthlyWaterTrendData = useMemo(() => {
     return waterMonthsAvailable.map(month => {
       const mainBulkMeter = waterSystemData.find(item => item.label === 'L1');
@@ -165,7 +165,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
     });
   }, []);
 
-  // Zone-wise consumption data for May 2025
+  // Zone-wise consumption data for CORRECTED May 2025
   const zoneConsumptionData = useMemo(() => {
     const monthData = selectedWaterMonth;
     const zoneData: { [key: string]: { zone: string; consumption: number; type: string } } = {};
@@ -186,7 +186,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
     })).sort((a, b) => b.consumption - a.consumption);
   }, [selectedWaterMonth]);
 
-  // Top water consumers with updated May 2025 data
+  // Top water consumers with updated CORRECTED May 2025 data
   const topWaterConsumers = useMemo(() => {
     const monthData = selectedWaterMonth;
     return waterSystemData
@@ -202,7 +202,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
       .slice(0, 10);
   }, [selectedWaterMonth]);
 
-  // Filter options including May 2025
+  // Filter options including CORRECTED May 2025
   const monthOptions = waterMonthsAvailable.map(m => ({ value: m, label: m }));
   const distinctZones = [...new Set(waterSystemData.map(item => item.zone))].filter(zone => zone !== 'MAIN');
   const zoneOptions = [{ value: 'All Zones', label: 'All Zones' }, ...distinctZones.map(z => ({ value: z, label: z }))];
@@ -216,7 +216,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
         </h1>
         <p className="text-gray-600">Real Hierarchical Water Distribution Monitoring & Loss Analysis</p>
         <div className="mt-2 text-sm text-green-600 font-medium">
-          ✨ Updated with May 2025 Data - Real-time Supabase Integration
+          ✨ UPDATED with CORRECTED May 2025 Data - Accurate Database Values
         </div>
       </div>
 
@@ -328,7 +328,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GlassChart 
           title="Water System Hierarchy Trends" 
-          subtitle="A1, A2, A3 flow analysis by month (incl. May 2025)"
+          subtitle="A1, A2, A3 flow analysis by month (incl. CORRECTED May 2025)"
           height={400}
         >
           <LineChart data={monthlyWaterTrendData}>
@@ -376,7 +376,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
 
         <GlassChart 
           title="Zone Bulk Consumption" 
-          subtitle={`Zone distribution for ${selectedWaterMonth} - Live Data`}
+          subtitle={`Zone distribution for ${selectedWaterMonth} - CORRECTED Data`}
           height={400}
         >
           <BarChart data={zoneConsumptionData}>
@@ -399,7 +399,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
       {/* Top Consumers Table */}
       <GlassChart 
         title="Top Water Consumers" 
-        subtitle={`Highest consumption for ${selectedWaterMonth} - Updated from Supabase`}
+        subtitle={`Highest consumption for ${selectedWaterMonth} - CORRECTED Database Values`}
         height={400}
       >
         <div className="overflow-x-auto">
@@ -448,7 +448,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
       {/* System Performance Indicators */}
       <GlassChart 
         title="System Performance Indicators" 
-        subtitle="Key operational metrics with May 2025 data"
+        subtitle="Key operational metrics with CORRECTED May 2025 data"
         height={300}
       >
         <div className="space-y-4 mt-4">
