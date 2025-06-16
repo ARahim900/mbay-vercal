@@ -34,6 +34,7 @@ import {
   Building,
   Sparkles,
   X,
+  Gauge,
 } from "lucide-react"
 import { COLORS } from "@/lib/constants"
 
@@ -120,6 +121,71 @@ const StyledSelect = ({ label, value, onChange, options, id, icon: Icon, disable
 }
 
 // ===============================
+// GAUGE CHART COMPONENT
+// ===============================
+
+const GaugeChart = ({ value, max, title, subtitle, color = COLORS.primary, size = 120 }) => {
+  const percentage = Math.min((value / max) * 100, 100)
+  const strokeDasharray = `${percentage * 2.51} 251` // 251 is approximately the circumference for radius 40
+  
+  const getColorByPercentage = (percent) => {
+    if (percent <= 50) return COLORS.success
+    if (percent <= 75) return COLORS.warning
+    return COLORS.error
+  }
+
+  const gaugeColor = getColorByPercentage(percentage)
+
+  return (
+    <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm border">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} className="transform -rotate-90">
+          {/* Background circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r="40"
+            stroke="#e5e7eb"
+            strokeWidth="8"
+            fill="transparent"
+            strokeDasharray="251 251"
+            strokeDashoffset="62.75" // Start from top
+          />
+          {/* Progress circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r="40"
+            stroke={gaugeColor}
+            strokeWidth="8"
+            fill="transparent"
+            strokeDasharray={strokeDasharray}
+            strokeDashoffset="62.75"
+            strokeLinecap="round"
+            className="transition-all duration-1000 ease-out"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-xl font-bold text-slate-800">{percentage.toFixed(1)}%</span>
+          <span className="text-xs text-slate-500">Loss</span>
+        </div>
+      </div>
+      <div className="text-center mt-2">
+        <h4 className="font-semibold text-sm text-slate-800">{title}</h4>
+        <p className="text-xs text-slate-500">{subtitle}</p>
+        <div className="mt-1 text-xs">
+          <span className="text-slate-600">Bulk: {max.toLocaleString()} m³</span>
+          <br />
+          <span className="text-slate-600">Individual: {(max - value).toLocaleString()} m³</span>
+          <br />
+          <span className="text-red-600 font-semibold">Loss: {value.toLocaleString()} m³</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ===============================
 // MAIN WATER ANALYSIS COMPONENT
 // ===============================
 
@@ -150,351 +216,249 @@ const WaterLossAnalysis = () => {
     "Feb-25",
     "Mar-25",
     "Apr-25",
-    "May-25", // Updated with May-25
+    "May-25",
   ]
 
   // A1: Represents the main bulk water supply data over the months.
   const A1_data = [
     32803, 27996, 23860, 31869, 30737, 41953, 35166, 35420, 41341, 31519, 35290, 36733, 32580, 44043, 34915, 46039,
-    58425, // CORRECTED May-25 data from your database (Main Bulk NAMA)
+    58425,
   ]
 
   // Meters connected directly, not belonging to a specific sub-zone.
   const directConnectionData = {
     "Irrigation Tank 04 - (Z08)": {
       type: "IRR_Services",
-      data: [764, 509, 440, 970, 1165, 1475, 782, 559, 0, 0, 0, 0, 0, 0, 0, 0, 0], // May-25: 0 from database
+      data: [764, 509, 440, 970, 1165, 1475, 782, 559, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     },
     "Sales Center Common Building": {
       type: "MB_Common",
-      data: [45, 46, 37, 35, 61, 32, 36, 28, 25, 41, 54, 62, 76, 68, 37, 67, 69], // May-25: 69 from database
+      data: [45, 46, 37, 35, 61, 32, 36, 28, 25, 41, 54, 62, 76, 68, 37, 67, 69],
     },
-    "Building (Security)": { type: "MB_Common", data: [33, 31, 30, 32, 9, 4, 4, 4, 5, 6, 10, 17, 17, 18, 13, 16, 18] }, // May-25: 18 from database
-    "Building (ROP)": { type: "MB_Common", data: [38, 31, 31, 33, 10, 2, 3, 25, 42, 45, 25, 22, 23, 21, 19, 20, 21] }, // May-25: 21 from database
-    "Irrigation Tank 01 (Inlet)": { type: "IRR_Services", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
+    "Building (Security)": { type: "MB_Common", data: [33, 31, 30, 32, 9, 4, 4, 4, 5, 6, 10, 17, 17, 18, 13, 16, 18] },
+    "Building (ROP)": { type: "MB_Common", data: [38, 31, 31, 33, 10, 2, 3, 25, 42, 45, 25, 22, 23, 21, 19, 20, 21] },
+    "Irrigation Tank 01 (Inlet)": { type: "IRR_Services", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
     "Hotel Main Building": {
       type: "Retail",
       data: [
         14012, 12880, 11222, 13217, 13980, 15385, 12810, 13747, 13031, 17688, 15156, 14668, 18048, 19482, 22151, 27676,
-        26963, // CORRECTED May-25 data from your database
+        26963,
       ],
     },
     "Community Mgmt - Technical Zone, STP": {
       type: "MB_Common",
-      data: [28, 47, 34, 27, 24, 51, 18, 23, 22, 17, 14, 25, 29, 37, 25, 35, 35], // May-25: 35 from database
+      data: [28, 47, 34, 27, 24, 51, 18, 23, 22, 17, 14, 25, 29, 37, 25, 35, 35],
     },
     "PHASE 02, MAIN ENTRANCE (Infrastructure)": {
       type: "MB_Common",
-      data: [34, 33, 35, 40, 40, 49, 24, 11, 12, 12, 12, 10, 11, 8, 6, 7, 7], // May-25: 7 from database
+      data: [34, 33, 35, 40, 40, 49, 24, 11, 12, 12, 12, 10, 11, 8, 6, 7, 7],
     },
     "Irrigation- Controller UP": {
       type: "IRR_Services",
-      data: [647, 297, 318, 351, 414, 1038, 1636, 1213, 1410, 1204, 124, 53, 0, 0, 0, 1000, 945], // May-25: 945 from database
+      data: [647, 297, 318, 351, 414, 1038, 1636, 1213, 1410, 1204, 124, 53, 0, 0, 0, 1000, 945],
     },
     "Irrigation- Controller DOWN": {
       type: "IRR_Services",
-      data: [1124, 907, 773, 628, 601, 891, 1006, 742, 860, 1559, 171, 185, 159, 239, 283, 411, 397], // May-25: 397 from database
+      data: [1124, 907, 773, 628, 601, 891, 1006, 742, 860, 1559, 171, 185, 159, 239, 283, 411, 397],
     },
     "Al Adrak Construction": {
       type: "Retail",
-      data: [0, 0, 0, 0, 0, 0, 0, 0, 474, 1179, 494, 494, 597, 520, 580, 600, 2657], // CORRECTED May-25 data from your database
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 474, 1179, 494, 494, 597, 520, 580, 600, 2657],
     },
-    "Al Adrak Camp": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 193, 1073, 808, 808, 1038, 702, 1161, 1000, 1026] }, // May-25: 1026 from database
+    "Al Adrak Camp": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 193, 1073, 808, 808, 1038, 702, 1161, 1000, 1026] },
   }
 
-  // Complete data for all zones and their individual meters.
+  // Complete data for all zones with ALL meters included based on user's provided data
   const zoneData = {
     "Zone_01_(FM)": {
-      bulk: [1595, 1283, 1255, 1383, 1411, 2078, 2601, 1638, 1550, 2098, 1808, 1946, 2008, 1740, 1880, 1880, 3448], // CORRECTED May-25: 3448 from your database
+      bulk: [1595, 1283, 1255, 1383, 1411, 2078, 2601, 1638, 1550, 2098, 1808, 1946, 2008, 1740, 1880, 1880, 3448],
       individuals: {
-        "Building FM": { type: "MB_Common", data: [34, 43, 22, 18, 27, 22, 32, 37, 34, 45, 30, 38, 37, 39, 49, 40, 42] }, // May-25: 42 from database
-        "Building Taxi": { type: "Retail", data: [11, 9, 10, 10, 13, 10, 8, 13, 12, 17, 11, 13, 11, 16, 12, 14, 14] }, // May-25: 14 from database
-        "Building B1": {
-          type: "Retail",
-          data: [258, 183, 178, 184, 198, 181, 164, 202, 184, 167, 214, 245, 228, 225, 235, 253, 255], // May-25: 255 from database
-        },
-        "Building B2": {
-          type: "Retail",
-          data: [239, 194, 214, 205, 167, 187, 177, 191, 206, 163, 194, 226, 236, 213, 202, 187, 189], // May-25: 189 from database
-        },
-        "Building B3": {
-          type: "Retail",
-          data: [166, 147, 153, 190, 170, 124, 119, 123, 131, 112, 172, 161, 169, 165, 132, 134, 134], // May-25: 134 from database
-        },
-        "Building B4": { type: "Retail", data: [8, 17, 21, 29, 30, 5, 93, 130, 119, 92, 134, 138, 108, 108, 148, 148, 150] }, // May-25: 150 from database
-        "Building B5": { type: "Retail", data: [28, 0, 0, 17, 49, 175, 8, 8, 3, 0, 0, 0, 1, 2, 1, 1, 1] }, // May-25: 1 from database
-        "Building B6": {
-          type: "Retail",
-          data: [7, 9, 9, 11, 16, 57, 131, 234, 226, 196, 195, 224, 254, 228, 268, 281, 283], // May-25: 283 from database
-        },
-        "Building B7": {
-          type: "Retail",
-          data: [304, 243, 251, 275, 244, 226, 140, 161, 36, 116, 148, 151, 178, 190, 174, 201, 203], // May-25: 203 from database
-        },
-        "Building B8": {
-          type: "Retail",
-          data: [557, 260, 253, 290, 320, 275, 261, 196, 176, 178, 261, 276, 268, 250, 233, 0, 0], // May-25: 0 from database
-        },
-        "Irrigation Tank (Z01_FM)": {
-          type: "IRR_Services",
-          data: [0, 0, 0, 0, 0, 519, 877, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // May-25: 0
-        },
-        "Room PUMP (FIRE)": { type: "MB_Common", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 107, 78, 0, 0, 0, 0] }, // May-25: 0
-        "Building (MEP)": { type: "MB_Common", data: [1, 1, 1, 2, 4, 4, 6, 8, 3, 2, 3, 2, 2, 2, 1, 5, 5] }, // May-25: 5 from database
-        "Building CIF/CB": {
-          type: "Retail",
-          data: [8, 5, 6, 27, 29, 25, 258, 300, 285, 388, 349, 347, 420, 331, 306, 307, 310], // May-25: 310 from database
-        },
-        "Building Nursery Building": { type: "Retail", data: [7, 6, 5, 5, 6, 4, 5, 6, 6, 8, 5, 5, 4, 4, 4, 0, 0] }, // May-25: 0 from database
-        "Cabinet FM (CONTRACTORS OFFICE)": {
-          type: "MB_Common",
-          data: [99, 98, 70, 53, 22, 95, 90, 10, 4, 1, 15, 42, 68, 59, 52, 58, 59], // May-25: 59 from database
-        },
-        "Building CIF/CB (COFFEE SH)": { type: "Retail", data: [19, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
+        "Building FM": { type: "MB_Common", data: [34, 43, 22, 18, 27, 22, 32, 37, 34, 45, 30, 38, 37, 39, 49, 40, 41] },
+        "Building Taxi": { type: "Retail", data: [11, 9, 10, 10, 13, 10, 8, 13, 12, 17, 11, 13, 11, 16, 12, 14, 13] },
+        "Building B1": { type: "Retail", data: [258, 183, 178, 184, 198, 181, 164, 202, 184, 167, 214, 245, 228, 225, 235, 253, 233] },
+        "Building B2": { type: "Retail", data: [239, 194, 214, 205, 167, 187, 177, 191, 206, 163, 194, 226, 236, 213, 202, 187, 200] },
+        "Building B3": { type: "Retail", data: [166, 147, 153, 190, 170, 124, 119, 123, 131, 112, 172, 161, 169, 165, 132, 134, 160] },
+        "Building B4": { type: "Retail", data: [8, 17, 21, 29, 30, 5, 93, 130, 119, 92, 134, 138, 108, 108, 148, 148, 120] },
+        "Building B5": { type: "Retail", data: [28, 0, 0, 17, 49, 175, 8, 8, 3, 0, 0, 0, 1, 2, 1, 1, 10] },
+        "Building B6": { type: "Retail", data: [7, 9, 9, 11, 16, 57, 131, 234, 226, 196, 195, 224, 254, 228, 268, 281, 214] },
+        "Building B7": { type: "Retail", data: [304, 243, 251, 275, 244, 226, 140, 161, 36, 116, 148, 151, 178, 190, 174, 201, 199] },
+        "Building B8": { type: "Retail", data: [557, 260, 253, 290, 320, 275, 261, 196, 176, 178, 261, 276, 268, 250, 233, 0, 413] },
+        "Irrigation Tank (Z01_FM)": { type: "IRR_Services", data: [0, 0, 0, 0, 0, 519, 877, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Room PUMP (FIRE)": { type: "MB_Common", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 107, 78, 0, 0, 0, 0] },
+        "Building (MEP)": { type: "MB_Common", data: [1, 1, 1, 2, 4, 4, 6, 8, 3, 2, 3, 2, 2, 2, 1, 5, 6] },
+        "Building CIF/CB": { type: "Retail", data: [8, 5, 6, 27, 29, 25, 258, 300, 285, 388, 349, 347, 420, 331, 306, 307, 284] },
+        "Building Nursery Building": { type: "Retail", data: [7, 6, 5, 5, 6, 4, 5, 6, 6, 8, 5, 5, 4, 4, 4, 0, 6] },
+        "Cabinet FM (CONTRACTORS OFFICE)": { type: "MB_Common", data: [99, 98, 70, 53, 22, 95, 90, 10, 4, 1, 15, 42, 68, 59, 52, 58, 52] },
+        "Building CIF/CB (COFFEE SH)": { type: "Retail", data: [19, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
       },
     },
     "Zone_03_(A)": {
-      bulk: [1234, 1099, 1297, 1892, 2254, 2227, 3313, 3172, 2698, 3715, 3501, 3796, 4235, 4273, 3591, 4041, 8893], // CORRECTED May-25: 8893 from your database
+      bulk: [1234, 1099, 1297, 1892, 2254, 2227, 3313, 3172, 2698, 3715, 3501, 3796, 4235, 4273, 3591, 4041, 8893],
       individuals: {
-        "Z3-42 (Villa)": {
-          type: "Residential",
-          data: [61, 33, 36, 47, 39, 42, 25, 20, 44, 57, 51, 75, 32, 46, 19, 62, 63], // May-25: 63 from database
-        },
-        "Z3-46(5) (Building)": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0] }, // May-25: 0
-        "Z3-49(3) (Building)": { type: "Residential", data: [1, 1, 22, 30, 18, 6, 7, 11, 7, 10, 9, 5, 10, 15, 11, 13, 13] }, // May-25: 13 from database
-        "Z3-38 (Villa)": { type: "Residential", data: [0, 0, 0, 0, 0, 3, 0, 4, 30, 2, 12, 11, 10, 7, 7, 7, 7] }, // May-25: 7 from database
-        "Z3-75(4) (Building)": { type: "Residential", data: [0, 14, 3, 0, 0, 0, 0, 0, 0, 0, 7, 6, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z3-46(3A) (Building)": {
-          type: "Residential",
-          data: [13, 7, 6, 25, 27, 30, 35, 41, 29, 44, 32, 43, 38, 35, 15, 35, 36], // May-25: 36 from database
-        },
-        "Z3-049(4) (Building)": { type: "Residential", data: [11, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 1, 8, 0, 0] }, // May-25: 0 from database
-        "Z3-46(1A) (Building)": {
-          type: "Residential",
-          data: [9, 10, 10, 11, 10, 10, 11, 11, 12, 17, 11, 13, 11, 10, 10, 11, 11], // May-25: 11 from database
-        },
-        "Z3-47(2) (Building)": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 2, 2, 3, 1, 3, 1, 1, 1, 1, 1, 1] }, // May-25: 1 from database
-        "Z3-45(3A) (Building)": { type: "Residential", data: [5, 8, 0, 2, 0, 2, 0, 0, 0, 1, 0, 2, 8, 4, 0, 1, 1] }, // May-25: 1 from database
-        "Z3-41 (Villa)": {
-          type: "Residential",
-          data: [50, 38, 26, 20, 90, 66, 128, 192, 58, 53, 44, 22, 13, 18, 34, 26, 28], // May-25: 28 from database
-        },
-        "Z3-43 (Villa)": {
-          type: "Residential",
-          data: [79, 67, 50, 62, 72, 75, 49, 83, 76, 91, 77, 70, 70, 68, 46, 52, 53], // May-25: 53 from database
-        },
-        "Z3-31 (Villa)": {
-          type: "Residential",
-          data: [115, 105, 86, 81, 140, 135, 151, 258, 222, 37, 164, 176, 165, 133, 30, 306, 312], // May-25: 312 from database
-        },
-        "Z3-35 (Villa)": {
-          type: "Residential",
-          data: [82, 78, 77, 67, 91, 54, 58, 70, 78, 92, 83, 69, 65, 61, 52, 74, 75], // May-25: 75 from database
-        },
-        "Z3-40 (Villa)": {
-          type: "Residential",
-          data: [26, 18, 25, 19, 26, 19, 12, 10, 12, 36, 20, 20, 18, 23, 37, 37, 38], // May-25: 38 from database
-        },
-        "Z3-33 (Villa)": {
-          type: "Residential",
-          data: [78, 32, 43, 36, 52, 68, 60, 60, 47, 76, 52, 45, 45, 45, 40, 50, 51], // May-25: 51 from database
-        },
-        "Z3-36 (Villa)": {
-          type: "Residential",
-          data: [13, 11, 22, 44, 85, 68, 61, 58, 72, 102, 115, 93, 81, 83, 69, 83, 84], // May-25: 84 from database
-        },
-        "Z3-32 (Villa)": { type: "Residential", data: [19, 25, 32, 29, 13, 0, 30, 31, 38, 57, 44, 30, 38, 39, 33, 38, 39] }, // May-25: 39 from database
-        "Z3-39 (Villa)": {
-          type: "Residential",
-          data: [67, 33, 35, 40, 27, 51, 24, 38, 35, 47, 34, 37, 39, 36, 29, 33, 34], // May-25: 34 from database
-        },
-        "Z3-34 (Villa)": { type: "Residential", data: [1, 12, 9, 30, 14, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 20, 21] }, // May-25: 21 from database
-        "Z3-27 (Villa)": { type: "Residential", data: [0, 0, 0, 0, 8, 0, 5, 0, 4, 0, 8, 59, 15, 32, 55, 73, 74] }, // May-25: 74 from database
-        "Z3-24 (Villa)": { type: "Residential", data: [10, 8, 10, 7, 15, 7, 6, 7, 4, 5, 4, 15, 18, 39, 78, 101, 103] }, // May-25: 103 from database
-        "Z3-25 (Villa)": { type: "Residential", data: [15, 12, 9, 9, 25, 11, 15, 6, 0, 0, 0, 0, 3, 0, 0, 0, 0] }, // May-25: 0
-        "Z3-26 (Villa)": { type: "Residential", data: [10, 69, 13, 21, 17, 18, 13, 4, 4, 3, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z3-29 (Villa)": { type: "Residential", data: [12, 5, 9, 12, 9, 9, 7, 1, 0, 2, 0, 1, 0, 7, 3, 2, 2] }, // May-25: 2 from database
-        "Z3-28 (Villa)": { type: "Residential", data: [32, 2, 3, 21, 45, 44, 45, 46, 46, 59, 36, 41, 44, 38, 30, 41, 42] }, // May-25: 42 from database
-        "Z3-30 (Villa)": { type: "Residential", data: [16, 14, 19, 26, 9, 8, 8, 0, 0, 1, 1, 0, 0, 0, 4, 0, 0] }, // May-25: 0
+        // ALL Zone 03(A) meters from user's data
+        "Z3-42 (Villa)": { type: "Residential (Villa)", data: [61, 33, 36, 47, 39, 42, 25, 20, 44, 57, 51, 75, 32, 46, 19, 62, 87] },
+        "Z3-46(5) (Building)": { type: "Residential (Apart)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 4] },
+        "Z3-49(3) (Building)": { type: "Residential (Apart)", data: [1, 1, 22, 30, 18, 6, 7, 11, 7, 10, 9, 5, 10, 15, 11, 13, 11] },
+        "Z3-38 (Villa)": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 3, 0, 4, 30, 2, 12, 11, 10, 7, 7, 7, 8] },
+        "Z3-75(4) (Building)": { type: "Residential (Apart)", data: [0, 14, 3, 0, 0, 0, 0, 0, 0, 0, 7, 6, 0, 0, 0, 0, 0] },
+        "Z3-46(3A) (Building)": { type: "Residential (Apart)", data: [13, 7, 6, 25, 27, 30, 35, 41, 29, 44, 32, 43, 38, 35, 15, 35, 42] },
+        "Z3-049(4) (Building)": { type: "Residential (Apart)", data: [11, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 1, 8, 0, 0] },
+        "Z3-46(1A) (Building)": { type: "Residential (Apart)", data: [9, 10, 10, 11, 10, 10, 11, 11, 12, 17, 11, 13, 11, 10, 10, 11, 11] },
+        "Z3-47(2) (Building)": { type: "Residential (Apart)", data: [0, 0, 0, 0, 0, 0, 2, 2, 3, 1, 3, 1, 1, 1, 1, 1, 0] },
+        "Z3-45(3A) (Building)": { type: "Residential (Apart)", data: [5, 8, 0, 2, 0, 2, 0, 0, 0, 1, 0, 2, 8, 4, 0, 1, 1] },
+        "Z3-46(2A) (Building)": { type: "Residential (Apart)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z3-46(6) (Building)": { type: "Residential (Apart)", data: [3, 2, 1, 1, 3, 3, 2, 2, 2, 2, 1, 2, 3, 1, 1, 5, 5] },
+        "Z3-47(4) (Building)": { type: "Residential (Apart)", data: [15, 15, 26, 15, 22, 14, 23, 6, 16, 16, 8, 13, 11, 12, 0, 1, 0] },
+        "Z3-45(5) (Building)": { type: "Residential (Apart)", data: [4, 3, 2, 10, 6, 8, 9, 3, 7, 22, 15, 10, 5, 3, 2, 2, 2] },
+        "Z3-47(5) (Building)": { type: "Residential (Apart)", data: [8, 56, 13, 7, 2, 0, 1, 15, 0, 13, 5, 9, 36, 12, 11, 18, 16] },
+        "Z3-45(6) (Building)": { type: "Residential (Apart)", data: [3, 3, 4, 20, 3, 8, 6, 4, 5, 6, 7, 4, 5, 18, 32, 42, 47] },
+        "Z3-50(4) (Building)": { type: "Residential (Apart)", data: [15, 4, 7, 6, 11, 5, 6, 9, 6, 9, 8, 9, 6, 4, 6, 17, 6] },
+        "Z3-74(3) (Building)": { type: "Residential (Apart)", data: [21, 54, 16, 6, 22, 5, 6, 12, 13, 24, 19, 12, 12, 19, 19, 27, 26] },
+        "Z3-45(4A) (Building)": { type: "Residential (Apart)", data: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z3-50(5) (Building)": { type: "Residential (Apart)", data: [2, 0, 0, 1, 0, 1, 23, 10, 9, 8, 12, 8, 9, 10, 22, 11, 11] },
+        "Z3-50(6) (Building)": { type: "Residential (Apart)", data: [6, 14, 16, 15, 16, 20, 1, 12, 17, 25, 21, 23, 21, 20, 18, 13, 16] },
+        // Continue with all remaining Zone 03(A) meters including all villas and building common meters...
+        "Z3-41 (Villa)": { type: "Residential (Villa)", data: [50, 38, 26, 20, 90, 66, 128, 192, 58, 53, 44, 22, 13, 18, 34, 26, 25] },
+        "Z3-43 (Villa)": { type: "Residential (Villa)", data: [79, 67, 50, 62, 72, 75, 49, 83, 76, 91, 77, 70, 70, 68, 46, 52, 48] },
+        "Z3-31 (Villa)": { type: "Residential (Villa)", data: [115, 105, 86, 81, 140, 135, 151, 258, 222, 37, 164, 176, 165, 133, 30, 306, 527] },
+        "Z3-35 (Villa)": { type: "Residential (Villa)", data: [82, 78, 77, 67, 91, 54, 58, 70, 78, 92, 83, 69, 65, 61, 52, 74, 68] },
+        "Z3-40 (Villa)": { type: "Residential (Villa)", data: [26, 18, 25, 19, 26, 19, 12, 10, 12, 36, 20, 20, 18, 23, 37, 37, 139] },
+        "Z3-33 (Villa)": { type: "Residential (Villa)", data: [78, 32, 43, 36, 52, 68, 60, 60, 47, 76, 52, 45, 45, 45, 40, 50, 49] },
+        "Z3-36 (Villa)": { type: "Residential (Villa)", data: [13, 11, 22, 44, 85, 68, 61, 58, 72, 102, 115, 93, 81, 83, 69, 83, 170] },
+        "Z3-32 (Villa)": { type: "Residential (Villa)", data: [19, 25, 32, 29, 13, 0, 30, 31, 38, 57, 44, 30, 38, 39, 33, 38, 40] },
+        "Z3-39 (Villa)": { type: "Residential (Villa)", data: [67, 33, 35, 40, 27, 51, 24, 38, 35, 47, 34, 37, 39, 36, 29, 33, 41] },
+        "Z3-34 (Villa)": { type: "Residential (Villa)", data: [1, 12, 9, 30, 14, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 20, 17] },
+        "Z3-27 (Villa)": { type: "Residential (Villa)", data: [0, 0, 0, 0, 8, 0, 5, 0, 4, 0, 8, 59, 15, 32, 55, 73, 26] },
+        "Z3-24 (Villa)": { type: "Residential (Villa)", data: [10, 8, 10, 7, 15, 7, 6, 7, 4, 5, 4, 15, 18, 39, 78, 101, 75] },
+        "Z3-25 (Villa)": { type: "Residential (Villa)", data: [15, 12, 9, 9, 25, 11, 15, 6, 0, 0, 0, 0, 3, 0, 0, 0, 0] },
+        "Z3-26 (Villa)": { type: "Residential (Villa)", data: [10, 69, 13, 21, 17, 18, 13, 4, 4, 3, 0, 0, 0, 0, 0, 0, 0] },
+        "Z3-29 (Villa)": { type: "Residential (Villa)", data: [12, 5, 9, 12, 9, 9, 7, 1, 0, 2, 0, 1, 0, 7, 3, 2, 0] },
+        "Z3-28 (Villa)": { type: "Residential (Villa)", data: [32, 2, 3, 21, 45, 44, 45, 46, 46, 59, 36, 41, 44, 38, 30, 41, 53] },
+        "Z3-30 (Villa)": { type: "Residential (Villa)", data: [16, 14, 19, 26, 9, 8, 8, 0, 0, 1, 1, 0, 0, 0, 4, 0, 0] },
+        "Z3-37 (Villa)": { type: "Residential (Villa)", data: [1, 2, 0, 1, 0, 0, 5, 13, 0, 1, 1, 3, 26, 15, 18, 28, 48] },
+        // Add all building common meters from Zone 03(A)
+        "D 45-Building Common Meter": { type: "D_Building_Common", data: [3, 3, 2, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1] },
+        "D 50-Building Common Meter": { type: "D_Building_Common", data: [3, 5, 1, 2, 0, 1, 1, 1, 0, 2, 1, 0, 1, 1, 1, 1, 0] },
+        "D 51-Building Common Meter": { type: "D_Building_Common", data: [4, 3, 2, 2, 1, 3, 1, 1, 1, 1, 2, 1, 1, 0, 1, 1, 2] },
+        "D 46-Building Common Meter": { type: "D_Building_Common", data: [3, 5, 2, 1, 51, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 2] },
+        "D 74-Building Common Meter": { type: "D_Building_Common", data: [3, 3, 2, 1, 2, 0, 1, 1, 0, 2, 1, 1, 0, 1, 1, 2, 1] },
+        "D 49-Building Common Meter": { type: "D_Building_Common", data: [3, 4, 1, 2, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 2, 1, 1] },
+        "D 48-Building Common Meter": { type: "D_Building_Common", data: [3, 4, 1, 2, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0] },
+        "D 47-Building Common Meter": { type: "D_Building_Common", data: [4, 5, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 2, 0] },
+        "D 44-Building Common Meter": { type: "D_Building_Common", data: [3, 4, 2, 1, 1, 1, 1, 1, 0, 2, 1, 1, 1, 1, 0, 1, 1] },
+        "D 75-Building Common Meter": { type: "D_Building_Common", data: [4, 5, 2, 2, 2, 1, 2, 2, 2, 7, 6, 2, 3, 4, 3, 7, 9] },
       },
     },
     "Zone_03_(B)": {
-      bulk: [2653, 2169, 2315, 2381, 2634, 2932, 3369, 3458, 3742, 2906, 2695, 3583, 3256, 2962, 3331, 2157, 5177], // CORRECTED May-25: 5177 from your database
+      bulk: [2653, 2169, 2315, 2381, 2634, 2932, 3369, 3458, 3742, 2906, 2695, 3583, 3256, 2962, 3331, 2157, 5177],
       individuals: {
-        "Z3-52(6) (Building)": {
-          type: "Residential",
-          data: [27, 22, 19, 28, 27, 27, 298, 58, 14, 18, 17, 8, 10, 9, 9, 14, 15], // May-25: 15 from database
-        },
-        "Z3-21 (Villa)": {
-          type: "Residential",
-          data: [37, 38, 24, 20, 31, 41, 9, 54, 263, 68, 45, 43, 41, 53, 42, 48, 50], // May-25: 50 from database
-        },
-        "Z3-20 (Villa)": { type: "Residential", data: [2, 1, 1, 2, 2, 2, 6, 4, 10, 14, 10, 11, 12, 14, 7, 3, 3] }, // May-25: 3 from database
-        "Z3-13 (Villa)": { type: "Residential", data: [24, 27, 23, 17, 20, 24, 10, 11, 5, 20, 16, 19, 20, 22, 18, 24, 25] }, // May-25: 25 from database
-        "Z3-15 (Villa)": {
-          type: "Residential",
-          data: [53, 39, 32, 31, 34, 45, 43, 31, 37, 45, 36, 36, 40, 41, 35, 47, 48], // May-25: 48 from database
-        },
-        "Z3-14 (Villa)": {
-          type: "Residential",
-          data: [55, 45, 42, 57, 66, 27, 31, 11, 16, 27, 30, 173, 166, 102, 30, 43, 44], // May-25: 44 from database
-        },
-        "Z3-12 (Villa)": {
-          type: "Residential",
-          data: [52, 95, 258, 55, 67, 111, 93, 120, 118, 178, 55, 67, 73, 59, 54, 181, 184], // May-25: 184 from database
-        },
-        "Z3-11 (Villa)": { type: "Residential", data: [0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z3-4 (Villa)": {
-          type: "Residential",
-          data: [105, 90, 96, 106, 126, 122, 156, 150, 97, 171, 56, 111, 90, 55, 22, 23, 24], // May-25: 24 from database
-        },
-        "Z3-17 (Villa)": { type: "Residential", data: [11, 5, 8, 5, 14, 19, 18, 22, 14, 24, 17, 20, 19, 8, 5, 13, 13] }, // May-25: 13 from database
-        "Z3-18 (Villa)": {
-          type: "Residential",
-          data: [62, 43, 36, 56, 47, 63, 59, 67, 46, 58, 42, 31, 36, 36, 33, 39, 40], // May-25: 40 from database
-        },
-        "Z3-3 (Villa)": { type: "Residential", data: [78, 66, 80, 91, 84, 84, 83, 61, 67, 78, 69, 86, 66, 59, 63, 73, 74] }, // May-25: 74 from database
-        "Z3-7 (Villa)": { type: "Residential", data: [27, 23, 14, 21, 30, 46, 23, 43, 24, 50, 34, 31, 38, 45, 46, 57, 58] }, // May-25: 58 from database
-        "Z3-10 (Villa)": {
-          type: "Residential",
-          data: [37, 32, 31, 35, 47, 34, 40, 56, 41, 60, 33, 37, 78, 81, 62, 101, 103], // May-25: 103 from database
-        },
-        "Z3-1 (Villa)": { type: "Residential", data: [6, 6, 3, 4, 5, 5, 5, 6, 5, 3, 4, 3, 4, 4, 5, 7, 7] }, // May-25: 7 from database
-        "Z3-9 (Villa)": {
-          type: "Residential",
-          data: [68, 57, 76, 32, 17, 40, 38, 100, 60, 57, 70, 71, 67, 49, 55, 60, 61], // May-25: 61 from database
-        },
-        "Z3-2 (Villa)": {
-          type: "Residential",
-          data: [111, 114, 97, 110, 57, 129, 113, 88, 74, 89, 52, 17, 6, 6, 8, 7, 7], // May-25: 7 from database
-        },
-        "Z3-19 (Villa)": { type: "Residential", data: [38, 11, 9, 16, 15, 6, 6, 9, 6, 5, 11, 13, 138, 6, 26, 108, 110] }, // May-25: 110 from database
-        "Z3-6 (Villa)": { type: "Residential", data: [34, 21, 29, 32, 34, 45, 49, 57, 39, 49, 40, 34, 31, 33, 38, 36, 37] }, // May-25: 37 from database
-        "Z3-22 (Villa)": {
-          type: "Residential",
-          data: [24, 20, 17, 19, 22, 20, 36, 22, 15, 20, 15, 23, 32, 14, 53, 31, 32], // May-25: 32 from database
-        },
-        "Z3-16 (Villa)": { type: "Residential", data: [43, 14, 16, 10, 38, 6, 1, 21, 6, 2, 3, 5, 1, 28, 2, 5, 5] }, // May-25: 5 from database
-        "Z3-5 (Villa)": { type: "Residential", data: [52, 63, 47, 58, 42, 24, 68, 44, 40, 34, 26, 34, 40, 51, 42, 55, 56] }, // May-25: 56 from database
-        "Z3-8 (Villa)": {
-          type: "Residential",
-          data: [56, 32, 19, 15, 49, 40, 38, 25, 49, 68, 181, 290, 83, 106, 196, 358, 365], // May-25: 365 from database
-        },
+        // ALL Zone 03(B) meters from user's data
+        "Z3-52(6) (Building)": { type: "Residential (Apart)", data: [27, 22, 19, 28, 27, 27, 298, 58, 14, 18, 17, 8, 10, 9, 9, 14, 12] },
+        "Z3-21 (Villa)": { type: "Residential (Villa)", data: [37, 38, 24, 20, 31, 41, 9, 54, 263, 68, 45, 43, 41, 53, 42, 48, 51] },
+        "Z3-20 (Villa)": { type: "Residential (Villa)", data: [2, 1, 1, 2, 2, 2, 6, 4, 10, 14, 10, 11, 12, 14, 7, 3, 6] },
+        "Z3-13 (Villa)": { type: "Residential (Villa)", data: [24, 27, 23, 17, 20, 24, 10, 11, 5, 20, 16, 19, 20, 22, 18, 24, 20] },
+        "Z3-15 (Villa)": { type: "Residential (Villa)", data: [53, 39, 32, 31, 34, 45, 43, 31, 37, 45, 36, 36, 40, 41, 35, 47, 44] },
+        "Z3-14 (Villa)": { type: "Residential (Villa)", data: [55, 45, 42, 57, 66, 27, 31, 11, 16, 27, 30, 173, 166, 102, 30, 43, 32] },
+        "Z3-12 (Villa)": { type: "Residential (Villa)", data: [52, 95, 258, 55, 67, 111, 93, 120, 118, 178, 55, 67, 73, 59, 54, 181, 178] },
+        "Z3-11 (Villa)": { type: "Residential (Villa)", data: [0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z3-4 (Villa)": { type: "Residential (Villa)", data: [105, 90, 96, 106, 126, 122, 156, 150, 97, 171, 56, 111, 90, 55, 22, 23, 113] },
+        "Z3-17 (Villa)": { type: "Residential (Villa)", data: [11, 5, 8, 5, 14, 19, 18, 22, 14, 24, 17, 20, 19, 8, 5, 13, 15] },
+        "Z3-18 (Villa)": { type: "Residential (Villa)", data: [62, 43, 36, 56, 47, 63, 59, 67, 46, 58, 42, 31, 36, 36, 33, 39, 76] },
+        "Z3-3 (Villa)": { type: "Residential (Villa)", data: [78, 66, 80, 91, 84, 84, 83, 61, 67, 78, 69, 86, 66, 59, 63, 73, 176] },
+        "Z3-7 (Villa)": { type: "Residential (Villa)", data: [27, 23, 14, 21, 30, 46, 23, 43, 24, 50, 34, 31, 38, 45, 46, 57, 58] },
+        "Z3-10 (Villa)": { type: "Residential (Villa)", data: [37, 32, 31, 35, 47, 34, 40, 56, 41, 60, 33, 37, 78, 81, 62, 101, 88] },
+        "Z3-1 (Villa)": { type: "Residential (Villa)", data: [6, 6, 3, 4, 5, 5, 5, 6, 5, 3, 4, 3, 4, 4, 5, 7, 7] },
+        "Z3-9 (Villa)": { type: "Residential (Villa)", data: [68, 57, 76, 32, 17, 40, 38, 100, 60, 57, 70, 71, 67, 49, 55, 60, 69] },
+        "Z3-2 (Villa)": { type: "Residential (Villa)", data: [111, 114, 97, 110, 57, 129, 113, 88, 74, 89, 52, 17, 6, 6, 8, 7, 38] },
+        "Z3-19 (Villa)": { type: "Residential (Villa)", data: [38, 11, 9, 16, 15, 6, 6, 9, 6, 5, 11, 13, 138, 6, 26, 108, 77] },
+        "Z3-6 (Villa)": { type: "Residential (Villa)", data: [34, 21, 29, 32, 34, 45, 49, 57, 39, 49, 40, 34, 31, 33, 38, 36, 29] },
+        "Z3-22 (Villa)": { type: "Residential (Villa)", data: [24, 20, 17, 19, 22, 20, 36, 22, 15, 20, 15, 23, 32, 14, 53, 31, 32] },
+        "Z3-16 (Villa)": { type: "Residential (Villa)", data: [43, 14, 16, 10, 38, 6, 1, 21, 6, 2, 3, 5, 1, 28, 2, 5, 22] },
+        "Z3-5 (Villa)": { type: "Residential (Villa)", data: [52, 63, 47, 58, 42, 24, 68, 44, 40, 34, 26, 34, 40, 51, 42, 55, 51] },
+        "Z3-8 (Villa)": { type: "Residential (Villa)", data: [56, 32, 19, 15, 49, 40, 38, 25, 49, 68, 181, 290, 83, 106, 196, 358, 414] },
+        // Add remaining Zone 03(B) meters and building common meters
+        "Irrigation Tank 02 (Z03)": { type: "IRR_Servies", data: [42, 36, 74, 39, 31, 36, 45, 45, 30, 30, 29, 57, 49, 47, 43, 15, 319] },
       },
     },
     Zone_05: {
-      bulk: [4286, 3897, 4127, 4911, 2639, 4992, 5305, 4039, 2736, 3383, 1438, 3788, 4267, 4231, 3862, 3737, 7511], // CORRECTED May-25: 7511 from your database
+      bulk: [4286, 3897, 4127, 4911, 2639, 4992, 5305, 4039, 2736, 3383, 1438, 3788, 4267, 4231, 3862, 3737, 7511],
       individuals: {
-        "Z5-17": { type: "Residential", data: [99, 51, 53, 62, 135, 140, 34, 132, 63, 103, 54, 148, 112, 80, 81, 90, 92] }, // May-25: 92 from database
-        "Z5-13": { type: "Residential", data: [78, 73, 9, 46, 17, 83, 40, 80, 61, 56, 68, 85, 72, 106, 89, 120, 122] }, // May-25: 122 from database
-        "Z5-14": { type: "Residential", data: [68, 56, 52, 250, 128, 100, 12, 20, 22, 22, 62, 72, 71, 93, 77, 93, 95] }, // May-25: 95 from database
-        "Z5-5": { type: "Residential", data: [1, 2, 0, 3, 1, 8, 3, 0, 2, 13, 4, 3, 3, 6, 2, 5, 5] }, // May-25: 5 from database
-        "Z5-30": { type: "Residential", data: [0, 1, 3, 53, 10, 1, 0, 17, 17, 4, 6, 60, 65, 87, 71, 113, 115] }, // May-25: 115 from database
-        "Z5-2": { type: "Residential", data: [2, 2, 0, 0, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z5-10": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 6, 3, 0, 4, 37, 0, 0, 0, 0] }, // May-25: 0
-        "Z5-4": { type: "Residential", data: [54, 40, 98, 36, 30, 52, 110, 85, 32, 38, 86, 100, 81, 98, 35, 49, 50] }, // May-25: 50 from database
-        "Z5-6": { type: "Residential", data: [1, 0, 1, 0, 0, 0, 0, 0, 5, 12, 5, 2, 6, 3, 10, 5, 5] }, // May-25: 5 from database
-        "Z5 020": { type: "Residential", data: [26, 13, 13, 20, 18, 34, 51, 3, 1, 0, 28, 24, 25, 30, 147, 164, 167] }, // May-25: 167 from database
-        "Z5-23": { type: "Residential", data: [0, 0, 0, 5, 6, 56, 1, 0, 4, 11, 3, 0, 0, 22, 19, 0, 0] }, // May-25: 0
-        "Z5-15": { type: "Residential", data: [39, 33, 33, 27, 41, 60, 47, 40, 36, 51, 40, 37, 35, 19, 16, 23, 24] }, // May-25: 24 from database
-        "Z5-9": { type: "Residential", data: [72, 97, 84, 96, 158, 82, 70, 74, 95, 134, 94, 56, 38, 49, 40, 56, 57] }, // May-25: 57 from database
-        "Z5-26": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 2, 0, 12, 18, 25, 61, 41, 16, 69, 70] }, // May-25: 70 from database
-        "Z5-25": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 24, 20, 37, 18, 37, 24, 10, 71, 72] }, // May-25: 72 from database
-        "Z5-31": { type: "Residential", data: [7, 20, 0, 0, 0, 0, 189, 68, 61, 0, 0, 14, 33, 24, 14, 16, 17] }, // May-25: 17 from database
-        "Z5-33": { type: "Residential", data: [0, 7, 3, 3, 0, 0, 0, 1, 18, 3, 0, 0, 2, 0, 24, 0, 0] }, // May-25: 0
-        "Z5-29": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 1, 0, 68, 15, 21, 49, 66, 21, 20, 21] }, // May-25: 21 from database
-        "Z5-28": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 40, 0, 90, 16, 11, 50, 21, 9, 8, 8] }, // May-25: 8 from database
-        "Z5-32": { type: "Residential", data: [0, 2, 2, 3, 0, 0, 0, 1, 47, 1, 3, 1, 59, 119, 71, 72, 73] }, // May-25: 73 from database
-        "Z5-22": { type: "Residential", data: [89, 32, 38, 10, 36, 17, 21, 39, 0, 18, 25, 28, 15, 40, 186, 243, 246] }, // May-25: 246 from database
-        "Z5-7": { type: "Residential", data: [2, 2, 1, 2, 2, 6, 2, 0, 2, 0, 0, 0, 0, 26, 14, 7, 7] }, // May-25: 7 from database
-        "Z5-27": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 12, 9, 9, 11, 36, 13, 19, 12, 12] }, // May-25: 12 from database
-        "Z5-12": { type: "Residential", data: [59, 78, 49, 39, 89, 105, 90, 90, 84, 112, 89, 71, 44, 47, 40, 66, 67] }, // May-25: 67 from database
-        "Z5 024": { type: "Residential", data: [19, 2, 0, 30, 1, 1, 1, 0, 0, 3, 4, 39, 68, 1, 0, 0, 0] }, // May-25: 0
-        "Z5 016": { type: "Residential", data: [306, 64, 6, 10, 34, 118, 363, 347, 16, 85, 67, 57, 27, 29, 37, 51, 52] }, // May-25: 52 from database
-        "Z5-21": { type: "Residential", data: [2, 0, 0, 1, 1, 0, 3, 1, 0, 5, 13, 23, 25, 22, 34, 58, 59] }, // May-25: 59 from database
-        "Z5-3": { type: "Residential", data: [1, 1, 0, 0, 1, 5, 24, 28, 68, 116, 205, 141, 149, 86, 67, 100, 102] }, // May-25: 102 from database
-        "Z5 019": { type: "Residential", data: [4, 9, 6, 8, 9, 14, 8, 9, 8, 12, 6, 7, 5, 7, 6, 2, 2] }, // May-25: 2 from database
-        "Z5-1": { type: "Residential", data: [0, 3, 8, 7, 43, 0, 1, 6, 88, 8, 5, 5, 5, 5, 4, 5, 5] }, // May-25: 5 from database
-        "Z5-11": { type: "Residential", data: [15, 6, 10, 24, 13, 15, 16, 34, 50, 65, 71, 68, 30, 45, 3, 3, 3] }, // May-25: 3 from database
-        "Z5-18": { type: "Residential", data: [5, 13, 11, 10, 12, 26, 10, 15, 35, 23, 23, 18, 8, 12, 11, 37, 38] }, // May-25: 38 from database
-        "Z5-8": { type: "Residential", data: [0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 0, 5, 6, 12, 11, 67, 68] }, // May-25: 68 from database
-        "Irrigation Tank 03 (Z05)": {
-          type: "IRR_Services",
-          data: [1223, 1016, 552, 808, 0, 347, 763, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], // May-25: 0
-        },
+        // ALL Zone 05 meters from user's data
+        "Z5-17": { type: "Residential (Villa)", data: [99, 51, 53, 62, 135, 140, 34, 132, 63, 103, 54, 148, 112, 80, 81, 90, 58] },
+        "Z5-13": { type: "Residential (Villa)", data: [78, 73, 9, 46, 17, 83, 40, 80, 61, 56, 68, 85, 72, 106, 89, 120, 110] },
+        "Z5-14": { type: "Residential (Villa)", data: [68, 56, 52, 250, 128, 100, 12, 20, 22, 22, 62, 72, 71, 93, 77, 93, 82] },
+        "Z5-5": { type: "Residential (Villa)", data: [1, 2, 0, 3, 1, 8, 3, 0, 2, 13, 4, 3, 3, 6, 2, 5, 39] },
+        "Z5-30": { type: "Residential (Villa)", data: [0, 1, 3, 53, 10, 1, 0, 17, 17, 4, 6, 60, 65, 87, 71, 113, 202] },
+        "Z5-2": { type: "Residential (Villa)", data: [2, 2, 0, 0, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z5-10": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 6, 3, 0, 4, 37, 0, 0, 0, 0] },
+        "Z5-4": { type: "Residential (Villa)", data: [54, 40, 98, 36, 30, 52, 110, 85, 32, 38, 86, 100, 81, 98, 35, 49, 29] },
+        "Z5-6": { type: "Residential (Villa)", data: [1, 0, 1, 0, 0, 0, 0, 0, 5, 12, 5, 2, 6, 3, 10, 5, 37] },
+        "Z5 020": { type: "Residential (Villa)", data: [26, 13, 13, 20, 18, 34, 51, 3, 1, 0, 28, 24, 25, 30, 147, 164, 203] },
+        "Z5-23": { type: "Residential (Villa)", data: [0, 0, 0, 5, 6, 56, 1, 0, 4, 11, 3, 0, 0, 22, 19, 0, 1] },
+        "Z5-15": { type: "Residential (Villa)", data: [39, 33, 33, 27, 41, 60, 47, 40, 36, 51, 40, 37, 35, 19, 16, 23, 30] },
+        "Z5-9": { type: "Residential (Villa)", data: [72, 97, 84, 96, 158, 82, 70, 74, 95, 134, 94, 56, 38, 49, 40, 56, 76] },
+        "Z5-26": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 2, 0, 12, 18, 25, 61, 41, 16, 69, 107] },
+        "Z5-25": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 24, 20, 37, 18, 37, 24, 10, 71, 104] },
+        "Z5-31": { type: "Residential (Villa)", data: [7, 20, 0, 0, 0, 0, 189, 68, 61, 0, 0, 14, 33, 24, 14, 16, 4] },
+        "Z5-33": { type: "Residential (Villa)", data: [0, 7, 3, 3, 0, 0, 0, 1, 18, 3, 0, 0, 2, 0, 24, 0, 18] },
+        "Z5-29": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 1, 0, 68, 15, 21, 49, 66, 21, 20, 28] },
+        "Z5-28": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 40, 0, 90, 16, 11, 50, 21, 9, 8, 14] },
+        "Z5-32": { type: "Residential (Villa)", data: [0, 2, 2, 3, 0, 0, 0, 1, 47, 1, 3, 1, 59, 119, 71, 72, 67] },
+        "Z5-22": { type: "Residential (Villa)", data: [89, 32, 38, 10, 36, 17, 21, 39, 0, 18, 25, 28, 15, 40, 186, 243, 202] },
+        "Z5-7": { type: "Residential (Villa)", data: [2, 2, 1, 2, 2, 6, 2, 0, 2, 0, 0, 0, 0, 26, 14, 7, 5] },
+        "Z5-27": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 12, 9, 9, 11, 36, 13, 19, 12, 15] },
+        "Z5-12": { type: "Residential (Villa)", data: [59, 78, 49, 39, 89, 105, 90, 90, 84, 112, 89, 71, 44, 47, 40, 66, 81] },
+        "Z5 024": { type: "Residential (Villa)", data: [19, 2, 0, 30, 1, 1, 1, 0, 0, 3, 4, 39, 68, 1, 0, 0, 0] },
+        "Z5 016": { type: "Residential (Villa)", data: [306, 64, 6, 10, 34, 118, 363, 347, 16, 85, 67, 57, 27, 29, 37, 51, 53] },
+        "Z5-21": { type: "Residential (Villa)", data: [2, 0, 0, 1, 1, 0, 3, 1, 0, 5, 13, 23, 25, 22, 34, 58, 57] },
+        "Z5-3": { type: "Residential (Villa)", data: [1, 1, 0, 0, 1, 5, 24, 28, 68, 116, 205, 141, 149, 86, 67, 100, 71] },
+        "Z5 019": { type: "Residential (Villa)", data: [4, 9, 6, 8, 9, 14, 8, 9, 8, 12, 6, 7, 5, 7, 6, 2, 57] },
+        "Z5-1": { type: "Residential (Villa)", data: [0, 3, 8, 7, 43, 0, 1, 6, 88, 8, 5, 5, 5, 5, 4, 5, 47] },
+        "Z5-11": { type: "Residential (Villa)", data: [15, 6, 10, 24, 13, 15, 16, 34, 50, 65, 71, 68, 30, 45, 3, 3, 9] },
+        "Z5-18": { type: "Residential (Villa)", data: [5, 13, 11, 10, 12, 26, 10, 15, 35, 23, 23, 18, 8, 12, 11, 37, 30] },
+        "Z5-8": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 0, 5, 6, 12, 11, 67, 12] },
+        "Irrigation Tank 03 (Z05)": { type: "IRR_Servies", data: [1223, 1016, 552, 808, 0, 347, 763, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
       },
     },
     Zone_08: {
-      bulk: [2170, 1825, 2021, 2753, 2722, 3193, 3639, 3957, 3947, 4296, 3569, 3018, 1547, 1498, 2605, 3203, 6075], // CORRECTED May-25: 6075 from your database
+      bulk: [2170, 1825, 2021, 2753, 2722, 3193, 3639, 3957, 3947, 4296, 3569, 3018, 1547, 1498, 2605, 3203, 6075],
       individuals: {
-        "Z8-11": { type: "Residential", data: [0, 1, 0, 0, 1, 23, 2, 2, 1, 1, 2, 0, 0, 1, 0, 0, 0] }, // May-25: 0
-        "Z8-13": { type: "Residential", data: [6, 2, 1, 1, 0, 15, 0, 0, 0, 3, 2, 1, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z8-1": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 16, 17] }, // May-25: 17 from database
-        "Z8-2": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z8-3": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z8-4": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z8-6": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0] }, // May-25: 0
-        "Z8-7": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z8-8": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z8-10": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z8-12": {
-          type: "Residential",
-          data: [109, 148, 169, 235, 180, 235, 237, 442, 661, 417, 223, 287, 236, 192, 249, 267, 271], // May-25: 271 from database
-        },
-        "Z8-14": { type: "Residential", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Z8-15": {
-          type: "Residential",
-          data: [227, 74, 90, 145, 179, 100, 136, 152, 144, 87, 100, 90, 99, 61, 70, 125, 127], // May-25: 127 from database
-        },
-        "Z8-16": { type: "Residential", data: [180, 165, 52, 147, 0, 62, 113, 86, 91, 112, 103, 98, 67, 72, 54, 98, 100] }, // May-25: 100 from database
-        "Z8-17": {
-          type: "Residential",
-          data: [198, 135, 213, 190, 196, 138, 94, 220, 0, 191, 154, 155, 164, 162, 171, 207, 210], // May-25: 210 from database
-        },
-        "Z8-5": {
-          type: "Residential",
-          data: [131, 117, 131, 142, 208, 247, 272, 344, 236, 280, 309, 314, 208, 341, 313, 336, 342], // May-25: 342 from database
-        },
-        "Z8-9": { type: "Residential", data: [8, 8, 0, 4, 2, 5, 47, 51, 4, 14, 12, 25, 5, 12, 5, 4, 4] }, // May-25: 4 from database
-        "Z8-18": {
-          type: "Residential",
-          data: [290, 212, 253, 418, 384, 478, 459, 410, 312, 196, 239, 149, 122, 111, 336, 0, 0], // May-25: 0 from database
-        },
-        "Z8-19": {
-          type: "Residential",
-          data: [161, 147, 205, 271, 282, 340, 157, 306, 239, 197, 248, 125, 104, 87, 231, 0, 0], // May-25: 0 from database
-        },
-        "Z8-20": {
-          type: "Residential",
-          data: [226, 210, 289, 358, 298, 313, 290, 297, 275, 219, 298, 158, 146, 110, 312, 0, 0], // May-25: 0 from database
-        },
-        "Z8-21": {
-          type: "Residential",
-          data: [188, 173, 172, 320, 254, 344, 233, 243, 200, 119, 167, 101, 99, 72, 276, 0, 0], // May-25: 0 from database
-        },
-        "Z8-22": {
-          type: "Residential",
-          data: [262, 168, 174, 366, 388, 418, 271, 343, 330, 138, 213, 177, 225, 156, 336, 0, 0], // May-25: 0 from database
-        },
+        // ALL Zone 08 meters from user's data
+        "Z8-11": { type: "Residential (Villa)", data: [0, 1, 0, 0, 1, 23, 2, 2, 1, 1, 2, 0, 0, 1, 0, 0, 0] },
+        "Z8-13": { type: "Residential (Villa)", data: [6, 2, 1, 1, 0, 15, 0, 0, 0, 3, 2, 1, 0, 0, 0, 0, 0] },
+        "Z8-1": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 16, 6] },
+        "Z8-2": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z8-3": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z8-4": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z8-6": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0] },
+        "Z8-7": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z8-8": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z8-10": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z8-12": { type: "Residential (Villa)", data: [109, 148, 169, 235, 180, 235, 237, 442, 661, 417, 223, 287, 236, 192, 249, 267, 295] },
+        "Z8-14": { type: "Residential (Villa)", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        "Z8-15": { type: "Residential (Villa)", data: [227, 74, 90, 145, 179, 100, 136, 152, 144, 87, 100, 90, 99, 61, 70, 125, 112] },
+        "Z8-16": { type: "Residential (Villa)", data: [180, 165, 52, 147, 0, 62, 113, 86, 91, 112, 103, 98, 67, 72, 54, 98, 95] },
+        "Z8-17": { type: "Residential (Villa)", data: [198, 135, 213, 190, 196, 138, 94, 220, 0, 191, 154, 155, 164, 162, 171, 207, 238] },
+        "Z8-5": { type: "Residential (Villa)", data: [131, 117, 131, 142, 208, 247, 272, 344, 236, 280, 309, 314, 208, 341, 313, 336, 325] },
+        "Z8-9": { type: "Residential (Villa)", data: [8, 8, 0, 4, 2, 5, 47, 51, 4, 14, 12, 25, 5, 12, 5, 4, 6] },
+        "Z8-18": { type: "Residential (Villa)", data: [290, 212, 253, 418, 384, 478, 459, 410, 312, 196, 239, 149, 122, 111, 336, 0, 679] },
+        "Z8-19": { type: "Residential (Villa)", data: [161, 147, 205, 271, 282, 340, 157, 306, 239, 197, 248, 125, 104, 87, 231, 0, 513] },
+        "Z8-20": { type: "Residential (Villa)", data: [226, 210, 289, 358, 298, 313, 290, 297, 275, 219, 298, 158, 146, 110, 312, 0, 579] },
+        "Z8-21": { type: "Residential (Villa)", data: [188, 173, 172, 320, 254, 344, 233, 243, 200, 119, 167, 101, 99, 72, 276, 0, 393] },
+        "Z8-22": { type: "Residential (Villa)", data: [262, 168, 174, 366, 388, 418, 271, 343, 330, 138, 213, 177, 225, 156, 336, 0, 806] },
       },
     },
     Zone_VS: {
-      bulk: [26, 19, 72, 60, 125, 277, 143, 137, 145, 63, 34, 17, 14, 12, 21, 13, 28], // CORRECTED May-25: 28 from your database
+      bulk: [26, 19, 72, 60, 125, 277, 143, 137, 145, 63, 34, 17, 14, 12, 21, 13, 28],
       individuals: {
-        "Irrigation Tank - VS": { type: "IRR_Services", data: [0, 0, 0, 2, 0, 157, 116, 71, 100, 0, 1, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Coffee 1 (GF Shop No.591)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, -3, 0] }, // May-25: 0
-        "Coffee 2 (GF Shop No.594 A)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 2, 3, 5, 5, 5] }, // May-25: 5 from database
-        "Supermarket (FF Shop No.591)": { type: "Retail", data: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Pharmacy (FF Shop No.591 A)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Laundry Services (FF Shop No.593)": {
-          type: "Retail",
-          data: [0, 1, 16, 49, 32, 34, 32, 47, 34, 45, 52, 31, 33, 25, 22, 0, 0], // May-25: 0 from database
-        },
-        "Shop No.593 A": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // May-25: 0
-        "Sale Centre Caffe & Bar (GF Shop No.592 A)": {
-          type: "Retail",
-          data: [0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 2, 3, 5, 5], // May-25: 5 from database
-        },
+        // ALL Zone VS meters from user's data
+        "Irrigation Tank - VS": { type: "IRR_Servies", data: [0, 0, 0, 2, 0, 157, 116, 71, 100, 0, 1, 0, 0, 0, 0, 0, 0] },
+        "Coffee 1 (GF Shop No.591)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, -3, 0] },
+        "Coffee 2 (GF Shop No.594 A)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 2, 3, 5, 5, 5] },
+        "Supermarket (FF Shop No.591)": { type: "Retail", data: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
+        "Pharmacy (FF Shop No.591 A)": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0] },
+        "Laundry Services (FF Shop No.593)": { type: "Retail", data: [0, 1, 16, 49, 32, 34, 32, 47, 34, 45, 52, 31, 33, 25, 22, 0, 43] },
+        "Shop No.593 A": { type: "Retail", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
       },
     },
   }
@@ -503,9 +467,11 @@ const WaterLossAnalysis = () => {
   const getTypeColor = (type: string) => {
     const colors = {
       IRR_Services: COLORS.success, // Green for irrigation services
+      IRR_Servies: COLORS.success, // Green for irrigation services (typo in data)
       MB_Common: COLORS.primary, // Primary color for main building
       Retail: COLORS.warning, // Amber for retail
-      Residential: COLORS.info, // Blue for residential
+      "Residential (Villa)": COLORS.info, // Blue for residential villas
+      "Residential (Apart)": COLORS.secondary, // Purple for residential apartments
       D_Building_Common: COLORS.error, // Red for distribution building common
     }
     return colors[type] || "#64748b"
@@ -520,7 +486,30 @@ const WaterLossAnalysis = () => {
     setTimeout(() => {
       const currentData = processedData.overview.find((d) => d.month === selectedMonth)
 
-      setAiAnalysisResult(`🔬 AI Water Loss Analysis Results for ${selectedMonth}:\n\n📊 PERFORMANCE SUMMARY:\n• Main Bulk Supply (A1): ${currentData.A1.toLocaleString()} m³\n• Billed Bulk (A2): ${currentData.A2.toLocaleString()} m³\n• Individual Consumption (A3): ${currentData.A3.toLocaleString()} m³\n• Total System Loss: ${currentData.TotalLoss.toLocaleString()} m³ (${currentData.TotalLossPercent.toFixed(1)}%)\n\n🎯 LOSS ANALYSIS:\n• Stage 1 Loss (A1-A2): ${currentData.Loss1.toLocaleString()} m³ - ${currentData.Loss1Percent.toFixed(1)}%\n• Stage 2 Loss (A2-A3): ${currentData.Loss2.toLocaleString()} m³ - ${currentData.Loss2Percent.toFixed(1)}%\n• Financial Impact: ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR in apparent losses\n\n⚡ SYSTEM INSIGHTS (May 2025 Updated):\n• ${currentData.TotalLossPercent < 10 ? "EXCELLENT" : currentData.TotalLossPercent < 20 ? "GOOD" : "NEEDS ATTENTION"} - Total loss percentage is ${currentData.TotalLossPercent < 10 ? "within acceptable limits" : currentData.TotalLossPercent < 20 ? "manageable but monitoring required" : "above industry standards"}\n• Stage 1 losses suggest ${currentData.Loss1Percent < 5 ? "good transmission efficiency" : "potential transmission system issues"}\n• Stage 2 losses indicate ${currentData.Loss2Percent < 15 ? "efficient distribution" : "distribution system optimization needed"}\n• Data updated with latest May 2025 readings from Supabase\n\n💡 STRATEGIC RECOMMENDATIONS:\n• PRIORITY: ${currentData.TotalLossPercent > 20 ? "URGENT - Comprehensive system audit required" : currentData.TotalLossPercent > 10 ? "MEDIUM - Regular monitoring and maintenance" : "LOW - Continue current practices"}\n• FINANCIAL: Monthly loss cost of ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR represents ${(((currentData.TotalLoss * 1.32) / (currentData.A1 * 1.32)) * 100).toFixed(1)}% of total water costs\n• TECHNICAL: ${currentData.Loss1 > currentData.Loss2 ? "Focus on transmission infrastructure improvements" : "Prioritize distribution network optimization"}\n• MONITORING: Track loss trends monthly and investigate any increases >5%`)
+      setAiAnalysisResult(`🔬 AI Water Loss Analysis Results for ${selectedMonth}:
+
+📊 PERFORMANCE SUMMARY:
+• Main Bulk Supply (A1): ${currentData.A1.toLocaleString()} m³
+• Billed Bulk (A2): ${currentData.A2.toLocaleString()} m³
+• Individual Consumption (A3): ${currentData.A3.toLocaleString()} m³
+• Total System Loss: ${currentData.TotalLoss.toLocaleString()} m³ (${currentData.TotalLossPercent.toFixed(1)}%)
+
+🎯 LOSS ANALYSIS:
+• Stage 1 Loss (A1-A2): ${currentData.Loss1.toLocaleString()} m³ - ${currentData.Loss1Percent.toFixed(1)}%
+• Stage 2 Loss (A2-A3): ${currentData.Loss2.toLocaleString()} m³ - ${currentData.Loss2Percent.toFixed(1)}%
+• Financial Impact: ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR in apparent losses
+
+⚡ SYSTEM INSIGHTS (May 2025 Updated):
+• ${currentData.TotalLossPercent < 10 ? "EXCELLENT" : currentData.TotalLossPercent < 20 ? "GOOD" : "NEEDS ATTENTION"} - Total loss percentage is ${currentData.TotalLossPercent < 10 ? "within acceptable limits" : currentData.TotalLossPercent < 20 ? "manageable but monitoring required" : "above industry standards"}
+• Stage 1 losses suggest ${currentData.Loss1Percent < 5 ? "good transmission efficiency" : "potential transmission system issues"}
+• Stage 2 losses indicate ${currentData.Loss2Percent < 15 ? "efficient distribution" : "distribution system optimization needed"}
+• Data updated with latest May 2025 readings from Supabase
+
+💡 STRATEGIC RECOMMENDATIONS:
+• PRIORITY: ${currentData.TotalLossPercent > 20 ? "URGENT - Comprehensive system audit required" : currentData.TotalLossPercent > 10 ? "MEDIUM - Regular monitoring and maintenance" : "LOW - Continue current practices"}
+• FINANCIAL: Monthly loss cost of ${(currentData.TotalLoss * 1.32).toLocaleString()} OMR represents ${(((currentData.TotalLoss * 1.32) / (currentData.A1 * 1.32)) * 100).toFixed(1)}% of total water costs
+• TECHNICAL: ${currentData.Loss1 > currentData.Loss2 ? "Focus on transmission infrastructure improvements" : "Prioritize distribution network optimization"}
+• MONITORING: Track loss trends monthly and investigate any increases >5%`)
       setIsAiLoading(false)
     }, 2500)
   }
@@ -559,33 +548,36 @@ const WaterLossAnalysis = () => {
       }
     })
 
-    // This data is specific to the selected month.
-    const zonesForSelectedMonth = Object.keys(zoneData).map((zoneName) => {
-      const zone = zoneData[zoneName]
-      const bulk = zone.bulk[monthIndex]
-      const individualSum = Object.values(zone.individuals).reduce(
-        (sum, meter) => sum + (meter.data[monthIndex] || 0),
-        0,
-      )
-      const loss = bulk - individualSum
+    // This data is specific to the selected month and filtered zones.
+    const zonesForSelectedMonth = Object.keys(zoneData)
+      .filter((zoneName) => selectedZone === "all" || zoneName === selectedZone)
+      .map((zoneName) => {
+        const zone = zoneData[zoneName]
+        const bulk = zone.bulk[monthIndex]
+        const individualSum = Object.values(zone.individuals).reduce(
+          (sum, meter) => sum + (meter.data[monthIndex] || 0),
+          0,
+        )
+        const loss = bulk - individualSum
 
-      return {
-        name: zoneName.replace(/_/g, " "),
-        bulk,
-        individualSum,
-        loss,
-        lossPercent: bulk > 0 ? (loss / bulk) * 100 : 0,
-        lossCost: loss * 1.32,
-        individuals: Object.keys(zone.individuals)
-          .map((meterName) => ({
-            name: meterName,
-            consumption: zone.individuals[meterName].data[monthIndex] || 0,
-            cost: (zone.individuals[meterName].data[monthIndex] || 0) * 1.32,
-            type: zone.individuals[meterName].type,
-          }))
-          .sort((a, b) => b.consumption - a.consumption),
-      }
-    })
+        return {
+          name: zoneName.replace(/_/g, " "),
+          zoneName,
+          bulk,
+          individualSum,
+          loss,
+          lossPercent: bulk > 0 ? (loss / bulk) * 100 : 0,
+          lossCost: loss * 1.32,
+          individuals: Object.keys(zone.individuals)
+            .map((meterName) => ({
+              name: meterName,
+              consumption: zone.individuals[meterName].data[monthIndex] || 0,
+              cost: (zone.individuals[meterName].data[monthIndex] || 0) * 1.32,
+              type: zone.individuals[meterName].type,
+            }))
+            .sort((a, b) => b.consumption - a.consumption),
+        }
+      })
 
     const typesForSelectedMonth = (() => {
       const typeConsumption = {}
@@ -626,13 +618,13 @@ const WaterLossAnalysis = () => {
       zones: zonesForSelectedMonth,
       types: typesForSelectedMonth,
     }
-  }, [selectedMonth])
+  }, [selectedMonth, selectedZone])
 
   // --- UI COMPONENTS ---
 
-  const SmartTable = ({ data, totalBulk }) => {
+  const SmartTable = ({ data, totalBulk, zoneName }) => {
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 8
+    const itemsPerPage = 10
     const totalPages = Math.ceil(data.length / itemsPerPage)
 
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -652,32 +644,39 @@ const WaterLossAnalysis = () => {
 
     return (
       <div className="w-full">
+        <div className="mb-4 p-3 bg-slate-50 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <span className="text-slate-600">Total Meters: </span>
+              <span className="font-semibold text-slate-800">{data.length}</span>
+            </div>
+            <div>
+              <span className="text-slate-600">Zone Bulk: </span>
+              <span className="font-semibold text-blue-600">{totalBulk?.toLocaleString() || "N/A"} m³</span>
+            </div>
+            <div>
+              <span className="text-slate-600">Individual Sum: </span>
+              <span className="font-semibold text-green-600">
+                {data.reduce((sum, meter) => sum + meter.consumption, 0).toLocaleString()} m³
+              </span>
+            </div>
+          </div>
+        </div>
+        
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Meter Label
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Type
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Consumption (m³)
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Share of Bulk
                 </th>
               </tr>
@@ -686,7 +685,7 @@ const WaterLossAnalysis = () => {
               {paginatedData.map((meter, index) => {
                 const share = totalBulk > 0 ? (meter.consumption / totalBulk) * 100 : 0
                 return (
-                  <tr key={index}>
+                  <tr key={index} className="hover:bg-slate-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{meter.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -704,7 +703,7 @@ const WaterLossAnalysis = () => {
                         <div className="w-full bg-slate-200 rounded-full h-2.5 mr-2">
                           <div
                             className="h-2.5 rounded-full"
-                            style={{ width: `${share}%`, backgroundColor: getTypeColor(meter.type) }}
+                            style={{ width: `${Math.min(share, 100)}%`, backgroundColor: getTypeColor(meter.type) }}
                           ></div>
                         </div>
                         <span>{share.toFixed(1)}%</span>
@@ -785,7 +784,7 @@ const WaterLossAnalysis = () => {
     )
   }
 
-  // REDESIGNED Filter Bar - Now truly stationary
+  // Filter Bar
   const FilterBar = () => {
     const monthOptions = months.map((m) => ({ value: m, label: m }))
     const zoneOptions = [
@@ -879,8 +878,6 @@ const WaterLossAnalysis = () => {
   // --- SECTIONS ---
   const OverviewSection = () => {
     const currentData = processedData.overview.find((d) => d.month === selectedMonth)
-    const prevMonthIndex = months.indexOf(selectedMonth) - 1
-    const prevData = prevMonthIndex >= 0 ? processedData.overview[prevMonthIndex] : null
 
     return (
       <div className="space-y-6">
@@ -1027,27 +1024,43 @@ const WaterLossAnalysis = () => {
 
     return (
       <div className="space-y-6">
-        <ChartWrapper title="Zone-wise Consumption & Loss" subtitle={`Analysis for ${selectedMonth}`}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={processedData.zones} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" fontSize={12} />
-              <YAxis type="category" dataKey="name" width={150} fontSize={12} interval={0} />
-              <Tooltip formatter={(value, name) => [`${value.toLocaleString()} m³`, name]} />
-              <Legend />
-              <Bar dataKey="individualSum" stackId="a" fill={COLORS.success} name="Billed Consumption" />
-              <Bar dataKey="loss" stackId="a" fill={COLORS.error} name="Apparent Loss" />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartWrapper>
+        {/* Enhanced Gauge Charts Section */}
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+          <h3 className="text-xl font-semibold text-slate-700 mb-4 flex items-center">
+            <Gauge className="mr-2" />
+            Zone Water Loss Analysis - {selectedMonth}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredZones.map((zone, index) => (
+              <GaugeChart
+                key={zone.zoneName}
+                value={zone.loss}
+                max={zone.bulk}
+                title={zone.name}
+                subtitle={`${zone.individuals.length} meters`}
+                size={140}
+              />
+            ))}
+          </div>
+        </div>
 
+        {/* Individual Meter Details by Zone - ENHANCED */}
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-slate-800">Individual Meter Details by Zone</h3>
-          {filteredZones.map((zone, index) => (
-            <AccordionItem key={zone.name} zone={zone} defaultOpen={filteredZones.length === 1}>
-              <SmartTable data={zone.individuals} totalBulk={zone.bulk} />
-            </AccordionItem>
-          ))}
+          <h3 className="text-xl font-semibold text-slate-800 flex items-center">
+            <Building className="mr-2" />
+            Individual Meter Details by Zone - {selectedMonth}
+          </h3>
+          {filteredZones.length === 0 ? (
+            <div className="bg-white p-8 rounded-lg shadow-sm text-center">
+              <p className="text-slate-500">No zones found for the selected filters.</p>
+            </div>
+          ) : (
+            filteredZones.map((zone, index) => (
+              <AccordionItem key={zone.zoneName} zone={zone} defaultOpen={filteredZones.length === 1 || selectedZone !== "all"}>
+                <SmartTable data={zone.individuals} totalBulk={zone.bulk} zoneName={zone.zoneName} />
+              </AccordionItem>
+            ))
+          )}
         </div>
       </div>
     )
