@@ -124,17 +124,24 @@ const StyledSelect = ({ label, value, onChange, options, id, icon: Icon, disable
 // GAUGE CHART COMPONENT
 // ===============================
 
-const GaugeChart = ({ value, max, title, subtitle, color = COLORS.primary, size = 120 }) => {
+const GaugeChart = ({ value, max, title, subtitle, gaugeType = 'loss', color = COLORS.primary, size = 120 }) => {
   const percentage = Math.min((value / max) * 100, 100)
   const strokeDasharray = `${percentage * 2.51} 251` // 251 is approximately the circumference for radius 40
   
-  const getColorByPercentage = (percent) => {
-    if (percent <= 50) return COLORS.success
-    if (percent <= 75) return COLORS.warning
-    return COLORS.error
+  const getColorByPercentage = (percent, type) => {
+    if (type === 'loss') {
+      if (percent <= 5) return COLORS.success // Green - Good
+      if (percent <= 15) return COLORS.warning // Orange - Warning  
+      return COLORS.error // Red - Critical
+    } else if (type === 'bulk') {
+      return '#3B82F6' // Blue for bulk meters
+    } else if (type === 'individual') {
+      return '#10B981' // Green for individual meters
+    }
+    return color
   }
 
-  const gaugeColor = getColorByPercentage(percentage)
+  const gaugeColor = getColorByPercentage(percentage, gaugeType)
 
   return (
     <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm border">
@@ -166,19 +173,90 @@ const GaugeChart = ({ value, max, title, subtitle, color = COLORS.primary, size 
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-xl font-bold text-slate-800">{percentage.toFixed(1)}%</span>
-          <span className="text-xs text-slate-500">Loss</span>
+          {gaugeType === 'loss' ? (
+            <>
+              <span className="text-xl font-bold text-slate-800">{percentage.toFixed(1)}%</span>
+              <span className="text-xs text-slate-500">Loss</span>
+            </>
+          ) : (
+            <>
+              <span className="text-lg font-bold text-slate-800">{value.toLocaleString()}</span>
+              <span className="text-xs text-slate-500">m³</span>
+            </>
+          )}
         </div>
       </div>
       <div className="text-center mt-2">
         <h4 className="font-semibold text-sm text-slate-800">{title}</h4>
         <p className="text-xs text-slate-500">{subtitle}</p>
-        <div className="mt-1 text-xs">
-          <span className="text-slate-600">Bulk: {max.toLocaleString()} m³</span>
-          <br />
-          <span className="text-slate-600">Individual: {(max - value).toLocaleString()} m³</span>
-          <br />
-          <span className="text-red-600 font-semibold">Loss: {value.toLocaleString()} m³</span>
+        {gaugeType === 'loss' ? (
+          <div className="mt-1 text-xs">
+            <span className="text-slate-600">Bulk: {max.toLocaleString()} m³</span>
+            <br />
+            <span className="text-slate-600">Individual: {(max - value).toLocaleString()} m³</span>
+            <br />
+            <span className="text-red-600 font-semibold">Loss: {value.toLocaleString()} m³</span>
+          </div>
+        ) : (
+          <div className="mt-1 text-xs">
+            <span className="text-slate-400">{percentage.toFixed(1)}% of max</span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Three Gauge Set Component for Zone Analysis
+const ThreeGaugeSet = ({ zoneBulk, individualSum, loss, zoneName, metersCount }) => {
+  const lossPercentage = zoneBulk > 0 ? (loss / zoneBulk) * 100 : 0
+  
+  return (
+    <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-xl border border-slate-200">
+      <div className="mb-4 text-center">
+        <h4 className="text-lg font-semibold text-slate-800">{zoneName}</h4>
+        <p className="text-sm text-slate-600">{metersCount} individual meters</p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <GaugeChart
+          value={zoneBulk}
+          max={Math.max(zoneBulk, 10000)} // Dynamic max or minimum 10k
+          title="Zone Bulk"
+          subtitle="Total Supply"
+          gaugeType="bulk"
+          size={140}
+        />
+        <GaugeChart
+          value={individualSum}
+          max={zoneBulk} // Individual sum as percentage of bulk
+          title="Individual Total"
+          subtitle="End Consumption"
+          gaugeType="individual"
+          size={140}
+        />
+        <GaugeChart
+          value={loss}
+          max={zoneBulk} // Loss as percentage of bulk
+          title="System Loss"
+          subtitle={`${lossPercentage.toFixed(1)}% Loss Rate`}
+          gaugeType="loss"
+          size={140}
+        />
+      </div>
+      
+      <div className="mt-4 grid grid-cols-3 gap-4 text-center text-sm">
+        <div className="bg-blue-50 p-2 rounded">
+          <p className="font-semibold text-blue-800">Bulk Supply</p>
+          <p className="text-blue-600">{zoneBulk.toLocaleString()} m³</p>
+        </div>
+        <div className="bg-green-50 p-2 rounded">
+          <p className="font-semibold text-green-800">Individual</p>
+          <p className="text-green-600">{individualSum.toLocaleString()} m³</p>
+        </div>
+        <div className="bg-red-50 p-2 rounded">
+          <p className="font-semibold text-red-800">Loss</p>
+          <p className="text-red-600">{loss.toLocaleString()} m³</p>
         </div>
       </div>
     </div>
@@ -1174,21 +1252,21 @@ const WaterLossAnalysis = () => {
 
     return (
       <div className="space-y-6">
-        {/* Enhanced Gauge Charts Section */}
+        {/* Enhanced Three Gauge Charts Section */}
         <div className="bg-white p-6 rounded-xl shadow-lg">
           <h3 className="text-xl font-semibold text-slate-700 mb-4 flex items-center">
             <Gauge className="mr-2" />
             Zone Water Loss Analysis - {selectedMonth}
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {filteredZones.map((zone, index) => (
-              <GaugeChart
+              <ThreeGaugeSet
                 key={zone.zoneName}
-                value={zone.loss}
-                max={zone.bulk}
-                title={zone.name}
-                subtitle={`${zone.individuals.length} meters`}
-                size={140}
+                zoneBulk={zone.bulk}
+                individualSum={zone.individualSum}
+                loss={zone.loss}
+                zoneName={zone.name}
+                metersCount={zone.individuals.length}
               />
             ))}
           </div>
