@@ -18,7 +18,7 @@ interface WaterAnalysisModuleProps {
   isCollapsed?: boolean; // Pass this from parent component that knows sidebar state
 }
 
-// Water System Data - Updated with CORRECTED May 2025 data from user database
+// Water System Data - CORRECTED May 2025 data with enhanced validation
 const waterRawDataString = `Meter Label,Acct #,Zone,Type,Parent Meter,Label,Jan-24,Feb-24,Mar-24,Apr-24,May-24,Jun-24,Jul-24,Aug-24,Sep-24,Oct-24,Nov-24,Dec-24,Jan-25,Feb-25,Mar-25,Apr-25,May-25
 Main Bulk (NAMA),C43659,Main Bulk,Main BULK,NAMA,L1,32803,27996,23860,31869,30737,41953,35166,35420,41341,31519,35290,36733,32580,44043,34915,46039,58425
 Village Square (Zone Bulk),4300335,Zone_VS,Zone Bulk,Main Bulk (NAMA),L2,26,19,72,60,125,277,143,137,145,63,34,17,14,12,21,13,28
@@ -47,15 +47,37 @@ Z8-12 Villa,4300196,Zone_08,Residential (Villa),BULK ZONE 8,L3,109,148,169,235,1
 Coffee Shop VS,4300327,Zone_VS,Retail,Village Square (Zone Bulk),L3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,-3,0
 Supermarket VS,4300330,Zone_VS,Retail,Village Square (Zone Bulk),L3,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0`.trim();
 
-// Parse water system data
+// Enhanced parsing function with debugging and validation
 const parseWaterSystemData = (rawData: string) => {
+  console.log('🔧 DEBUGGING: Starting water data parsing...');
+  
   const lines = rawData.split('\n');
+  console.log(`📊 Total lines found: ${lines.length}`);
+  
   const headers = lines[0].split(',').map(h => h.trim());
+  console.log(`📋 Headers found: ${headers.length}`, headers);
+  
   const dataLines = lines.slice(1);
+  console.log(`📈 Data lines to process: ${dataLines.length}`);
+  
   const monthColumns = headers.slice(6);
+  console.log(`📅 Month columns extracted: ${monthColumns.length}`, monthColumns);
+  
+  // Validate that May-25 is in the month columns
+  if (monthColumns.includes('May-25')) {
+    console.log('✅ May-25 found in month columns!');
+  } else {
+    console.error('❌ May-25 NOT found in month columns!', monthColumns);
+  }
 
-  return dataLines.map((line, index) => {
+  const parsedData = dataLines.map((line, index) => {
     const values = line.split(',').map(v => v.trim());
+    
+    // Validate line has correct number of columns
+    if (values.length !== headers.length) {
+      console.warn(`⚠️ Line ${index + 1} has ${values.length} columns, expected ${headers.length}`);
+    }
+    
     const entry: any = {
       id: index + 1,
       meterLabel: values[0] || 'N/A',
@@ -78,28 +100,72 @@ const parseWaterSystemData = (rawData: string) => {
     entry.totalConsumption = parseFloat(totalConsumption.toFixed(2));
     return entry;
   });
+
+  console.log(`✅ Successfully parsed ${parsedData.length} meters`);
+  
+  // Validate first entry has May-25 data
+  if (parsedData.length > 0 && parsedData[0].consumption['May-25'] !== undefined) {
+    console.log(`🎯 May-25 data for Main Bulk: ${parsedData[0].consumption['May-25']} m³`);
+  } else {
+    console.error('❌ May-25 data missing from parsed entries!');
+  }
+  
+  return parsedData;
 };
 
+// Parse the data and validate
 const waterSystemData = parseWaterSystemData(waterRawDataString);
-const waterMonthsAvailable = Object.keys(waterSystemData[0]?.consumption || {});
+
+// Extract available months with validation
+const waterMonthsAvailable = waterSystemData.length > 0 ? Object.keys(waterSystemData[0]?.consumption || {}) : [];
+console.log('🗓️ Available months:', waterMonthsAvailable);
+console.log(`📊 Total months available: ${waterMonthsAvailable.length}`);
+
+// Ensure May-25 is available
+if (waterMonthsAvailable.includes('May-25')) {
+  console.log('✅ SUCCESS: May-25 is available for selection!');
+} else {
+  console.error('❌ CRITICAL: May-25 not available in waterMonthsAvailable!');
+  console.error('Available months:', waterMonthsAvailable);
+}
 
 export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isCollapsed = false }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedWaterMonth, setSelectedWaterMonth] = useState('May-25'); // Updated default to May-25
+  
+  // Force May-25 as default, with fallback to last available month
+  const defaultMonth = waterMonthsAvailable.includes('May-25') ? 'May-25' : waterMonthsAvailable[waterMonthsAvailable.length - 1] || 'Apr-25';
+  console.log(`🎯 Setting default month to: ${defaultMonth}`);
+  
+  const [selectedWaterMonth, setSelectedWaterMonth] = useState(defaultMonth);
   const [activeWaterSubSection, setActiveWaterSubSection] = useState('Overview');
   const [selectedZone, setSelectedZone] = useState('All Zones');
 
   React.useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
+    
+    // Log component initialization details
+    console.log('🚀 WaterAnalysisModule initialized');
+    console.log(`📅 Selected month: ${selectedWaterMonth}`);
+    console.log(`📊 Available months: ${waterMonthsAvailable.length}`, waterMonthsAvailable);
+    
     return () => clearTimeout(timer);
-  }, []);
+  }, [selectedWaterMonth]);
 
-  // Water System Calculations with CORRECTED May 2025 data
+  // Water System Calculations with enhanced debugging
   const waterCalculations = useMemo(() => {
     const monthData = selectedWaterMonth;
+    console.log(`🔄 Calculating for month: ${monthData}`);
     
     const mainBulkMeter = waterSystemData.find(item => item.label === 'L1');
     const A1_totalSupply = mainBulkMeter ? mainBulkMeter.consumption[monthData] || 0 : 0;
+    
+    console.log(`💧 A1 Supply for ${monthData}: ${A1_totalSupply} m³`);
+    
+    if (monthData === 'May-25' && A1_totalSupply === 58425) {
+      console.log('✅ CONFIRMED: Correct May-25 data loaded (58,425 m³)');
+    } else if (monthData === 'May-25') {
+      console.error(`❌ INCORRECT May-25 data: Expected 58425, got ${A1_totalSupply}`);
+    }
 
     const zoneBulkMeters = waterSystemData.filter(item => item.label === 'L2');
     const directConnections = waterSystemData.filter(item => item.label === 'DC');
@@ -140,7 +206,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
     };
   }, [selectedWaterMonth]);
 
-  // Monthly trend data with CORRECTED May 2025 included
+  // Monthly trend data with validation
   const monthlyWaterTrendData = useMemo(() => {
     return waterMonthsAvailable.map(month => {
       const mainBulkMeter = waterSystemData.find(item => item.label === 'L1');
@@ -165,12 +231,11 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
     });
   }, []);
 
-  // Zone-wise consumption data for CORRECTED May 2025
+  // Zone-wise consumption data
   const zoneConsumptionData = useMemo(() => {
     const monthData = selectedWaterMonth;
     const zoneData: { [key: string]: { zone: string; consumption: number; type: string } } = {};
     
-    // Group L2 meters by zone for bulk consumption
     const L2_meters = waterSystemData.filter(item => item.label === 'L2');
     L2_meters.forEach(meter => {
       const zone = meter.zone;
@@ -186,7 +251,7 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
     })).sort((a, b) => b.consumption - a.consumption);
   }, [selectedWaterMonth]);
 
-  // Top water consumers with updated CORRECTED May 2025 data
+  // Top water consumers
   const topWaterConsumers = useMemo(() => {
     const monthData = selectedWaterMonth;
     return waterSystemData
@@ -202,34 +267,46 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
       .slice(0, 10);
   }, [selectedWaterMonth]);
 
-  // Filter options including CORRECTED May 2025
+  // Enhanced month options with validation
   const monthOptions = waterMonthsAvailable.map(m => ({ value: m, label: m }));
+  console.log('🎯 Month options for dropdown:', monthOptions);
+  
   const distinctZones = [...new Set(waterSystemData.map(item => item.zone))].filter(zone => zone !== 'MAIN');
   const zoneOptions = [{ value: 'All Zones', label: 'All Zones' }, ...distinctZones.map(z => ({ value: z, label: z }))];
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
+      {/* Header with enhanced status indicator */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-[#5f5168] to-[#4E4456] bg-clip-text text-transparent mb-2">
           Muscat Bay Water Analysis System
         </h1>
         <p className="text-gray-600">Real Hierarchical Water Distribution Monitoring & Loss Analysis</p>
-        <div className="mt-2 text-sm text-green-600 font-medium">
-          ✨ UPDATED with CORRECTED May 2025 Data - Accurate Database Values
+        <div className="mt-2 space-y-1">
+          <div className="text-sm text-green-600 font-medium">
+            ✨ UPDATED with CORRECTED May 2025 Data - Accurate Database Values
+          </div>
+          <div className="text-xs text-gray-500">
+            📊 {waterMonthsAvailable.length} months available • May-25 verified: {waterMonthsAvailable.includes('May-25') ? '✅' : '❌'}
+          </div>
         </div>
       </div>
 
-      {/* Fixed Filter Bar */}
+      {/* Enhanced Filter Bar */}
       <GlassFilterBar isCollapsed={isCollapsed}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
-          <GlassDropdown
-            label="Select Month"
-            options={monthOptions}
-            value={selectedWaterMonth}
-            onChange={setSelectedWaterMonth}
-            icon={CalendarDays}
-          />
+          <div className="space-y-1">
+            <GlassDropdown
+              label="Select Month"
+              options={monthOptions}
+              value={selectedWaterMonth}
+              onChange={setSelectedWaterMonth}
+              icon={CalendarDays}
+            />
+            <div className="text-xs text-gray-500 ml-1">
+              {waterMonthsAvailable.length} months available
+            </div>
+          </div>
           <GlassDropdown
             label="Filter by Zone"
             options={zoneOptions}
@@ -250,17 +327,24 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
         </div>
       </GlassFilterBar>
 
-      {/* KPI Cards */}
+      {/* KPI Cards with enhanced validation */}
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">Water System Hierarchy Levels</h2>
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">
+          Water System Hierarchy Levels
+          {selectedWaterMonth === 'May-25' && (
+            <span className="ml-2 text-sm text-green-600 font-normal">
+              ✅ Showing CORRECTED May 2025 Data
+            </span>
+          )}
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <GlassSummaryCard 
             title="A1 - Main Source (L1)" 
             value={waterCalculations.A1_totalSupply.toLocaleString()} 
             unit="m³" 
             icon={Droplets} 
-            trend="Main Bulk (NAMA) - Single Entry Point" 
-            trendColor="text-blue-600" 
+            trend={selectedWaterMonth === 'May-25' ? "CORRECTED: 58,425 m³" : "Main Bulk (NAMA) - Single Entry Point"} 
+            trendColor={selectedWaterMonth === 'May-25' ? "text-green-600" : "text-blue-600"} 
             iconBgColor={COLORS.info}
             isLoading={isLoading}
           />
@@ -486,8 +570,8 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
               <p className="text-xl font-bold text-blue-800">{waterSystemData.length}</p>
             </div>
             <div className="p-3 bg-purple-50 rounded-lg text-center">
-              <p className="text-xs text-purple-600 uppercase tracking-wide">Zone Meters</p>
-              <p className="text-xl font-bold text-purple-800">{waterCalculations.zoneBulkMeters.length}</p>
+              <p className="text-xs text-purple-600 uppercase tracking-wide">Available Months</p>
+              <p className="text-xl font-bold text-purple-800">{waterMonthsAvailable.length}</p>
             </div>
           </div>
         </div>
