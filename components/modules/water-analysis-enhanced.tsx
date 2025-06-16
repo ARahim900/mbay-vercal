@@ -1000,7 +1000,7 @@ const WaterLossAnalysis = () => {
               <StyledSelect
                 id="typeFilter"
                 label="Filter by Type"
-                value={selectedType}
+value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
                 options={typeOptions}
                 icon={List}
