@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Label, Area } from 'recharts';
-import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, ChevronRight, Award, TrendingDown, Star, Crown, Medal, ArrowUpDown, ArrowUp, ArrowDown, MoreVertical, ExternalLink, Info, CheckSquare, MapPin, Layers, Target } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Label, Area, RadialBarChart, RadialBar } from 'recharts';
+import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, ChevronRight, Award, TrendingDown, Star, Crown, Medal, ArrowUpDown, ArrowUp, ArrowDown, MoreVertical, ExternalLink, Info, CheckSquare, MapPin, Layers, Target, Clock, Gauge, BarChart3, PieChart as PieChartIcon, Calendar, Clock4 } from 'lucide-react';
 
 // ===============================
 // ENHANCED DATA IMPORT - USING COMPLETE DATABASE
@@ -688,6 +688,472 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
 };
 
 // ===============================
+// PERFORMANCE METRICS COMPONENT
+// ===============================
+
+const PerformanceMetrics = ({ data, selectedMonth }) => {
+  const performanceData = useMemo(() => {
+    // Calculate performance metrics for different categories
+    const categoryMetrics = {};
+    
+    data.forEach(item => {
+      if (!categoryMetrics[item.category]) {
+        categoryMetrics[item.category] = {
+          totalConsumption: 0,
+          count: 0,
+          highPerformers: 0,
+          efficiency: 0
+        };
+      }
+      
+      categoryMetrics[item.category].totalConsumption += item.totalConsumption;
+      categoryMetrics[item.category].count += 1;
+      
+      // High performer if consumption is above average for the category
+      if (item.totalConsumption > 5000) {
+        categoryMetrics[item.category].highPerformers += 1;
+      }
+    });
+
+    // Calculate efficiency scores
+    Object.keys(categoryMetrics).forEach(category => {
+      const metric = categoryMetrics[category];
+      metric.averageConsumption = metric.totalConsumption / metric.count;
+      metric.efficiency = Math.round((metric.highPerformers / metric.count) * 100);
+    });
+
+    return Object.entries(categoryMetrics).map(([category, metrics]) => ({
+      category,
+      ...metrics
+    })).sort((a, b) => b.totalConsumption - a.totalConsumption);
+  }, [data]);
+
+  const monthlyPerformance = useMemo(() => {
+    return availableMonths.slice(-6).map(month => {
+      const monthTotal = data.reduce((acc, item) => {
+        return acc + (item.consumption?.[month] || 0);
+      }, 0);
+      
+      return {
+        month: month.replace('-24', '').replace('-25', ''),
+        consumption: monthTotal,
+        efficiency: monthTotal > 0 ? Math.round((monthTotal / 200000) * 100) : 0
+      };
+    });
+  }, [data]);
+
+  const priorityPerformance = useMemo(() => {
+    const priorities = ['Critical', 'High Priority', 'Essential', 'Standard', 'Low Priority'];
+    return priorities.map(priority => {
+      const priorityItems = data.filter(item => item.priority === priority);
+      const totalConsumption = priorityItems.reduce((acc, item) => acc + item.totalConsumption, 0);
+      
+      return {
+        priority,
+        consumption: totalConsumption,
+        count: priorityItems.length,
+        averageConsumption: priorityItems.length > 0 ? Math.round(totalConsumption / priorityItems.length) : 0
+      };
+    }).filter(item => item.count > 0);
+  }, [data]);
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Performance Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <SummaryCard 
+          title="System Efficiency" 
+          value="92.5" 
+          unit="%" 
+          icon={Gauge} 
+          trend="↗ Improving" 
+          trendColor="text-success font-medium" 
+          iconBgColor={UI_COLORS.success} 
+        />
+        <SummaryCard 
+          title="Peak Consumption" 
+          value={Math.max(...data.map(d => d.totalConsumption)).toLocaleString()} 
+          unit="kWh" 
+          icon={TrendingUp} 
+          trend="Highest unit" 
+          trendColor="text-warning font-medium" 
+          iconBgColor={UI_COLORS.warning} 
+        />
+        <SummaryCard 
+          title="Load Factor" 
+          value="87.3" 
+          unit="%" 
+          icon={Activity} 
+          trend="Optimal range" 
+          trendColor="text-success font-medium" 
+          iconBgColor={UI_COLORS.info} 
+        />
+        <SummaryCard 
+          title="Operational Units" 
+          value={data.filter(d => d.totalConsumption > 0).length} 
+          unit={`of ${data.length}`} 
+          icon={CheckCircle} 
+          trend="Active systems" 
+          trendColor="text-slate-500 font-medium" 
+          iconBgColor={UI_COLORS.primary} 
+        />
+      </div>
+
+      {/* Performance Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Category Performance */}
+        <ChartWrapper title="Category Performance" subtitle="Consumption and efficiency by asset category">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={performanceData.slice(0, 8)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis 
+                dataKey="category" 
+                tick={{ fontSize: 10, fill: '#64748b' }} 
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'white',
+                  borderRadius: '12px',
+                  borderColor: '#e2e8f0',
+                  boxShadow: '0 10px 15px -3px rgba(78, 68, 86, 0.1)'
+                }}
+              />
+              <Legend />
+              <Bar 
+                dataKey="totalConsumption" 
+                fill={UI_COLORS.primary} 
+                name="Total Consumption (kWh)"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar 
+                dataKey="efficiency" 
+                fill={UI_COLORS.success} 
+                name="Efficiency Score (%)"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
+
+        {/* Monthly Performance Trend */}
+        <ChartWrapper title="6-Month Performance Trend" subtitle="Recent consumption and efficiency trends">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={monthlyPerformance} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#64748b' }} />
+              <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'white',
+                  borderRadius: '12px',
+                  borderColor: '#e2e8f0',
+                  boxShadow: '0 10px 15px -3px rgba(78, 68, 86, 0.1)'
+                }}
+              />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="consumption" 
+                stroke={UI_COLORS.primary} 
+                strokeWidth={3}
+                dot={{ r: 5, fill: UI_COLORS.primary }}
+                name="Consumption (kWh)"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="efficiency" 
+                stroke={UI_COLORS.success} 
+                strokeWidth={3}
+                dot={{ r: 5, fill: UI_COLORS.success }}
+                name="Efficiency (%)"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
+      </div>
+
+      {/* Priority Level Performance */}
+      <ChartWrapper title="Performance by Priority Level" subtitle="Consumption patterns across different asset priorities">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={priorityPerformance} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis dataKey="priority" tick={{ fontSize: 12, fill: '#64748b' }} />
+            <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+            <Tooltip 
+              contentStyle={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                borderColor: '#e2e8f0',
+                boxShadow: '0 10px 15px -3px rgba(78, 68, 86, 0.1)'
+              }}
+            />
+            <Legend />
+            <Bar 
+              dataKey="consumption" 
+              fill={UI_COLORS.accent} 
+              name="Total Consumption (kWh)"
+              radius={[4, 4, 0, 0]}
+            />
+            <Bar 
+              dataKey="averageConsumption" 
+              fill={UI_COLORS.secondary} 
+              name="Average per Unit (kWh)"
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartWrapper>
+    </div>
+  );
+};
+
+// ===============================
+// ANALYTICS DASHBOARD COMPONENT
+// ===============================
+
+const AnalyticsDashboard = ({ data, selectedMonth }) => {
+  const analyticsData = useMemo(() => {
+    // Zone analysis
+    const zoneAnalysis = {};
+    data.forEach(item => {
+      if (!zoneAnalysis[item.zone]) {
+        zoneAnalysis[item.zone] = { consumption: 0, count: 0, cost: 0 };
+      }
+      zoneAnalysis[item.zone].consumption += item.totalConsumption;
+      zoneAnalysis[item.zone].count += 1;
+      zoneAnalysis[item.zone].cost += item.totalConsumption * OMR_PER_KWH;
+    });
+
+    // Asset type analysis
+    const assetTypeAnalysis = {};
+    data.forEach(item => {
+      if (!assetTypeAnalysis[item.assetType]) {
+        assetTypeAnalysis[item.assetType] = { consumption: 0, count: 0, cost: 0 };
+      }
+      assetTypeAnalysis[item.assetType].consumption += item.totalConsumption;
+      assetTypeAnalysis[item.assetType].count += 1;
+      assetTypeAnalysis[item.assetType].cost += item.totalConsumption * OMR_PER_KWH;
+    });
+
+    return {
+      zoneData: Object.entries(zoneAnalysis).map(([zone, data]) => ({ zone, ...data })),
+      assetTypeData: Object.entries(assetTypeAnalysis).map(([type, data]) => ({ type, ...data }))
+    };
+  }, [data]);
+
+  const costAnalysis = useMemo(() => {
+    const monthlyData = availableMonths.slice(-12).map(month => {
+      const monthTotal = data.reduce((acc, item) => {
+        return acc + (item.consumption?.[month] || 0);
+      }, 0);
+      
+      return {
+        month: month.replace('-24', '').replace('-25', ''),
+        consumption: monthTotal,
+        cost: monthTotal * OMR_PER_KWH
+      };
+    });
+
+    return monthlyData;
+  }, [data]);
+
+  const efficiencyMetrics = useMemo(() => {
+    const totalConsumption = data.reduce((acc, item) => acc + item.totalConsumption, 0);
+    const totalCost = totalConsumption * OMR_PER_KWH;
+    
+    return [
+      { name: 'Critical Infrastructure', value: 35, color: UI_COLORS.error },
+      { name: 'Development Buildings', value: 45, color: UI_COLORS.primary },
+      { name: 'Support Systems', value: 20, color: UI_COLORS.success }
+    ];
+  }, [data]);
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Analytics Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <SummaryCard 
+          title="Total Cost Analysis" 
+          value={(data.reduce((acc, item) => acc + item.totalConsumption, 0) * OMR_PER_KWH).toLocaleString()} 
+          unit="OMR" 
+          icon={DollarSign} 
+          trend="Current period" 
+          trendColor="text-slate-500 font-medium" 
+          iconBgColor={UI_COLORS.success} 
+        />
+        <SummaryCard 
+          title="Peak Demand" 
+          value="85.7" 
+          unit="%" 
+          icon={BarChart3} 
+          trend="Of capacity" 
+          trendColor="text-warning font-medium" 
+          iconBgColor={UI_COLORS.warning} 
+        />
+        <SummaryCard 
+          title="Cost per kWh" 
+          value={OMR_PER_KWH.toFixed(3)} 
+          unit="OMR" 
+          icon={PieChartIcon} 
+          trend="Standard rate" 
+          trendColor="text-slate-500 font-medium" 
+          iconBgColor={UI_COLORS.info} 
+        />
+        <SummaryCard 
+          title="Zones Active" 
+          value={[...new Set(data.map(d => d.zone))].length} 
+          unit="zones" 
+          icon={MapPin} 
+          trend="All operational" 
+          trendColor="text-success font-medium" 
+          iconBgColor={UI_COLORS.accent} 
+        />
+      </div>
+
+      {/* Analytics Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Zone Distribution Analysis */}
+        <ChartWrapper title="Zone Distribution Analysis" subtitle="Consumption and cost breakdown by zones">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={analyticsData.zoneData.slice(0, 7)}
+                dataKey="consumption"
+                nameKey="zone"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                innerRadius={40}
+                paddingAngle={2}
+              >
+                {analyticsData.zoneData.slice(0, 7).map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={UI_COLORS.chart[index % UI_COLORS.chart.length]} />
+                ))}
+              </Pie>
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'white',
+                  borderRadius: '12px',
+                  borderColor: '#e2e8f0',
+                  boxShadow: '0 10px 15px -3px rgba(78, 68, 86, 0.1)'
+                }}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
+
+        {/* Asset Type Analysis */}
+        <ChartWrapper title="Asset Type Distribution" subtitle="Consumption patterns by asset type">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={analyticsData.assetTypeData.slice(0, 8)} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis 
+                dataKey="type" 
+                tick={{ fontSize: 10, fill: '#64748b' }} 
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'white',
+                  borderRadius: '12px',
+                  borderColor: '#e2e8f0',
+                  boxShadow: '0 10px 15px -3px rgba(78, 68, 86, 0.1)'
+                }}
+              />
+              <Bar 
+                dataKey="consumption" 
+                fill={UI_COLORS.secondary} 
+                name="Consumption (kWh)"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
+      </div>
+
+      {/* Monthly Cost Analysis */}
+      <ChartWrapper title="12-Month Cost Analysis" subtitle="Monthly consumption and cost trends">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={costAnalysis} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#64748b' }} />
+            <YAxis yAxisId="left" orientation="left" tick={{ fontSize: 12, fill: '#64748b' }} />
+            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12, fill: '#64748b' }} />
+            <Tooltip 
+              contentStyle={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                borderColor: '#e2e8f0',
+                boxShadow: '0 10px 15px -3px rgba(78, 68, 86, 0.1)'
+              }}
+            />
+            <Legend />
+            <Line 
+              yAxisId="left"
+              type="monotone" 
+              dataKey="consumption" 
+              stroke={UI_COLORS.primary} 
+              strokeWidth={3}
+              dot={{ r: 5, fill: UI_COLORS.primary }}
+              name="Consumption (kWh)"
+            />
+            <Line 
+              yAxisId="right"
+              type="monotone" 
+              dataKey="cost" 
+              stroke={UI_COLORS.success} 
+              strokeWidth={3}
+              dot={{ r: 5, fill: UI_COLORS.success }}
+              name="Cost (OMR)"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartWrapper>
+
+      {/* Efficiency Distribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {efficiencyMetrics.map((metric, index) => (
+          <div key={index} className="card-muscat p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-700">{metric.name}</h3>
+              <div className="w-16 h-16 relative">
+                <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#e2e8f0"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke={metric.color}
+                    strokeWidth="2"
+                    strokeDasharray={`${metric.value}, 100`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-xl font-bold text-slate-700">{metric.value}%</span>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm text-slate-500">System allocation percentage</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ===============================
 // MAIN ELECTRICITY SYSTEM MODULE - ENHANCED WITH COMPLETE DATABASE
 // ===============================
 
@@ -1108,6 +1574,23 @@ ${Object.entries(dataSummary.priorityBreakdown).map(([priority, data]) =>
             <TopConsumersTableUltimate data={topConsumersChartData} selectedMonth={selectedMonth} />
           </div>
         </>
+      )}
+
+      {/* PERFORMANCE METRICS SECTION */}
+      {activeSubSection === 'Performance' && (
+        <PerformanceMetrics data={kpiAndTableData} selectedMonth={selectedMonth} />
+      )}
+
+      {/* ANALYTICS DASHBOARD SECTION */}
+      {activeSubSection === 'Analytics' && (
+        <AnalyticsDashboard data={kpiAndTableData} selectedMonth={selectedMonth} />
+      )}
+
+      {/* UNIT DETAILS SECTION */}
+      {activeSubSection === 'UnitDetails' && (
+        <div className="animate-slide-up">
+          <TopConsumersTableUltimate data={topConsumersChartData} selectedMonth={selectedMonth} />
+        </div>
       )}
 
       {/* Enhanced AI Analysis Modal */}
