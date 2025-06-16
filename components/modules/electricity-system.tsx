@@ -493,7 +493,10 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
 
   const kpiAndTableData = useMemo(() => {
     if (selectedMonth === "All Months") {
-        return filteredElectricityData.map(item => ({ ...item, }));
+        return filteredElectricityData.map(item => ({ 
+          ...item, 
+          totalConsumption: Object.values(item.consumption).reduce((acc, val) => acc + (val || 0), 0)
+        }));
     }
     return filteredElectricityData.map(item => ({ ...item, totalConsumption: item.consumption[selectedMonth] || 0, }));
   }, [filteredElectricityData, selectedMonth]);
@@ -1127,7 +1130,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                 />
                 <SummaryCard 
                   title="Growth Rate" 
-                  value={analyticsData.growthRate > 0 ? '+' : ''}{analyticsData.growthRate} 
+                  value={`${analyticsData.growthRate > 0 ? '+' : ''}${analyticsData.growthRate}`} 
                   unit="%" 
                   icon={TrendingUp} 
                   trend="Monthly Trend" 
