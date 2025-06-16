@@ -18,6 +18,152 @@ interface WaterAnalysisModuleProps {
   isCollapsed?: boolean; // Pass this from parent component that knows sidebar state
 }
 
+// Enhanced Gauge Chart Component for Water Analysis
+const GaugeChart: React.FC<{
+  value: number;
+  maxValue: number;
+  title: string;
+  subtitle: string;
+  gaugeType: 'zoneBulk' | 'individual' | 'loss';
+  size?: number;
+}> = ({ value, maxValue, title, subtitle, gaugeType, size = 140 }) => {
+  
+  // Calculate percentage and angle
+  const percentage = Math.min((value / maxValue) * 100, 100);
+  const angle = (percentage / 100) * 180; // Half circle (180 degrees)
+  
+  // Color coding based on gauge type
+  const getGaugeColor = () => {
+    switch (gaugeType) {
+      case 'zoneBulk':
+        return '#3B82F6'; // Blue for Zone Bulk
+      case 'individual':
+        return '#10B981'; // Green for Individual Consumption
+      case 'loss':
+        // Dynamic color for loss based on percentage
+        if (percentage <= 5) return '#10B981'; // Green - Good
+        if (percentage <= 15) return '#F59E0B'; // Orange - Warning  
+        return '#EF4444'; // Red - Critical
+      default:
+        return '#6B7280';
+    }
+  };
+
+  const gaugeColor = getGaugeColor();
+  const center = size / 2;
+  const radius = size * 0.35;
+  const strokeWidth = size * 0.1;
+
+  // Create arc path
+  const createArcPath = (startAngle: number, endAngle: number) => {
+    const start = polarToCartesian(center, center, radius, endAngle);
+    const end = polarToCartesian(center, center, radius, startAngle);
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+  };
+
+  const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
+    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+    return {
+      x: centerX + (radius * Math.cos(angleInRadians)),
+      y: centerY + (radius * Math.sin(angleInRadians))
+    };
+  };
+
+  return (
+    <div className="flex flex-col items-center p-4 bg-white/30 backdrop-blur-md rounded-xl border border-white/20 shadow-lg">
+      <div className="relative">
+        <svg width={size} height={size * 0.7} className="transform -rotate-0">
+          {/* Background arc */}
+          <path
+            d={createArcPath(0, 180)}
+            fill="none"
+            stroke="#E5E7EB"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+          />
+          {/* Progress arc */}
+          <path
+            d={createArcPath(0, angle)}
+            fill="none"
+            stroke={gaugeColor}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            className="transition-all duration-1000 ease-out"
+          />
+          {/* Center value text */}
+          <text
+            x={center}
+            y={center - 5}
+            textAnchor="middle"
+            className="text-lg font-bold fill-gray-800"
+          >
+            {gaugeType === 'loss' ? `${percentage.toFixed(1)}%` : value.toLocaleString()}
+          </text>
+          <text
+            x={center}
+            y={center + 12}
+            textAnchor="middle"
+            className="text-xs fill-gray-600"
+          >
+            {gaugeType === 'loss' ? 'Loss Rate' : 'm³'}
+          </text>
+        </svg>
+      </div>
+      
+      <div className="text-center mt-2">
+        <h4 className="font-semibold text-sm text-gray-800">{title}</h4>
+        <p className="text-xs text-gray-600">{subtitle}</p>
+        {gaugeType !== 'loss' && (
+          <p className="text-xs text-gray-500 mt-1">
+            Max: {maxValue.toLocaleString()} m³
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Three Gauge Set Component
+const ThreeGaugeSet: React.FC<{
+  zoneBulk: number;
+  individualTotal: number;
+  maxZoneBulk: number;
+  maxIndividual: number;
+  lossPercentage: number;
+  title: string;
+}> = ({ zoneBulk, individualTotal, maxZoneBulk, maxIndividual, lossPercentage, title }) => {
+  
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-gray-700 text-center">{title}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <GaugeChart
+          value={zoneBulk}
+          maxValue={maxZoneBulk}
+          title="Zone Bulk"
+          subtitle="Total Supply"
+          gaugeType="zoneBulk"
+        />
+        <GaugeChart
+          value={individualTotal}
+          maxValue={maxIndividual}
+          title="Individual Total"
+          subtitle="End Consumption"
+          gaugeType="individual"
+        />
+        <GaugeChart
+          value={lossPercentage}
+          maxValue={30} // Max 30% for loss gauge
+          title="System Loss"
+          subtitle="Loss Percentage"
+          gaugeType="loss"
+        />
+      </div>
+    </div>
+  );
+};
+
 // Water System Data - CORRECTED May 2025 data with enhanced validation
 const waterRawDataString = `Meter Label,Acct #,Zone,Type,Parent Meter,Label,Jan-24,Feb-24,Mar-24,Apr-24,May-24,Jun-24,Jul-24,Aug-24,Sep-24,Oct-24,Nov-24,Dec-24,Jan-25,Feb-25,Mar-25,Apr-25,May-25
 Main Bulk (NAMA),C43659,Main Bulk,Main BULK,NAMA,L1,32803,27996,23860,31869,30737,41953,35166,35420,41341,31519,35290,36733,32580,44043,34915,46039,58425
@@ -206,6 +352,30 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
     };
   }, [selectedWaterMonth]);
 
+  // Calculate max values for gauges across all months
+  const maxValues = useMemo(() => {
+    let maxZoneBulk = 0;
+    let maxIndividual = 0;
+    
+    waterMonthsAvailable.forEach(month => {
+      const zoneBulkTotal = waterSystemData
+        .filter(item => item.label === 'L2')
+        .reduce((sum, meter) => sum + (meter.consumption[month] || 0), 0);
+      
+      const individualTotal = waterSystemData
+        .filter(item => item.label === 'L3')
+        .reduce((sum, meter) => sum + (meter.consumption[month] || 0), 0);
+      
+      if (zoneBulkTotal > maxZoneBulk) maxZoneBulk = zoneBulkTotal;
+      if (individualTotal > maxIndividual) maxIndividual = individualTotal;
+    });
+    
+    return {
+      zoneBulk: Math.ceil(maxZoneBulk * 1.1), // Add 10% padding
+      individual: Math.ceil(maxIndividual * 1.1)
+    };
+  }, []);
+
   // Monthly trend data with validation
   const monthlyWaterTrendData = useMemo(() => {
     return waterMonthsAvailable.map(month => {
@@ -326,6 +496,18 @@ export const WaterAnalysisModule: React.FC<WaterAnalysisModuleProps> = ({ isColl
           </GlassButton>
         </div>
       </GlassFilterBar>
+
+      {/* THREE GAUGE CHARTS - Main Feature */}
+      <GlassCard className="p-6">
+        <ThreeGaugeSet
+          zoneBulk={waterCalculations.L2_total}
+          individualTotal={waterCalculations.L3_total}
+          maxZoneBulk={maxValues.zoneBulk}
+          maxIndividual={maxValues.individual}
+          lossPercentage={Math.abs(waterCalculations.stage2LossPercent)}
+          title={`Water System Overview - ${selectedWaterMonth}`}
+        />
+      </GlassCard>
 
       {/* KPI Cards with enhanced validation */}
       <div className="mb-4">
