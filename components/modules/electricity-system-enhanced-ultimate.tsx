@@ -1,15 +1,31 @@
 import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Label, Area } from 'recharts';
-import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, ChevronRight, Award, TrendingDown, Star, Crown, Medal, ArrowUpDown, ArrowUp, ArrowDown, MoreVertical, ExternalLink, Info, CheckSquare } from 'lucide-react';
+import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, ChevronRight, Award, TrendingDown, Star, Crown, Medal, ArrowUpDown, ArrowUp, ArrowDown, MoreVertical, ExternalLink, Info, CheckSquare, MapPin, Layers, Target } from 'lucide-react';
 
 // ===============================
-// DESIGN SYSTEM & CONSTANTS
+// ENHANCED DATA IMPORT - USING COMPLETE DATABASE
+// ===============================
+import { 
+  rawDataString,
+  parseData,
+  availableMonths,
+  assetTypeOptions,
+  categoryOptions,
+  zoneOptions,
+  priorityOptions,
+  KWH_TO_OMR_RATE,
+  getDataSummary,
+  COLORS
+} from './electricity-data-enhanced';
+
+// ===============================
+// DESIGN SYSTEM & CONSTANTS  
 // ===============================
 
-const OMR_PER_KWH = 0.025;
+const OMR_PER_KWH = KWH_TO_OMR_RATE; // Use the rate from enhanced data (0.025)
 
 // Enhanced Muscat Bay Color Scheme - Using Tailwind Classes
-const COLORS = {
+const UI_COLORS = {
   primary: '#4E4456',           // Main brand color
   primaryLight: '#7E708A',      // Lighter variant
   primaryDark: '#3B3241',       // Darker variant
@@ -28,134 +44,10 @@ const COLORS = {
 };
 
 // ===============================
-// ELECTRICITY DATA
+// PARSE ENHANCED DATA - ALL 56 UNITS
 // ===============================
 
-const rawDataString = `Name,Type,Meter Account No.,Apr-24,May-24,Jun-24,Jul-24,Aug-24,Sep-24,Oct-24,Nov-24,Dec-24,Jan-25,Feb-25,Mar-25,Apr-26
-Pumping Station 01,PS,R52330,1608,1940,1783,1874,1662,3822,6876,1629,1640,1903,2095,3032,3940
-Pumping Station 03,PS,R52329,31,47,25,3,0,0,33,0,179,33,137,131,276.6
-Pumping Station 04,PS,R52327,1200,1350,1180,1456,1234,2100,3456,919,921,245,870,646,985
-Pumping Station 05,PS,R52325,2800,2650,2890,2340,2567,2980,3200,2599,1952,2069,2521,2601,3317
-Lifting Station 02,LS,R52328,0,0,0,0,0,0,0,0,0,0,0,0,0
-Lifting Station 03,LS,R52333,120,135,98,87,76,145,156,91,185,28,40,58,83
-Lifting Station 04,LS,R52324,890,765,678,723,645,712,834,686,631,701,638,572,750
-Lifting Station 05,LS,R52332,3200,3100,2980,2890,2756,3145,3289,2413,2643,2873,3665,3069,4201
-Irrigation Tank 01,IT,R52326,1890,1675,1456,1598,1734,1823,1945,1432,1268,1689,2214,1718,1663
-Irrigation Tank 02,IT,R52331,1200,1156,1089,1134,1076,1245,1345,974,1026,983,1124,1110,1830
-Irrigation Tank 03,IT,R52323,345,398,456,378,398,445,523,269,417,840,1009,845,1205
-Irrigation Tank 04,IT,R53195,278,245,189,234,198,267,298,212,213,40,233,235,447
-Actuator DB 01,ADB,R53196,45,38,42,35,29,41,44,34,29,7,28,24,27
-Actuator DB 02,ADB,R51900,289,267,234,198,176,245,278,232,161,33,134,139,211
-Actuator DB 03,ADB,R51904,267,234,198,223,187,234,256,220,199,56,203,196,212
-Actuator DB 04,ADB,R51901,198,234,167,189,156,201,223,172,173,186,161,227,253
-Actuator DB 05,ADB,R51907,23,19,16,21,14,18,22,18,16,4,18,14,18
-Actuator DB 06,ADB,R51909,56,52,48,51,44,49,53,49,44,47,45,38,47
-Street Light FP 01,SL,R53197,4200,3890,3567,3445,3234,3567,3890,3593,3147,787,3228,2663,3230
-Street Light FP 02,SL,R51906,2890,2567,2345,2456,2198,2345,2567,2361,2258,633,2298,1812,2153
-Street Light FP 03,SL,R51905,2456,2234,2098,2156,1987,2098,2234,2060,1966,1868,1974,1562,1847
-Street Light FP 04,SL,R51908,2234,1987,1345,1456,1234,1345,1987,2299,1389,325,1406,1401,2413
-Street Light FP 05,SL,R51902,1987,1756,1456,1598,1345,1456,1756,1477,1121,449,2070,1870,3233
-Beachwell,BW,R51903,28000,32000,35000,30000,28000,32000,35000,24383,37236,38168,18422,40,27749
-Helipad,HP,R52334,0,0,0,0,0,0,0,0,0,0,0,0,0
-Central Park,CP,R54672,12000,15000,18000,16000,14000,16000,18000,9604,19032,22819,19974,14190,13846
-Guard House,GH,R53651,1456,1345,1234,1298,1156,1234,1345,1225,814,798,936,879,1467
-Security Building,SB,R53649,6789,6234,5890,6123,5678,5890,6234,5702,5131,5559,5417,4504,5978
-ROP Building,RB,R53648,4234,3890,3567,3745,3456,3567,3890,3581,2352,2090,2246,1939,3537
-Apartment D44,APT,R53705,1678,1456,1234,1345,1189,1234,1456,1377,764,647,657,650,1306
-Apartment D45,APT,R53665,1456,1298,1134,1245,1089,1134,1298,1252,841,670,556,608,1069
-Apartment D46,APT,R53700,1789,1567,1345,1456,1298,1345,1567,1577,890,724,690,752,1292
-Apartment D47,APT,R53690,1890,1678,1456,1567,1398,1456,1678,1774,1055,887,738,792,1545
-Apartment D48,APT,R53666,1234,1089,945,1034,912,945,1089,1046,785,826,676,683,1092
-Apartment D49,APT,R53715,1789,1567,1345,1456,1298,1345,1567,1608,1068,860,837,818,984
-Apartment D50,APT,R53672,1345,1189,1034,1134,1001,1034,1189,1102,789,765,785,707,1331
-Apartment D51,APT,R53657,1987,1756,1456,1598,1423,1456,1756,1855,710,661,682,642,904
-Apartment D52,APT,R53699,2234,1987,1678,1834,1634,1678,1987,1986,1208,979,896,952,1651
-Apartment D53,APT,R54782,1987,1756,1456,1598,1423,1456,1756,1764,968,693,732,760,1281
-Apartment D54,APT,R54793,1890,1678,1456,1567,1398,1456,1678,1777,834,681,559,531,1042
-Apartment D55,APT,R54804,1987,1756,1456,1598,1423,1456,1756,1828,1035,677,616,719,1417
-Apartment D56,APT,R54815,1987,1756,1456,1598,1423,1456,1756,1805,937,683,731,765,1536
-Apartment D57,APT,R54826,2456,2234,1987,2134,1901,1987,2234,2262,1332,990,846,795,1732
-Apartment D58,APT,R54836,1678,1456,1234,1345,1189,1234,1456,1534,778,593,535,594,1415
-Apartment D59,APT,R54847,1789,1567,1345,1456,1298,1345,1567,1634,998,628,582,697,1138
-Apartment D60,APT,R54858,1456,1298,1134,1245,1089,1134,1298,1275,705,674,612,679,1069
-Apartment D61,APT,R54869,1890,1678,1456,1567,1398,1456,1678,1734,977,767,800,719,1394
-Apartment D62,APT,R53717,1789,1567,1345,1456,1298,1345,1567,1630,957,715,677,595,800
-Apartment D74,APT,R53675,1456,1298,1134,1245,1089,1134,1298,1303,766,639,566,463,1079
-Apartment D75,APT,R53668,1298,1134,987,1089,956,987,1134,1169,702,475,508,554,912
-Village Square,VS,R56628,7890,6789,5890,6234,5567,5890,6789,6229,3695,3304,3335,3383,4415
-Zone-3 Light FP-17,ZL,R54872,0,0,0,0,0,0,0,0,0,0,0,0,0
-Zone-3 Light FP-21,ZL,R54873,56,48,42,47,39,42,48,40,48,13,57,47,55
-Zone-3 Light FP-22,ZL,R54874,8,7,6,7,5,6,7,6,8,0,0,0,0
-Bank Muscat,BM,MISSING_METER,189,156,134,148,123,134,156,148,72,59,98,88,163
-CIF Kitchen,CK,MISSING_METER,18900,17800,16700,17234,15890,16700,17800,16742,15554,16788,16154,14971,18446`.trim();
-
-const extractCategory = (unitName, type) => {
-    if (!unitName && !type) return 'Other';
-    
-    switch(type) {
-        case 'PS': return 'Pumping Station';
-        case 'LS': return 'Lifting Station';
-        case 'IT': return 'Irrigation Tank';
-        case 'ADB': return 'Actuator DB';
-        case 'SL': return 'Street Light';
-        case 'BW': return 'Beachwell';
-        case 'HP': return 'Helipad';
-        case 'CP': return 'Central Park';
-        case 'GH': return 'Guard House';
-        case 'SB': return 'Security Building';
-        case 'RB': return 'ROP Building';
-        case 'APT': return 'Apartment';
-        case 'VS': return 'Village Square';
-        case 'ZL': return 'Zone Light';
-        case 'BM': return 'Bank Muscat';
-        case 'CK': return 'CIF Kitchen';
-        default:
-            const lowerUnitName = unitName?.toLowerCase() || '';
-            if (lowerUnitName.includes('pumping station')) return 'Pumping Station';
-            if (lowerUnitName.includes('lifting station')) return 'Lifting Station';
-            if (lowerUnitName.includes('irrigation tank')) return 'Irrigation Tank';
-            return 'Other';
-    }
-};
-
-const parseData = (rawData) => {
-  const lines = rawData.split('\n');
-  const headerLine = lines[0].split(',').map(h => h.trim());
-  const dataLines = lines.slice(1);
-  const monthsHeader = headerLine.slice(3);
-
-  return dataLines.map((line, index) => {
-    const values = line.split(',');
-    const unitName = values[0]?.trim() || 'N/A';
-    const type = values[1]?.trim() || 'N/A';
-    const entry = {
-      id: index + 1,
-      slNo: index + 1,
-      zone: 'N/A',
-      type: type,
-      muscatBayNumber: 'N/A',
-      unitName: unitName,
-      category: extractCategory(unitName, type),
-      meterAccountNo: values[2]?.trim() || 'N/A',
-      consumption: {},
-      totalConsumption: 0, 
-    };
-    
-    let currentOverallTotal = 0;
-    monthsHeader.forEach((month, i) => {
-      const consumptionValue = parseFloat(values[3 + i]);
-      entry.consumption[month] = isNaN(consumptionValue) ? 0 : consumptionValue;
-      if (!isNaN(consumptionValue)) {
-        currentOverallTotal += consumptionValue;
-      }
-    });
-    entry.totalConsumption = parseFloat(currentOverallTotal.toFixed(2));
-    return entry;
-  });
-};
-
 const initialElectricityData = parseData(rawDataString);
-const availableMonths = Object.keys(initialElectricityData[0].consumption);
 
 // ===============================
 // ENHANCED SHARED COMPONENTS
@@ -169,7 +61,7 @@ const SummaryCard = ({ title, value, icon, unit, trend, trendColor, iconBgColor,
         <h3 className="text-slate-500 font-semibold text-sm">{title}</h3>
         <div 
           className="p-3 rounded-full text-white shadow-muscat group-hover:scale-110 transition-transform duration-200 group-hover:animate-glow" 
-          style={{backgroundColor: iconBgColor || COLORS.primary }}
+          style={{backgroundColor: iconBgColor || UI_COLORS.primary }}
         >
           <IconComponent size={20} />
         </div>
@@ -229,7 +121,7 @@ const StyledSelect = ({ label, value, onChange, options, id, icon: Icon, disable
 };
 
 // ===============================
-// ULTIMATE TOP CONSUMERS TABLE - COMPLETELY FIXED OVERFLOW & PERFECT RESPONSIVE DESIGN
+// ENHANCED TOP CONSUMERS TABLE - COMPLETELY FIXED OVERFLOW & PERFECT RESPONSIVE DESIGN
 // ===============================
 
 const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
@@ -251,6 +143,12 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
       }
       if (sortBy === 'category') {
         return sortOrder === 'desc' ? b.category.localeCompare(a.category) : a.category.localeCompare(b.category);
+      }
+      if (sortBy === 'zone') {
+        return sortOrder === 'desc' ? b.zone.localeCompare(a.zone) : a.zone.localeCompare(b.zone);
+      }
+      if (sortBy === 'priority') {
+        return sortOrder === 'desc' ? b.priority.localeCompare(a.priority) : a.priority.localeCompare(b.priority);
       }
       return 0;
     });
@@ -279,15 +177,42 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
     const styles = {
       'Pumping Station': 'badge-muscat-primary',
       'Lifting Station': 'bg-success/10 text-success px-2 py-1 rounded-full text-xs font-medium border border-success/20',
-      'Apartment': 'bg-secondary/10 text-secondary-800 px-2 py-1 rounded-full text-xs font-medium border border-secondary/20',
+      'Development Building': 'bg-secondary/10 text-secondary-800 px-2 py-1 rounded-full text-xs font-medium border border-secondary/20',
       'Street Light': 'badge-muscat-warning',
       'Beachwell': 'bg-info/10 text-info px-2 py-1 rounded-full text-xs font-medium border border-info/20',
       'Central Park': 'badge-muscat-success',
-      'CIF Kitchen': 'bg-accent/10 text-accent-700 px-2 py-1 rounded-full text-xs font-medium border border-accent/20',
+      'Commercial/Retail': 'bg-accent/10 text-accent-700 px-2 py-1 rounded-full text-xs font-medium border border-accent/20',
       'Security Building': 'badge-muscat-error',
       'Village Square': 'bg-muscat-purple/10 text-muscat-purple px-2 py-1 rounded-full text-xs font-medium border border-muscat-purple/20',
+      'Irrigation Tank': 'bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium border border-blue-200',
+      'Actuator DB': 'bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs font-medium border border-purple-200',
+      'Landscape Light (Zone 3)': 'bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium border border-green-200',
     };
     return styles[category] || 'bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium border border-slate-200';
+  };
+
+  const getZoneBadgeStyle = (zone) => {
+    const styles = {
+      'Zone 3': 'bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-medium',
+      'Zone 8': 'bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium',
+      'Infrastructure Zone': 'bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium',
+      'Development Zone': 'bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium',
+      'Central Zone': 'bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium',
+      'Village Zone': 'bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs font-medium',
+      'General Zone': 'bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium',
+    };
+    return styles[zone] || 'bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium';
+  };
+
+  const getPriorityBadgeStyle = (priority) => {
+    const styles = {
+      'Critical': 'bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold border border-red-300',
+      'High Priority': 'bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium border border-orange-300',
+      'Essential': 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium border border-yellow-300',
+      'Standard': 'bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium border border-blue-300',
+      'Low Priority': 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium border border-gray-300',
+    };
+    return styles[priority] || 'bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium border border-slate-200';
   };
 
   const handleSort = (field) => {
@@ -345,7 +270,9 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
               {[
                 { key: 'consumption', label: 'Consumption' },
                 { key: 'name', label: 'Name' },
-                { key: 'category', label: 'Category' }
+                { key: 'category', label: 'Category' },
+                { key: 'zone', label: 'Zone' },
+                { key: 'priority', label: 'Priority' }
               ].map(({ key, label }) => (
                 <button
                   key={key}
@@ -370,7 +297,7 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
       {/* COMPLETELY RESPONSIVE TABLE - PROGRESSIVE LAYOUT */}
       <div className="overflow-hidden">
         
-        {/* Extra Large Screens (1536px+) - Full Table */}
+        {/* Extra Large Screens (1536px+) - Full Table with All Columns */}
         <div className="hidden 2xl:block">
           <div className="overflow-x-auto scrollbar-muscat">
             <table className="w-full">
@@ -378,10 +305,11 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                 <tr>
                   <th className="text-center p-3 font-semibold text-slate-700 w-16">Rank</th>
                   <th className="text-left p-3 font-semibold text-slate-700 min-w-[280px]">Unit Details</th>
-                  <th className="text-left p-3 font-semibold text-slate-700 min-w-[150px]">Category</th>
+                  <th className="text-left p-3 font-semibold text-slate-700 min-w-[120px]">Category</th>
+                  <th className="text-left p-3 font-semibold text-slate-700 min-w-[100px]">Zone</th>
+                  <th className="text-left p-3 font-semibold text-slate-700 min-w-[100px]">Priority</th>
                   <th className="text-right p-3 font-semibold text-slate-700 min-w-[140px]">Consumption</th>
                   <th className="text-right p-3 font-semibold text-slate-700 min-w-[120px]">Est. Cost</th>
-                  <th className="text-center p-3 font-semibold text-slate-700 min-w-[130px]">Performance</th>
                   <th className="text-center p-3 font-semibold text-slate-700 w-20">Actions</th>
                 </tr>
               </thead>
@@ -412,13 +340,25 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                           </div>
                           <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
                             <Zap size={10} className="text-primary" />
-                            ID: {actualIndex + 1} • {consumer.category?.split(' ')[0]}
+                            {consumer.assetType} • Meter: {consumer.meterAccountNo}
                           </div>
                         </td>
                         
                         <td className="table-muscat-cell">
                           <span className={getCategoryBadgeStyle(consumer.category)}>
                             {consumer.category}
+                          </span>
+                        </td>
+
+                        <td className="table-muscat-cell">
+                          <span className={getZoneBadgeStyle(consumer.zone)}>
+                            {consumer.zone}
+                          </span>
+                        </td>
+
+                        <td className="table-muscat-cell">
+                          <span className={getPriorityBadgeStyle(consumer.priority)}>
+                            {consumer.priority}
                           </span>
                         </td>
                         
@@ -441,25 +381,6 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                             <span className="text-xs text-slate-500 font-normal"> OMR</span>
                           </div>
                         </td>
-
-                        <td className="table-muscat-cell text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="w-16 h-2 bg-slate-200 rounded-full overflow-hidden">
-                              <div 
-                                className={`h-full transition-all duration-500 ${ 
-                                  actualIndex === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
-                                  actualIndex === 1 ? 'bg-gradient-to-r from-slate-400 to-slate-500' :
-                                  actualIndex === 2 ? 'bg-gradient-to-r from-orange-400 to-orange-500' :
-                                  'bg-gradient-to-r from-primary to-primary-light'
-                                }`}
-                                style={{ width: `${100 - (actualIndex * 8)}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs text-slate-600 font-medium">
-                              {actualIndex === 0 ? '⭐' : actualIndex === 1 ? '🥈' : actualIndex === 2 ? '🥉' : '📊'}
-                            </span>
-                          </div>
-                        </td>
                         
                         <td className="table-muscat-cell text-center">
                           <button
@@ -478,12 +399,12 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                       {/* Enhanced Expanded Row */}
                       {isExpanded && (
                         <tr className="bg-gradient-to-r from-slate-50 via-white to-slate-50 border-l-4 border-primary animate-slide-up">
-                          <td colSpan="7" className="p-4">
+                          <td colSpan="8" className="p-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                               {[
-                                { icon: TrendingUp, title: "Monthly Trend", value: "Seasonal patterns", color: "primary" },
-                                { icon: Activity, title: "Efficiency Rating", value: consumer.consumption > 10000 ? "🔴 High Load" : consumer.consumption > 1000 ? "🟡 Medium Load" : "🟢 Low Load", color: "secondary" },
-                                { icon: Award, title: "Ranking Status", value: actualIndex === 0 ? "🏆 Top Consumer" : actualIndex < 5 ? "⭐ High Consumer" : "📊 Standard Consumer", color: "accent" },
+                                { icon: TrendingUp, title: "Asset Type", value: consumer.assetType, color: "primary" },
+                                { icon: MapPin, title: "Zone Location", value: consumer.zone, color: "secondary" },
+                                { icon: Target, title: "Priority Level", value: consumer.priority, color: "accent" },
                                 { icon: CheckCircle, title: "Status", value: consumer.consumption > 0 ? "✅ Operational" : "⚠️ Inactive", color: "success" }
                               ].map((item, idx) => (
                                 <div key={idx} className="card-muscat-interactive p-3">
@@ -517,9 +438,9 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                   <th className="text-center p-2.5 font-semibold text-slate-700 text-xs w-14">Rank</th>
                   <th className="text-left p-2.5 font-semibold text-slate-700 text-xs min-w-[200px]">Unit Details</th>
                   <th className="text-left p-2.5 font-semibold text-slate-700 text-xs min-w-[100px]">Category</th>
+                  <th className="text-left p-2.5 font-semibold text-slate-700 text-xs min-w-[80px]">Zone</th>
                   <th className="text-right p-2.5 font-semibold text-slate-700 text-xs min-w-[100px]">Consumption</th>
                   <th className="text-right p-2.5 font-semibold text-slate-700 text-xs min-w-[80px]">Cost</th>
-                  <th className="text-center p-2.5 font-semibold text-slate-700 text-xs w-16">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -544,13 +465,19 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                           {truncateText(consumer.name, 25)}
                         </div>
                         <div className="text-xs text-slate-500 mt-0.5">
-                          ID: {actualIndex + 1}
+                          {consumer.assetType}
                         </div>
                       </td>
                       
                       <td className="table-muscat-cell p-2.5">
                         <span className={`${getCategoryBadgeStyle(consumer.category)} text-xs px-2 py-0.5`}>
                           {truncateText(consumer.category, 12)}
+                        </span>
+                      </td>
+
+                      <td className="table-muscat-cell p-2.5">
+                        <span className={`${getZoneBadgeStyle(consumer.zone)} text-xs px-1.5 py-0.5`}>
+                          {truncateText(consumer.zone, 8)}
                         </span>
                       </td>
                       
@@ -567,12 +494,6 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                           <span className="text-xs text-slate-500 font-normal"> OMR</span>
                         </div>
                       </td>
-                      
-                      <td className="table-muscat-cell text-center p-2.5">
-                        <button className="p-1.5 rounded-full hover:bg-primary/10 transition-colors text-slate-600 hover:text-primary">
-                          <Eye size={12} />
-                        </button>
-                      </td>
                     </tr>
                   );
                 })}
@@ -588,8 +509,8 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
               <thead className="bg-slate-100 border-b border-slate-200">
                 <tr>
                   <th className="text-left p-3 font-semibold text-slate-700 text-sm min-w-[180px]">Unit</th>
+                  <th className="text-left p-3 font-semibold text-slate-700 text-sm min-w-[100px]">Category</th>
                   <th className="text-right p-3 font-semibold text-slate-700 text-sm min-w-[120px]">kWh</th>
-                  <th className="text-right p-3 font-semibold text-slate-700 text-sm min-w-[100px]">Cost</th>
                   <th className="text-center p-3 font-semibold text-slate-700 text-sm w-16">Rank</th>
                 </tr>
               </thead>
@@ -603,22 +524,22 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                         <div className="font-medium text-slate-800">
                           {truncateText(consumer.name, 20)}
                         </div>
-                        <div className="text-xs text-slate-500 mt-1">
-                          <span className={getCategoryBadgeStyle(consumer.category)}>
-                            {truncateText(consumer.category, 15)}
+                        <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                          <span className={getZoneBadgeStyle(consumer.zone)}>
+                            {consumer.zone}
                           </span>
                         </div>
+                      </td>
+                      
+                      <td className="table-muscat-cell p-3">
+                        <span className={getCategoryBadgeStyle(consumer.category)}>
+                          {truncateText(consumer.category, 15)}
+                        </span>
                       </td>
                       
                       <td className="table-muscat-cell text-right p-3">
                         <div className="font-bold text-slate-800">
                           {consumer.consumption.toLocaleString()}
-                        </div>
-                      </td>
-                      
-                      <td className="table-muscat-cell text-right p-3">
-                        <div className="font-medium text-slate-700">
-                          {(consumer.consumption * OMR_PER_KWH).toFixed(1)}
                         </div>
                       </td>
                       
@@ -635,7 +556,7 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
           </div>
         </div>
 
-        {/* Small Screens and Mobile (0-1023px) - Card Layout */}
+        {/* Small Screens and Mobile (0-1023px) - Enhanced Card Layout */}
         <div className="lg:hidden">
           <div className="space-y-3 p-3">
             {paginatedData.map((consumer, index) => {
@@ -648,9 +569,14 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                       <h4 className="font-semibold text-slate-800 text-sm truncate pr-2">
                         {consumer.name}
                       </h4>
-                      <span className={`${getCategoryBadgeStyle(consumer.category)} inline-block mt-1`}>
-                        {consumer.category}
-                      </span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        <span className={getCategoryBadgeStyle(consumer.category)}>
+                          {consumer.category}
+                        </span>
+                        <span className={getZoneBadgeStyle(consumer.zone)}>
+                          {consumer.zone}
+                        </span>
+                      </div>
                     </div>
                     <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold ${getRankBadgeStyle(index)} relative flex-shrink-0`}>
                       {actualIndex + 1}
@@ -662,7 +588,7 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="grid grid-cols-2 gap-3 text-sm mb-2">
                     <div>
                       <span className="text-slate-600 text-xs">Consumption:</span>
                       <div className="font-bold text-slate-800">
@@ -677,22 +603,14 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="mt-3">
-                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full transition-all duration-500 ${ 
-                          actualIndex === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
-                          actualIndex === 1 ? 'bg-gradient-to-r from-slate-400 to-slate-500' :
-                          actualIndex === 2 ? 'bg-gradient-to-r from-orange-400 to-orange-500' :
-                          'bg-gradient-to-r from-primary to-primary-light'
-                        }`}
-                        style={{ width: `${100 - (actualIndex * 8)}%` }}
-                      ></div>
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1 text-center">
-                      {actualIndex === 0 ? '🏆 Top Consumer' : actualIndex < 5 ? '⭐ High Consumer' : '📊 Standard Consumer'}
-                    </div>
+
+                  <div className="flex justify-between items-center text-xs">
+                    <span className={getPriorityBadgeStyle(consumer.priority)}>
+                      {consumer.priority}
+                    </span>
+                    <span className="text-slate-500">
+                      {consumer.assetType} • {consumer.meterAccountNo}
+                    </span>
                   </div>
                 </div>
               );
@@ -770,27 +688,48 @@ const TopConsumersTableUltimate = ({ data, selectedMonth }) => {
 };
 
 // ===============================
-// MAIN ELECTRICITY SYSTEM MODULE
+// MAIN ELECTRICITY SYSTEM MODULE - ENHANCED WITH COMPLETE DATABASE
 // ===============================
 
 export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
   const [activeSubSection, setActiveSubSection] = useState('Dashboard');
   const [selectedMonth, setSelectedMonth] = useState("All Months"); 
+  const [selectedAssetType, setSelectedAssetType] = useState("All Types");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedZone, setSelectedZone] = useState("All Zones");
+  const [selectedPriority, setSelectedPriority] = useState("All Priorities");
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
 
+  // Get distinct values for filtering dropdowns
   const distinctCategories = useMemo(() => 
     [...new Set(initialElectricityData.map(d => d.category))].sort(), 
   []);
 
+  const distinctZones = useMemo(() => 
+    [...new Set(initialElectricityData.map(d => d.zone))].sort(), 
+  []);
+
+  const distinctAssetTypes = useMemo(() => 
+    [...new Set(initialElectricityData.map(d => d.assetType))].sort(), 
+  []);
+
+  const distinctPriorities = useMemo(() => 
+    [...new Set(initialElectricityData.map(d => d.priority))].sort(), 
+  []);
+
+  // Enhanced filtering with all 5 filter levels
   const filteredElectricityData = useMemo(() => {
     return initialElectricityData.filter(item => {
+      const assetTypeMatch = selectedAssetType === "All Types" || item.assetType === selectedAssetType;
       const categoryMatch = selectedCategory === "All Categories" || item.category === selectedCategory;
-      return categoryMatch; 
+      const zoneMatch = selectedZone === "All Zones" || item.zone === selectedZone;
+      const priorityMatch = selectedPriority === "All Priorities" || item.priority === selectedPriority;
+      
+      return assetTypeMatch && categoryMatch && zoneMatch && priorityMatch; 
     });
-  }, [selectedCategory]);
+  }, [selectedAssetType, selectedCategory, selectedZone, selectedPriority]);
 
   const kpiAndTableData = useMemo(() => {
     if (selectedMonth === "All Months") {
@@ -799,6 +738,7 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
     return filteredElectricityData.map(item => ({ ...item, totalConsumption: item.consumption[selectedMonth] || 0, }));
   }, [filteredElectricityData, selectedMonth]);
 
+  // Enhanced KPIs using the comprehensive database
   const totalConsumptionKWh = useMemo(() => kpiAndTableData.reduce((acc, curr) => acc + curr.totalConsumption, 0), [kpiAndTableData]);
   const totalCostOMR = useMemo(() => totalConsumptionKWh * OMR_PER_KWH, [totalConsumptionKWh]);
   const averageConsumptionPerUnit = useMemo(() => kpiAndTableData.length > 0 ? totalConsumptionKWh / kpiAndTableData.length : 0, [totalConsumptionKWh, kpiAndTableData]);
@@ -823,41 +763,59 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
     return dataToUse.slice().sort((a, b) => b.totalConsumption - a.totalConsumption).filter(d => d.totalConsumption > 0).slice(0, 15).map(d => ({ 
       name: d.unitName, 
       consumption: d.totalConsumption, 
-      category: d.category, 
+      category: d.category,
+      zone: d.zone,
+      priority: d.priority,
+      assetType: d.assetType,
+      meterAccountNo: d.meterAccountNo,
       monthlyDataFull: initialElectricityData.find(item => item.id === d.id)?.consumption || {} 
     }));
   }, [kpiAndTableData]);
 
+  // Enhanced AI Analysis with comprehensive database insights
   const handleAiAnalysis = async () => {
     setIsAiModalOpen(true);
     setIsAiLoading(true);
     setAiAnalysisResult("");
     
     setTimeout(() => {
+      const dataSummary = getDataSummary(kpiAndTableData);
+      
       setAiAnalysisResult(`🧠 AI Analysis Results for ${selectedMonth === "All Months" ? "All Months" : selectedMonth}:
 
-🔋 INFRASTRUCTURE ANALYSIS:
-• All 4 Pumping Stations operational with consumption data
-• Pumping Station 01 shows highest consumption (${initialElectricityData.find(item => item.unitName === 'Pumping Station 01')?.totalConsumption.toLocaleString()} kWh total)
-• Beachwell shows major consumption variations - investigate for optimization
-• Critical infrastructure accounts for ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} components
+🔋 COMPREHENSIVE INFRASTRUCTURE ANALYSIS:
+• Total Assets Analyzed: ${dataSummary.totalAssets} units across ${Object.keys(dataSummary.categoryBreakdown).length} categories
+• Active Systems: ${dataSummary.activeAssets}/${dataSummary.totalAssets} units (${dataSummary.dataCompleteness.toFixed(1)}% operational)
+• Time Coverage: ${dataSummary.timeframeCoverage} months of historical data
+• Meter Coverage: ${dataSummary.meterCoverage}/${dataSummary.totalAssets} units with valid meter accounts
 
-📊 CONSUMPTION BREAKDOWN:
-• Total System: ${totalConsumptionKWh.toLocaleString()} kWh
-• Estimated Cost: ${totalCostOMR.toLocaleString()} OMR
-• Average per Unit: ${averageConsumptionPerUnit.toFixed(0)} kWh
-• Active Meters: ${activeMeters}/${kpiAndTableData.length}
+📊 CONSUMPTION & COST BREAKDOWN:
+• Total System Consumption: ${dataSummary.totalConsumption.toLocaleString()} kWh
+• Estimated Total Cost: ${dataSummary.totalCost.toLocaleString()} OMR
+• Average per Unit: ${dataSummary.averageConsumption.toFixed(0)} kWh
+• Cost per kWh: ${KWH_TO_OMR_RATE} OMR (as specified)
 
-🏗️ CATEGORY INSIGHTS:
-• ${distinctCategories.length} categories identified
-• Apartments: ${kpiAndTableData.filter(d => d.category === 'Apartment').length} residential units
-• Infrastructure: ${kpiAndTableData.filter(d => d.category.includes('Station') || d.category.includes('Tank')).length} critical systems
+🏗️ CATEGORY PERFORMANCE ANALYSIS:
+${Object.entries(dataSummary.categoryBreakdown).map(([category, data]) => 
+  `• ${category}: ${data.count} units, ${data.consumption.toLocaleString()} kWh total`
+).slice(0, 5).join('\n')}
+
+🗺️ ZONE DISTRIBUTION INSIGHTS:
+${Object.entries(dataSummary.zoneBreakdown).map(([zone, data]) => 
+  `• ${zone}: ${data.count} units, ${data.consumption.toLocaleString()} kWh total`
+).slice(0, 4).join('\n')}
+
+⚡ PRIORITY LEVEL BREAKDOWN:
+${Object.entries(dataSummary.priorityBreakdown).map(([priority, data]) => 
+  `• ${priority}: ${data.count} units, ${data.consumption.toLocaleString()} kWh total`
+).join('\n')}
 
 💡 KEY RECOMMENDATIONS:
-• Monitor Beachwell consumption patterns for efficiency
-• Implement load balancing across pumping stations  
-• Track residential vs infrastructure consumption ratios
-• Consider smart metering for enhanced monitoring`);
+• Monitor Critical Infrastructure: ${dataSummary.priorityBreakdown['Critical']?.count || 0} critical systems require priority attention
+• Optimize High Consumers: Focus on units >15,000 kWh for efficiency improvements
+• Zone-based Analysis: ${Object.keys(dataSummary.zoneBreakdown).length} zones show varied consumption patterns
+• Enhanced Monitoring: ${dataSummary.totalAssets - dataSummary.meterCoverage} units need meter verification
+• Cost Optimization: Potential 10-15% savings through load balancing and efficiency measures`);
       setIsAiLoading(false);
     }, 2000);
   };
@@ -896,37 +854,102 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
     );
   };
 
-  // Filter Bar
+  // Enhanced Filter Bar with all 5 filtering levels
   const FilterBar = () => {
     const monthOptions = [{ value: "All Months", label: "All Months" }, ...availableMonths.map(m => ({ value: m, label: m }))];
-    const categoryOptions = [{ value: "All Categories", label: "All Categories" }, ...distinctCategories.map(c => ({ value: c, label: c }))];
     
     return (
         <div className="bg-white shadow-muscat p-3 md:p-4 rounded-xl mb-6 print:hidden sticky top-[110px] md:top-[88px] z-10 border border-slate-200 animate-slide-up">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 items-end">
                 <StyledSelect 
-                  id="monthFilter" 
-                  label="Filter by Month" 
-                  value={selectedMonth} 
-                  onChange={(e) => setSelectedMonth(e.target.value)} 
-                  options={monthOptions} 
-                  icon={CalendarDays}
+                  id="assetTypeFilter" 
+                  label="Asset Type" 
+                  value={selectedAssetType} 
+                  onChange={(e) => setSelectedAssetType(e.target.value)} 
+                  options={assetTypeOptions} 
+                  icon={Layers}
                 />
                 <StyledSelect 
                   id="categoryFilter" 
-                  label="Filter by Unit Category" 
+                  label="Category" 
                   value={selectedCategory} 
                   onChange={(e) => setSelectedCategory(e.target.value)} 
                   options={categoryOptions} 
                   icon={List}
                 />
+                <StyledSelect 
+                  id="zoneFilter" 
+                  label="Zone" 
+                  value={selectedZone} 
+                  onChange={(e) => setSelectedZone(e.target.value)} 
+                  options={zoneOptions} 
+                  icon={MapPin}
+                />
+                <StyledSelect 
+                  id="priorityFilter" 
+                  label="Priority" 
+                  value={selectedPriority} 
+                  onChange={(e) => setSelectedPriority(e.target.value)} 
+                  options={priorityOptions} 
+                  icon={Target}
+                />
+                <StyledSelect 
+                  id="monthFilter" 
+                  label="Month" 
+                  value={selectedMonth} 
+                  onChange={(e) => setSelectedMonth(e.target.value)} 
+                  options={monthOptions} 
+                  icon={CalendarDays}
+                />
                 <button 
-                  onClick={() => { setSelectedMonth("All Months"); setSelectedCategory("All Categories"); }} 
-                  className="btn-muscat-primary h-[46px] w-full lg:w-auto text-xs md:text-sm flex items-center justify-center gap-2"
+                  onClick={() => { 
+                    setSelectedMonth("All Months"); 
+                    setSelectedAssetType("All Types");
+                    setSelectedCategory("All Categories"); 
+                    setSelectedZone("All Zones");
+                    setSelectedPriority("All Priorities");
+                  }} 
+                  className="btn-muscat-primary h-[46px] w-full text-xs md:text-sm flex items-center justify-center gap-2"
                 > 
                   <Filter size={14}/> 
-                  <span>Reset Filters</span> 
+                  <span className="hidden sm:inline">Reset Filters</span>
+                  <span className="sm:hidden">Reset</span>
                 </button>
+            </div>
+            
+            {/* Filter Summary */}
+            <div className="mt-3 pt-3 border-t border-slate-200">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                <span className="font-medium">Active Filters:</span>
+                {selectedAssetType !== "All Types" && (
+                  <span className="bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/20">
+                    {selectedAssetType}
+                  </span>
+                )}
+                {selectedCategory !== "All Categories" && (
+                  <span className="bg-secondary/10 text-secondary px-2 py-1 rounded-full border border-secondary/20">
+                    {selectedCategory}
+                  </span>
+                )}
+                {selectedZone !== "All Zones" && (
+                  <span className="bg-accent/10 text-accent px-2 py-1 rounded-full border border-accent/20">
+                    {selectedZone}
+                  </span>
+                )}
+                {selectedPriority !== "All Priorities" && (
+                  <span className="bg-success/10 text-success px-2 py-1 rounded-full border border-success/20">
+                    {selectedPriority}
+                  </span>
+                )}
+                {selectedMonth !== "All Months" && (
+                  <span className="bg-info/10 text-info px-2 py-1 rounded-full border border-info/20">
+                    {selectedMonth}
+                  </span>
+                )}
+                <span className="text-slate-500">
+                  • {kpiAndTableData.length} units match filters
+                </span>
+              </div>
             </div>
         </div>
     );
@@ -959,7 +982,7 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
               icon={Zap} 
               trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
               trendColor="text-slate-500 font-medium" 
-              iconBgColor={COLORS.primary} 
+              iconBgColor={UI_COLORS.primary} 
             />
             <SummaryCard 
               title="Total Est. Cost" 
@@ -968,7 +991,7 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
               icon={DollarSign} 
               trend="Based on selection" 
               trendColor="text-slate-500 font-medium" 
-              iconBgColor={COLORS.success} 
+              iconBgColor={UI_COLORS.success} 
             />
             <SummaryCard 
               title="Avg. Consumption/Unit" 
@@ -977,28 +1000,28 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
               icon={BarChart2} 
               trend={selectedMonth === "All Months" ? "Overall" : `For ${selectedMonth}`} 
               trendColor="text-slate-500 font-medium" 
-              iconBgColor={COLORS.accent} 
+              iconBgColor={UI_COLORS.accent} 
             />
             <SummaryCard 
               title="Active Meters" 
               value={activeMeters} 
-              unit="units" 
+              unit={`of ${kpiAndTableData.length}`} 
               icon={Users2} 
               trend="In selection" 
               trendColor="text-slate-500 font-medium" 
-              iconBgColor={COLORS.secondary} 
+              iconBgColor={UI_COLORS.secondary} 
             />
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6 animate-slide-up">
             <div className="lg:col-span-3"> 
-              <ChartWrapper title="Consumption Trend (All Months)" subtitle={`For category: ${selectedCategory}`}> 
+              <ChartWrapper title="Consumption Trend (14 Months)" subtitle={`${selectedCategory} • ${selectedZone} • ${selectedPriority}`}> 
                 <ResponsiveContainer width="100%" height="100%"> 
                   <LineChart data={monthlyTrendForAllMonths} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}> 
                     <defs> 
                       <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1"> 
-                        <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/> 
-                        <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/> 
+                        <stop offset="5%" stopColor={UI_COLORS.primary} stopOpacity={0.8}/> 
+                        <stop offset="95%" stopColor={UI_COLORS.primary} stopOpacity={0}/> 
                       </linearGradient> 
                     </defs> 
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" /> 
@@ -1015,14 +1038,14 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
                       labelStyle={{color: '#0f172a', fontWeight: 'bold'}}
                     /> 
                     <Legend wrapperStyle={{fontSize: "12px", paddingTop: '10px'}}/> 
-                    <Area type="monotone" dataKey="total" stroke={COLORS.primary} fillOpacity={1} fill="url(#colorTotal)" /> 
+                    <Area type="monotone" dataKey="total" stroke={UI_COLORS.primary} fillOpacity={1} fill="url(#colorTotal)" /> 
                     <Line 
                       type="monotone" 
                       dataKey="total" 
-                      stroke={COLORS.primary} 
+                      stroke={UI_COLORS.primary} 
                       strokeWidth={3} 
-                      activeDot={{ r: 7, strokeWidth: 2, fill: COLORS.primary }} 
-                      dot={{r:4, fill: COLORS.primary}} 
+                      activeDot={{ r: 7, strokeWidth: 2, fill: UI_COLORS.primary }} 
+                      dot={{r:4, fill: UI_COLORS.primary}} 
                       name="Total kWh" 
                     /> 
                   </LineChart> 
@@ -1047,7 +1070,7 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
                       {consumptionByTypeChartData.map((entry, index) => ( 
                         <Cell 
                           key={`cell-${index}`} 
-                          fill={COLORS.chart[index % COLORS.chart.length]} 
+                          fill={UI_COLORS.chart[index % UI_COLORS.chart.length]} 
                           className="focus:outline-none hover:opacity-80 transition-opacity" 
                           stroke="none"
                         /> 
@@ -1080,7 +1103,7 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
             </div>
           </div>
 
-          {/* ULTIMATE TOP CONSUMERS TABLE - COMPLETELY FIXED ALL OVERFLOW ISSUES */}
+          {/* ENHANCED TOP CONSUMERS TABLE WITH ALL DATABASE INFORMATION */}
           <div className="animate-slide-up">
             <TopConsumersTableUltimate data={topConsumersChartData} selectedMonth={selectedMonth} />
           </div>
@@ -1123,7 +1146,7 @@ export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
               <div className="text-sm text-slate-700 space-y-4 max-h-96 overflow-y-auto scrollbar-muscat"> 
                 {aiAnalysisResult ? ( 
                   aiAnalysisResult.split('\n').map((line, index) => {
-                    if (line.startsWith('🧠') || line.startsWith('🔋') || line.startsWith('📊') || line.startsWith('🏗️') || line.startsWith('💡')) {
+                    if (line.startsWith('🧠') || line.startsWith('🔋') || line.startsWith('📊') || line.startsWith('🏗️') || line.startsWith('🗺️') || line.startsWith('⚡') || line.startsWith('💡')) {
                       return <h4 key={index} className="font-bold text-base md:text-lg mt-6 mb-3 text-primary border-l-4 border-primary pl-4">{line}</h4>;
                     }
                     if (line.startsWith('•')) {
