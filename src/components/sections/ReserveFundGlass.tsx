@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 import { 
   GlassChart, GlassSummaryCard, GlassDropdown, GlassButton, GlassCard, GlassFilterBar
-} from '@/components/glassmorphism';
-import { COLORS } from '@/constants/colors';
+} from '@/src/components/glassmorphism';
+import { COLORS } from '@/lib/constants';
 
 interface ReserveFundModuleProps {
   isCollapsed?: boolean;
