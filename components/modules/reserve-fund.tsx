@@ -12,7 +12,9 @@ export function ReserveFundModuleWrapper({ isDarkMode = false }: ReserveFundModu
     <div className={`min-h-screen transition-colors duration-300 ${
       isDarkMode ? 'bg-slate-900' : 'bg-slate-50'
     }`}>
-      <ReserveFundModule />
+      <div className="container mx-auto px-4 py-6">
+        <ReserveFundModule />
+      </div>
     </div>
   );
 }
