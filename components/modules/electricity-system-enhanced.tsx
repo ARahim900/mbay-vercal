@@ -487,7 +487,6 @@ const TopConsumersTable = ({ data, selectedMonth }) => {
 export const ElectricitySystemModule = ({ isDarkMode }) => {
   const [activeSubSection, setActiveSubSection] = useState('Dashboard');
   const [selectedMonth, setSelectedMonth] = useState("All Months"); 
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedAssetType, setSelectedAssetType] = useState("All Types");
   const [selectedZone, setSelectedZone] = useState("All Zones");
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
@@ -498,15 +497,14 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
   const initialElectricityData = useMemo(() => parseData(rawDataString), []);
   const dataSummary = useMemo(() => getDataSummary(initialElectricityData), [initialElectricityData]);
 
-  // Enhanced filtering with multiple criteria
+  // Enhanced filtering with multiple criteria (removed category filter)
   const filteredElectricityData = useMemo(() => {
     return initialElectricityData.filter(item => {
-      const categoryMatch = selectedCategory === "All Categories" || item.category === selectedCategory;
       const assetTypeMatch = selectedAssetType === "All Types" || item.assetType === selectedAssetType;
       const zoneMatch = selectedZone === "All Zones" || item.zone === selectedZone;
-      return categoryMatch && assetTypeMatch && zoneMatch; 
+      return assetTypeMatch && zoneMatch; 
     });
-  }, [initialElectricityData, selectedCategory, selectedAssetType, selectedZone]);
+  }, [initialElectricityData, selectedAssetType, selectedZone]);
 
   // Get distinct categories, asset types, and zones for filtering
   const distinctCategories = useMemo(() => 
@@ -754,17 +752,16 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
     );
   };
 
-  // Enhanced Filter Bar with comprehensive filtering options
+  // Enhanced Filter Bar with comprehensive filtering options (removed category filter)
   const FilterBar = () => {
     const monthOptions = [{ value: "All Months", label: "All Months" }, ...availableMonths.map(m => ({ value: m, label: m }))];
-    const categoryFilterOptions = [{ value: "All Categories", label: "All Categories" }, ...distinctCategories.map(c => ({ value: c, label: c }))];
     const assetTypeFilterOptions = [{ value: "All Types", label: "All Asset Types" }, ...distinctAssetTypes.map(a => ({ value: a, label: a }))];
     const zoneFilterOptions = [{ value: "All Zones", label: "All Zones" }, ...distinctZones.map(z => ({ value: z, label: z }))];
     
     return (
         <div className="bg-white shadow-lg border-b border-slate-200 mb-6 print:hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                     <StyledSelect 
                       id="monthFilter" 
                       label="Filter by Month" 
@@ -772,14 +769,6 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                       onChange={(e) => setSelectedMonth(e.target.value)} 
                       options={monthOptions} 
                       icon={CalendarDays}
-                    />
-                    <StyledSelect 
-                      id="categoryFilter" 
-                      label="Filter by Category" 
-                      value={selectedCategory} 
-                      onChange={(e) => setSelectedCategory(e.target.value)} 
-                      options={categoryFilterOptions} 
-                      icon={List}
                     />
                     <StyledSelect 
                       id="assetTypeFilter" 
@@ -800,7 +789,6 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                     <button 
                       onClick={() => { 
                         setSelectedMonth("All Months"); 
-                        setSelectedCategory("All Categories"); 
                         setSelectedAssetType("All Types");
                         setSelectedZone("All Zones");
                       }} 
@@ -816,11 +804,6 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                   {selectedMonth !== "All Months" && (
                     <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                       📅 {selectedMonth}
-                    </span>
-                  )}
-                  {selectedCategory !== "All Categories" && (
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                      🏷️ {selectedCategory}
                     </span>
                   )}
                   {selectedAssetType !== "All Types" && (
@@ -905,7 +888,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
               
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 <div className="lg:col-span-3"> 
-                  <ChartWrapper title="Consumption Trend (14 Months)" subtitle={`Complete data coverage: Apr-24 to May-25 • Filters: ${selectedCategory}, ${selectedAssetType}, ${selectedZone}`}> 
+                  <ChartWrapper title="Consumption Trend (14 Months)" subtitle={`Complete data coverage: Apr-24 to May-25 • Filters: ${selectedAssetType}, ${selectedZone}`}> 
                     <ResponsiveContainer width="100%" height="100%"> 
                       <LineChart data={monthlyTrendForAllMonths} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}> 
                         <defs> 
@@ -1048,7 +1031,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
             </>
           )}
 
-          {/* PERFORMANCE SECTION - NEW COMPREHENSIVE CONTENT */}
+          {/* PERFORMANCE SECTION - COMPREHENSIVE CONTENT */}
           {activeSubSection === 'Performance' && (
             <div className="space-y-6">
               {/* Performance KPI Cards */}
@@ -1202,7 +1185,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
             </div>
           )}
 
-          {/* ANALYTICS SECTION - NEW COMPREHENSIVE CONTENT */}
+          {/* ANALYTICS SECTION - COMPREHENSIVE CONTENT */}
           {activeSubSection === 'Analytics' && (
             <div className="space-y-6">
               {/* Analytics KPI Cards */}
