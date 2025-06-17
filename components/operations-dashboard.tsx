@@ -6,6 +6,7 @@ import { Header } from "./layout/header"
 import { ElectricitySystemModule } from "./modules/electricity-system"
 import WaterLossAnalysis from "./modules/water-analysis"
 import { STPPlantModule } from "./modules/stp-plant"
+import { ReserveFundModule } from "./modules/reserve-fund"
 import { ContractorTrackerModule } from "./modules/contractor-tracker"
 import { ElectricityDiagnostics } from "./modules/electricity-diagnostics"
 import { Columns, Loader2 } from "lucide-react"
@@ -53,6 +54,8 @@ export function OperationsDashboard() {
         return <WaterLossAnalysis />
       case "STPPlant":
         return <STPPlantModule />
+      case "ReserveFund":
+        return <ReserveFundModule isDarkMode={isDarkMode} />
       case "ContractorTracker":
         return <ContractorTrackerModule />
       case "ElectricityDiagnostics":
