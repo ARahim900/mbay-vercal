@@ -1,6 +1,6 @@
 "use client"
 
-import { Zap, Droplets, Combine, UserCheck, Power, Menu, Settings, Activity } from "lucide-react"
+import { Zap, Droplets, Combine, UserCheck, Power, Menu, Settings, Activity, DollarSign } from "lucide-react"
 import { COLORS } from "@/lib/constants"
 
 interface SidebarProps {
@@ -22,6 +22,7 @@ export function Sidebar({
     { name: "Electricity System", icon: Zap, sectionId: "ElectricitySystem" },
     { name: "Water Analysis", icon: Droplets, sectionId: "WaterAnalysis" },
     { name: "STP Plant", icon: Combine, sectionId: "STPPlant" },
+    { name: "Reserve Fund", icon: DollarSign, sectionId: "ReserveFund" },
     { name: "Contractor Tracker", icon: UserCheck, sectionId: "ContractorTracker" },
     { name: "System Diagnostics", icon: Activity, sectionId: "ElectricityDiagnostics" },
   ]
@@ -66,6 +67,12 @@ export function Sidebar({
             {section.sectionId === "ElectricityDiagnostics" && !isCollapsed && (
               <span className="ml-auto px-2 py-0.5 text-xs bg-orange-500 text-white rounded-full">
                 DIAG
+              </span>
+            )}
+            {/* Add indicator for reserve fund */}
+            {section.sectionId === "ReserveFund" && !isCollapsed && (
+              <span className="ml-auto px-2 py-0.5 text-xs bg-green-500 text-white rounded-full">
+                NEW
               </span>
             )}
           </button>
