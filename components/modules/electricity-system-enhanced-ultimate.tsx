@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Search, Bell, ChevronDown, SlidersHorizontal, Share2, LayoutDashboard, BarChart2, List, Zap, TrendingUp, Users2, Power, DollarSign, Filter, Activity, Droplets, Combine, UserCheck, Columns, Sparkles, X, CalendarDays, Building, Menu, Moon, Sun, Download, Settings, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, ChevronRight, Award, TrendingDown, Star, Crown, Medal, ArrowUpDown, ArrowUp, ArrowDown, MoreVertical, ExternalLink, Info, CheckSquare, MapPin, Layers, Target, Clock, Gauge, BarChart3, PieChart as PieChartIcon, Calendar, Clock4 } from 'lucide-react';
 
 // ===============================
-// ENHANCED DATA IMPORT - USING COMPLETE DATABASE
+// DATA IMPORT
 // ===============================
 import { 
   rawDataString,
@@ -44,7 +44,7 @@ const UI_COLORS = {
 };
 
 // ===============================
-// PARSE ENHANCED DATA - ALL 56 UNITS
+// PARSE DATA
 // ===============================
 
 const initialElectricityData = parseData(rawDataString);
@@ -1154,7 +1154,7 @@ const AnalyticsDashboard = ({ data, selectedMonth }) => {
 };
 
 // ===============================
-// MAIN ELECTRICITY SYSTEM MODULE - ENHANCED WITH COMPLETE DATABASE
+// MAIN ELECTRICITY SYSTEM MODULE
 // ===============================
 
 export const ElectricitySystemModuleUltimate = ({ isDarkMode }) => {
