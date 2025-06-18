@@ -701,10 +701,7 @@ export const ElectricitySystemModule = ({ isDarkMode }) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-bold text-slate-800 mb-2">🔋 Enhanced Electricity System - Complete Database</h2>
-                    <p className="text-slate-600 mb-4">
-                      Now featuring <strong>{initialElectricityData.length} assets</strong> with <strong>{availableMonths.length} months</strong> of historical data 
-                      (Apr-24 to May-25) • Advanced filtering by asset type, category, and zone
-                    </p>
+                    <p className="text-slate-600 mb-4"></p>
                     <div className="flex flex-wrap gap-2 text-xs">
                       <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                         🏗️ {distinctAssetTypes.length} Asset Types: PS, LS, IRR, DB, D_Building, etc.

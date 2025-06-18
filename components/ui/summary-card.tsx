@@ -25,7 +25,7 @@ export function SummaryCard({
   change,
 }: SummaryCardProps) {
   return (
-    <div className="card-base p-3 sm:p-4 md:p-6 group transform hover:-translate-y-1">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-3 sm:p-4 md:p-6 group transform hover:-translate-y-1 transition-all border border-slate-200 dark:border-slate-700">
       <div className="flex justify-between items-start mb-3">
         <h3 className="text-slate-500 dark:text-slate-400 font-semibold text-xs sm:text-sm group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors">
           {title}

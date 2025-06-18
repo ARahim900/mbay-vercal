@@ -340,20 +340,20 @@ poured chemical "
 checked PH and TDS of raw and product water
 checked MLSS of  aeration and mbr sludge water
 poured chemical "		
-26/09/2024	386	342	352	7	140	212	"aeration and mbr tank clean by water
+26/09/2025	386	342	352	7	140	212	"aeration and mbr tank clean by water
 checked PH and TDS  of raw and product water
 checked MLSS of aeration and mbr tank sludge water
 poured chemical  "		
-27/09/2024	519	467	489	11	220	269	"aeration and mbr tank cleaned by water
+27/09/2025	519	467	489	11	220	269	"aeration and mbr tank cleaned by water
 checked PH and TDS of raw water  and product water
 checked MLSS of  aeration and mbr tank sludge water
 poured chemical "		
-28/09/2024	539	469	483	8	160	323	"today MBR blower clean and checked
+28/09/2025	539	469	483	8	160	323	"today MBR blower clean and checked
 aeration and mbr tank cleaned by water
 checked PH and TDS  of raw water and product water
 checked MLSS of aeration and mbr tank sludge water
 house keeping "		
-29/09/2024	557	503	448	9	180	268	"aeration and mbr tank cleaned by water
+29/09/2025	557	503	448	9	180	268	"aeration and mbr tank cleaned by water
 checked PH and TDS of raw water and product water
 checked MLSS of  both mbr and aeration tank sludge water
 poured chemical "		
@@ -1554,7 +1554,7 @@ const SummaryCard = ({ title, value, icon, unit, trend, trendColor, iconBgColor,
 };
 
 const ChartWrapper = ({ title, children, subtitle, actions }) => (
-  <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-slate-100">
+  <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-slate-200">
     <div className="flex justify-between items-start mb-4">
       <div>
         <h3 className="text-xl font-semibold text-slate-700">{title}</h3>
@@ -1562,7 +1562,7 @@ const ChartWrapper = ({ title, children, subtitle, actions }) => (
       </div>
       {actions && <div className="flex space-x-2">{actions}</div>}
     </div>
-    <div className="mt-4" style={{ height: '350px' }}>
+    <div className="mt-4" style={{ height: '350px', minHeight: '300px' }}>
       {children}
     </div>
   </div>
@@ -1825,28 +1825,28 @@ export const STPPlantModule = () => {
     ];
     
     return (
-        <div className="bg-white shadow p-4 rounded-lg mb-6 print:hidden sticky top-0 z-10 border border-slate-200">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
-                <StyledSelect 
-                  id="monthFilter" 
-                  label="Select Period" 
-                  value={selectedMonth} 
-                  onChange={(e) => setSelectedMonth(e.target.value)} 
-                  options={monthOptions} 
-                  icon={CalendarDays}
-                />
-                <div className="lg:col-span-1"></div>
-                <button 
-                  onClick={handleAiAnalysis}
-                  className="text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 h-[46px] w-full bg-opacity-80 hover:bg-opacity-100" 
-                  style={{ backgroundColor: COLORS.primary }} 
-                  disabled={isAiLoading}
-                > 
-                  <Sparkles size={16}/> 
-                  <span>{isAiLoading ? 'Analyzing...' : '🧠 AI Analysis'}</span> 
-                </button>
-            </div>
+      <div className="bg-white shadow p-4 rounded-lg mb-6 print:hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+          <StyledSelect 
+            id="monthFilter" 
+            label="Select Period" 
+            value={selectedMonth} 
+            onChange={(e) => setSelectedMonth(e.target.value)} 
+            options={monthOptions} 
+            icon={CalendarDays}
+          />
+          <div className="lg:col-span-1"></div>
+          <button 
+            onClick={handleAiAnalysis}
+            className="text-white py-2.5 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 h-[46px] w-full bg-opacity-80 hover:bg-opacity-100" 
+            style={{ backgroundColor: COLORS.primary }} 
+            disabled={isAiLoading}
+          > 
+            <Sparkles size={16}/> 
+            <span>{isAiLoading ? 'Analyzing...' : '🧠 AI Analysis'}</span> 
+          </button>
         </div>
+      </div>
     );
   };
 
@@ -1859,7 +1859,7 @@ export const STPPlantModule = () => {
       {activeSubSection === 'Dashboard' && (
         <>
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <SummaryCard 
               title={selectedMonth === 'All Months' ? "Total Treated Water" : `${selectedMonth} Total`} 
               value={kpiData.totalTreatedWater.toLocaleString()} 

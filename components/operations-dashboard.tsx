@@ -8,7 +8,6 @@ import WaterLossAnalysis from "./modules/water-analysis"
 import { STPPlantModule } from "./modules/stp-plant"
 import { ReserveFundModule } from "./modules/reserve-fund"
 import { ContractorTrackerModule } from "./modules/contractor-tracker"
-import { ElectricityDiagnostics } from "./modules/electricity-diagnostics"
 import { Columns, Loader2 } from "lucide-react"
 import { COLORS } from "@/lib/constants"
 
@@ -58,8 +57,6 @@ export function OperationsDashboard() {
         return <ReserveFundModule isDarkMode={isDarkMode} />
       case "ContractorTracker":
         return <ContractorTrackerModule />
-      case "ElectricityDiagnostics":
-        return <ElectricityDiagnostics />
       default:
         return (
           <div className="p-8">

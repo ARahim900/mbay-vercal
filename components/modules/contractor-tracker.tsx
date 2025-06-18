@@ -355,53 +355,65 @@ export function ContractorTrackerModule() {
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ChartWrapper title="Contract Status Distribution" subtitle="Current contract portfolio">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={statusDistribution}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                  >
-                    {statusDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              {statusDistribution.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={statusDistribution}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
+                    >
+                      {statusDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p>No status data available</p>
+                </div>
+              )}
             </ChartWrapper>
 
             <ChartWrapper title="Contracts by Service Category" subtitle="Distribution by service type">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={categoryDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="category" angle={-45} textAnchor="end" height={80} fontSize={12} />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill={COLORS.primary} name="Contract Count" />
-                </BarChart>
-              </ResponsiveContainer>
+              {categoryDistribution.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={categoryDistribution}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="category" angle={-45} textAnchor="end" height={80} fontSize={12} />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill={COLORS.primary} name="Contract Count" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p>No category data available</p>
+                </div>
+              )}
             </ChartWrapper>
           </div>
 
           {/* Active Contracts Table */}
-          <ChartWrapper title="Active Contracts Overview" subtitle="Current operational contracts">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+          <ChartWrapper title="Active Contracts Overview" subtitle="Current operational contracts" isTable={true}>
+            <div className="overflow-x-auto max-w-full">
+              <table className="w-full text-sm table-fixed">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="text-left p-3 font-semibold text-slate-700">Contractor</th>
-                    <th className="text-left p-3 font-semibold text-slate-700">Service</th>
-                    <th className="text-left p-3 font-semibold text-slate-700">Category</th>
-                    <th className="text-left p-3 font-semibold text-slate-700">End Date</th>
-                    <th className="text-right p-3 font-semibold text-slate-700">Annual Value (OMR)</th>
-                    <th className="text-center p-3 font-semibold text-slate-700">Status</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 w-[20%]">Contractor</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 w-[30%]">Service</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 w-[15%]">Category</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 w-[10%]">End Date</th>
+                    <th className="text-right p-3 font-semibold text-slate-700 w-[15%]">Annual Value (OMR)</th>
+                    <th className="text-center p-3 font-semibold text-slate-700 w-[10%]">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -410,11 +422,11 @@ export function ContractorTrackerModule() {
                     .slice(0, 10)
                     .map((contract, index) => (
                       <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
-                        <td className="p-3 font-medium text-slate-800">{contract.contractor}</td>
-                        <td className="p-3 text-slate-600">{contract.service}</td>
-                        <td className="p-3 text-slate-600">{contract.category}</td>
-                        <td className="p-3 text-slate-600">{contract.endDate}</td>
-                        <td className="p-3 text-right font-semibold text-slate-800">
+                        <td className="p-3 font-medium text-slate-800 truncate" title={contract.contractor}>{contract.contractor}</td>
+                        <td className="p-3 text-slate-600 truncate" title={contract.service}>{contract.service}</td>
+                        <td className="p-3 text-slate-600 truncate" title={contract.category}>{contract.category}</td>
+                        <td className="p-3 text-slate-600 whitespace-nowrap">{contract.endDate}</td>
+                        <td className="p-3 text-right font-semibold text-slate-800 whitespace-nowrap">
                           {contract.yearlyAmount.toLocaleString()}
                         </td>
                         <td className="p-3 text-center">
@@ -442,15 +454,21 @@ export function ContractorTrackerModule() {
       {activeSubSection === "Financial" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartWrapper title="Contract Value by Category" subtitle="Annual spending breakdown">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryDistribution}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="category" angle={-45} textAnchor="end" height={80} fontSize={12} />
-                <YAxis />
-                <Tooltip formatter={(value) => [`${value.toLocaleString()} OMR`, "Annual Value"]} />
-                <Bar dataKey="value" fill={COLORS.warning} name="Annual Value (OMR)" />
-              </BarChart>
-            </ResponsiveContainer>
+            {categoryDistribution.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={categoryDistribution}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="category" angle={-45} textAnchor="end" height={80} fontSize={12} />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${value.toLocaleString()} OMR`, "Annual Value"]} />
+                  <Bar dataKey="value" fill={COLORS.warning} name="Annual Value (OMR)" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p>No financial data available</p>
+              </div>
+            )}
           </ChartWrapper>
 
           <ChartWrapper title="Financial Summary" subtitle="Contract value analysis">
@@ -504,7 +522,7 @@ export function ContractorTrackerModule() {
         <div className="space-y-6">
           {/* Upcoming Renewals */}
           {kpiData.upcomingRenewals.length > 0 && (
-            <ChartWrapper title="Contracts Requiring Attention" subtitle="Expiring within 90 days">
+            <ChartWrapper title="Contracts Requiring Attention" subtitle="Expiring within 90 days" isTable={true}>
               <div className="space-y-4 mt-4">
                 {kpiData.upcomingRenewals.map((contract, index) => (
                   <div key={index} className="p-4 bg-orange-50 rounded-lg border border-orange-200">
@@ -526,31 +544,31 @@ export function ContractorTrackerModule() {
           )}
 
           {/* All Contracts Table */}
-          <ChartWrapper title="Complete Contract Registry" subtitle="All contracts with detailed information">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+          <ChartWrapper title="Complete Contract Registry" subtitle="All contracts with detailed information" isTable={true}>
+            <div className="overflow-x-auto max-w-full">
+              <table className="w-full text-sm table-fixed">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="text-left p-3 font-semibold text-slate-700">Contractor</th>
-                    <th className="text-left p-3 font-semibold text-slate-700">Service</th>
-                    <th className="text-left p-3 font-semibold text-slate-700">Type</th>
-                    <th className="text-left p-3 font-semibold text-slate-700">Start Date</th>
-                    <th className="text-left p-3 font-semibold text-slate-700">End Date</th>
-                    <th className="text-right p-3 font-semibold text-slate-700">Value (OMR)</th>
-                    <th className="text-center p-3 font-semibold text-slate-700">Status</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 w-[18%]">Contractor</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 w-[30%]">Service</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 w-[10%]">Type</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 w-[10%]">Start Date</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 w-[10%]">End Date</th>
+                    <th className="text-right p-3 font-semibold text-slate-700 w-[12%]">Value (OMR)</th>
+                    <th className="text-center p-3 font-semibold text-slate-700 w-[10%]">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredData.map((contract, index) => (
                     <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="p-3 font-medium text-slate-800">{contract.contractor}</td>
-                      <td className="p-3 text-slate-600 max-w-xs truncate" title={contract.service}>
+                      <td className="p-3 font-medium text-slate-800 truncate" title={contract.contractor}>{contract.contractor}</td>
+                      <td className="p-3 text-slate-600 truncate" title={contract.service}>
                         {contract.service}
                       </td>
-                      <td className="p-3 text-slate-600">{contract.contractType}</td>
-                      <td className="p-3 text-slate-600">{contract.startDate}</td>
-                      <td className="p-3 text-slate-600">{contract.endDate}</td>
-                      <td className="p-3 text-right font-semibold text-slate-800">
+                      <td className="p-3 text-slate-600 truncate" title={contract.contractType}>{contract.contractType}</td>
+                      <td className="p-3 text-slate-600 whitespace-nowrap">{contract.startDate}</td>
+                      <td className="p-3 text-slate-600 whitespace-nowrap">{contract.endDate}</td>
+                      <td className="p-3 text-right font-semibold text-slate-800 whitespace-nowrap">
                         {contract.yearlyAmount > 0 ? contract.yearlyAmount.toLocaleString() : "N/A"}
                       </td>
                       <td className="p-3 text-center">

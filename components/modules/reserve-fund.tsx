@@ -37,7 +37,9 @@ import {
   Search,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react"
 import { SummaryCard } from "@/components/ui/summary-card"
 import { ChartWrapper } from "@/components/ui/chart-wrapper"
@@ -347,10 +349,12 @@ export function ReserveFundModule({ isDarkMode = false }: ReserveFundModuleProps
     type: "All Types",
     unitType: "All Unit Types"
   })
-  const [sortConfig, setSortConfig] = useState({ column: null, direction: 'asc' })
+  const [sortConfig, setSortConfig] = useState<{ column: string | null; direction: string }>({ column: null, direction: 'asc' })
   const [isAiModalOpen, setIsAiModalOpen] = useState(false)
   const [aiAnalysisResult, setAiAnalysisResult] = useState("")
   const [isAiLoading, setIsAiLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of items per page
 
   // Parse data function
   const parseData = (raw: string) => {
@@ -542,7 +546,7 @@ export function ReserveFundModule({ isDarkMode = false }: ReserveFundModuleProps
     setSortConfig(prevConfig => ({
       column,
       direction: prevConfig.column === column && prevConfig.direction === 'asc' ? 'desc' : 'asc'
-    }))
+    }) as { column: string | null; direction: string })
   }
 
   // Handle filter change
@@ -784,38 +788,50 @@ ${chartData.sectorBreakdown.slice(0, 3).map(sector =>
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ChartWrapper title="Contributions by Sector" subtitle="Reserve fund distribution by sector">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData.sectorBreakdown}
-                    dataKey="totalContrib"
-                    nameKey="sector"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                  >
-                    {chartData.sectorBreakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS.chart[index % COLORS.chart.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${Number(value).toLocaleString()} OMR`, "Contribution"]} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              {chartData.sectorBreakdown && chartData.sectorBreakdown.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData.sectorBreakdown}
+                      dataKey="totalContrib"
+                      nameKey="sector"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
+                    >
+                      {chartData.sectorBreakdown.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS.chart[index % COLORS.chart.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${Number(value).toLocaleString()} OMR`, "Contribution"]} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p>No sector data available</p>
+                </div>
+              )}
             </ChartWrapper>
 
             <ChartWrapper title="Property Type Distribution" subtitle="Units and contributions by property type">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData.typeBreakdown}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="type" angle={-45} textAnchor="end" height={80} fontSize={12} />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="units" fill={COLORS.primary} name="Unit Count" />
-                </BarChart>
-              </ResponsiveContainer>
+              {chartData.typeBreakdown && chartData.typeBreakdown.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData.typeBreakdown}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="type" angle={-45} textAnchor="end" height={80} fontSize={12} />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="units" fill={COLORS.primary} name="Unit Count" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p>No property type data available</p>
+                </div>
+              )}
             </ChartWrapper>
           </div>
 
@@ -859,62 +875,131 @@ ${chartData.sectorBreakdown.slice(0, 3).map(sector =>
 
       {activeSubSection === "DetailedTable" && (
         <TableWrapper title="Complete Reserve Fund Schedule" subtitle="Detailed contributions table with search and sorting">
-          <table className="w-full text-sm">
-            <thead className="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-100 dark:bg-slate-700">
-              <tr>
-                <SortableHeader column="unitNo">Unit No</SortableHeader>
-                <SortableHeader column="sector">Sector</SortableHeader>
-                <SortableHeader column="type">Type</SortableHeader>
-                <SortableHeader column="unitType">Unit Type</SortableHeader>
-                <SortableHeader column="bua">BUA (sqm)</SortableHeader>
-                <SortableHeader column="zoneContrib">Zone Contrib. (OMR)</SortableHeader>
-                <SortableHeader column="masterContrib">Master Contrib. (OMR)</SortableHeader>
-                <SortableHeader column="totalContrib">Total 2025 Contrib. (OMR)</SortableHeader>
-                <th scope="col" className="px-6 py-3">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.length === 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-100 dark:bg-slate-700 sticky top-0">
                 <tr>
-                  <td colSpan={9} className="text-center py-12 px-6">
-                    <div className="flex flex-col items-center">
-                      <Search className="h-12 w-12 text-slate-400 mb-4" />
-                      <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">No results found</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Your search and filter combination did not match any records. Try adjusting your criteria.</p>
-                    </div>
-                  </td>
+                  <SortableHeader column="unitNo">Unit No</SortableHeader>
+                  <SortableHeader column="sector">Sector</SortableHeader>
+                  <SortableHeader column="type">Type</SortableHeader>
+                  <SortableHeader column="unitType">Unit Type</SortableHeader>
+                  <SortableHeader column="bua">BUA (sqm)</SortableHeader>
+                  <SortableHeader column="zoneContrib">Zone Contrib. (OMR)</SortableHeader>
+                  <SortableHeader column="masterContrib">Master Contrib. (OMR)</SortableHeader>
+                  <SortableHeader column="totalContrib">Total 2025 Contrib. (OMR)</SortableHeader>
+                  <th scope="col" className="px-6 py-3">Notes</th>
                 </tr>
-              ) : (
-                filteredData.map(item => (
-                  <tr key={item.id} className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">{item.unitNo}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.sector}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.type}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.unitType}</td>
-                    <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.bua)}</td>
-                    <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.zoneContrib)}</td>
-                    <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.masterContrib)}</td>
-                    <td className="px-6 py-4 text-right font-semibold" style={{ color: COLORS.info }}>{formatNumber(item.totalContrib)}</td>
-                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 max-w-xs truncate" title={item.notes}>
-                      {item.notes || "-"}
+              </thead>
+              <tbody>
+                {filteredData.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="text-center py-12 px-6">
+                      <div className="flex flex-col items-center">
+                        <Search className="h-12 w-12 text-slate-400 mb-4" />
+                        <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">No results found</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Your search and filter combination did not match any records. Try adjusting your criteria.</p>
+                      </div>
                     </td>
                   </tr>
-                ))
+                ) : (
+                  filteredData
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map(item => (
+                    <tr key={item.id} className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                      <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">{item.unitNo}</td>
+                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.sector}</td>
+                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.type}</td>
+                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.unitType}</td>
+                      <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.bua)}</td>
+                      <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.zoneContrib)}</td>
+                      <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.masterContrib)}</td>
+                      <td className="px-6 py-4 text-right font-semibold" style={{ color: COLORS.info }}>{formatNumber(item.totalContrib)}</td>
+                      <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 max-w-xs truncate" title={item.notes}>
+                        {item.notes || "-"}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+              {filteredData.length > 0 && (
+                <tfoot className="bg-slate-100 dark:bg-slate-700 font-semibold text-slate-800 dark:text-slate-200">
+                  <tr className="border-t-2 border-slate-300 dark:border-slate-600">
+                    <td colSpan={4} className="px-6 py-4 text-right font-bold text-lg">Totals</td>
+                    <td className="px-6 py-4 text-right">{formatNumber(statistics.totalBUA)}</td>
+                    <td className="px-6 py-4 text-right">{formatNumber(statistics.totalZoneContrib)}</td>
+                    <td className="px-6 py-4 text-right">{formatNumber(statistics.totalMasterContrib)}</td>
+                    <td className="px-6 py-4 text-right font-bold" style={{ color: COLORS.info }}>{formatNumber(statistics.totalContrib)}</td>
+                    <td className="px-6 py-4"></td>
+                  </tr>
+                </tfoot>
               )}
-            </tbody>
-            {filteredData.length > 0 && (
-              <tfoot className="bg-slate-100 dark:bg-slate-700 font-semibold text-slate-800 dark:text-slate-200">
-                <tr className="border-t-2 border-slate-300 dark:border-slate-600">
-                  <td colSpan={4} className="px-6 py-4 text-right font-bold text-lg">Totals</td>
-                  <td className="px-6 py-4 text-right">{formatNumber(statistics.totalBUA)}</td>
-                  <td className="px-6 py-4 text-right">{formatNumber(statistics.totalZoneContrib)}</td>
-                  <td className="px-6 py-4 text-right">{formatNumber(statistics.totalMasterContrib)}</td>
-                  <td className="px-6 py-4 text-right font-bold" style={{ color: COLORS.info }}>{formatNumber(statistics.totalContrib)}</td>
-                  <td className="px-6 py-4"></td>
-                </tr>
-              </tfoot>
-            )}
-          </table>
+            </table>
+          </div>
+          
+          {/* Pagination controls */}
+          {filteredData.length > itemsPerPage && (
+            <div className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+              <div className="text-sm text-slate-700 dark:text-slate-300 mb-4 sm:mb-0">
+                Showing <span className="font-medium">{Math.min((currentPage - 1) * itemsPerPage + 1, filteredData.length)}</span> to{" "}
+                <span className="font-medium">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of{" "}
+                <span className="font-medium">{filteredData.length}</span> results
+              </div>
+              <div className="flex justify-center">
+                <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`relative inline-flex items-center px-3 py-2 rounded-l-md border ${
+                      currentPage === 1 ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600'
+                    } text-sm font-medium transition-colors`}
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  
+                  {/* Page numbers */}
+                  {Array.from({ length: Math.min(5, Math.ceil(filteredData.length / itemsPerPage)) }).map((_, index) => {
+                    const pageNumber = index + 1;
+                    const isCurrentPage = pageNumber === currentPage;
+                    
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          isCurrentPage
+                            ? 'z-10 border-primary-500 text-white'
+                            : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600'
+                        } transition-colors`}
+                        style={isCurrentPage ? { backgroundColor: COLORS.primary } : {}}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  })}
+                  
+                  {Math.ceil(filteredData.length / itemsPerPage) > 5 && (
+                    <span className="relative inline-flex items-center px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300">
+                      ...
+                    </span>
+                  )}
+                  
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredData.length / itemsPerPage)))}
+                    disabled={currentPage >= Math.ceil(filteredData.length / itemsPerPage)}
+                    className={`relative inline-flex items-center px-3 py-2 rounded-r-md border ${
+                      currentPage >= Math.ceil(filteredData.length / itemsPerPage)
+                        ? 'bg-slate-50 text-slate-400 cursor-not-allowed'
+                        : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600'
+                    } text-sm font-medium transition-colors`}
+                  >
+                    <span className="sr-only">Next</span>
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </nav>
+              </div>
+            </div>
+          )}
         </TableWrapper>
       )}
 

@@ -276,6 +276,8 @@ const WaterLossAnalysis = () => {
   const [isAiModalOpen, setIsAiModalOpen] = useState(false)
   const [aiAnalysisResult, setAiAnalysisResult] = useState("")
   const [isAiLoading, setIsAiLoading] = useState(false)
+  const [activeFilters, setActiveFilters] = useState(null)
+  const [activeFlowFilters, setActiveFlowFilters] = useState(null)
 
   // --- DATA ---
   const months = [
@@ -1133,20 +1135,14 @@ const WaterLossAnalysis = () => {
 
     return (
       <div className="space-y-6">
-        {selectedMonth === "May-25" && (
-          <div className="bg-gradient-to-r from-green-500/20 to-green-600/20 border border-green-500/30 rounded-2xl p-4 text-center">
-            <p className="text-green-800 font-semibold">
-              🎉 UPDATED with CORRECTED May 2025 Data from Your Database
-            </p>
-          </div>
-        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <SummaryCard
             title="A1: Main Bulk (L1)"
             value={currentData.A1.toLocaleString()}
             unit="m³"
             icon={Droplets}
-            trend={`For ${selectedMonth} - ${selectedMonth === "May-25" ? "CORRECTED from your database" : "Historical data"}`}
+            trend={`For ${selectedMonth} - Historical data`}
             trendColor={selectedMonth === "May-25" ? "text-green-600" : "text-blue-600"}
             iconBgColor={COLORS.info}
           />
@@ -1155,7 +1151,7 @@ const WaterLossAnalysis = () => {
             value={currentData.A2.toLocaleString()}
             unit="m³"
             icon={Droplets}
-            trend={`For ${selectedMonth} - ${selectedMonth === "May-25" ? "CORRECTED from your database" : "Historical data"}`}
+            trend={`For ${selectedMonth} - Historical data`}
             trendColor={selectedMonth === "May-25" ? "text-green-600" : "text-blue-600"}
             iconBgColor={COLORS.success}
           />
@@ -1164,7 +1160,7 @@ const WaterLossAnalysis = () => {
             value={currentData.A3.toLocaleString()}
             unit="m³"
             icon={Droplets}
-            trend={`For ${selectedMonth} - ${selectedMonth === "May-25" ? "CORRECTED from your database" : "Historical data"}`}
+            trend={`For ${selectedMonth} - Historical data`}
             trendColor={selectedMonth === "May-25" ? "text-green-600" : "text-blue-600"}
             iconBgColor={COLORS.warning}
           />
@@ -1209,15 +1205,55 @@ const WaterLossAnalysis = () => {
                 <Tooltip
                   contentStyle={{ backgroundColor: "white", border: `2px solid #e2e8f0`, borderRadius: "8px" }}
                 />
-                <Legend />
-                <Line type="monotone" dataKey="Loss1" stroke={COLORS.error} name="Loss 1 (m³)" strokeWidth={3} />
-                <Line type="monotone" dataKey="Loss2" stroke={COLORS.warning} name="Loss 2 (m³)" strokeWidth={3} />
+                <Legend onClick={(e) => {
+                  // When a legend item is clicked, update the filter state
+                  const dataKey = e.dataKey;
+                  const dataFilters = {...(activeFilters || {})}; 
+                  
+                  if (dataFilters[dataKey]) {
+                    delete dataFilters[dataKey]; // Toggle off
+                  } else {
+                    dataFilters[dataKey] = true; // Toggle on
+                  }
+                  
+                  // Only set filters if at least one is selected
+                  setActiveFilters(Object.keys(dataFilters).length ? dataFilters : null);
+                }} />
+                <Line 
+                  type="monotone" 
+                  dataKey="Loss1" 
+                  stroke={COLORS.error} 
+                  name="Loss 1 (m³)" 
+                  strokeWidth={3}
+                  onClick={(data) => {
+                    setSelectedMonth(data.month);
+                  }}
+                  className="cursor-pointer"
+                  opacity={activeFilters && !activeFilters['Loss1'] ? 0.3 : 1}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Loss2" 
+                  stroke={COLORS.warning} 
+                  name="Loss 2 (m³)" 
+                  strokeWidth={3}
+                  onClick={(data) => {
+                    setSelectedMonth(data.month);
+                  }}
+                  className="cursor-pointer"
+                  opacity={activeFilters && !activeFilters['Loss2'] ? 0.3 : 1}
+                />
                 <Line
                   type="monotone"
                   dataKey="TotalLoss"
                   stroke={COLORS.primary}
                   name="Total Loss (m³)"
                   strokeWidth={3}
+                  onClick={(data) => {
+                    setSelectedMonth(data.month);
+                  }}
+                  className="cursor-pointer"
+                  opacity={activeFilters && !activeFilters['TotalLoss'] ? 0.3 : 1}
                 />
               </LineChart>
             </ResponsiveContainer>
