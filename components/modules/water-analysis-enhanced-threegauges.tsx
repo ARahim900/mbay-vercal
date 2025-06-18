@@ -275,6 +275,8 @@ const WaterLossAnalysis = () => {
   const [isAiModalOpen, setIsAiModalOpen] = useState(false)
   const [aiAnalysisResult, setAiAnalysisResult] = useState("")
   const [isAiLoading, setIsAiLoading] = useState(false)
+  const [activeFilters, setActiveFilters] = useState(null)
+  const [activeFlowFilters, setActiveFlowFilters] = useState(null)
 
   // --- DATA ---
   const months = [
@@ -1109,20 +1111,14 @@ const WaterLossAnalysis = () => {
 
     return (
       <div className="space-y-6">
-        {selectedMonth === "May-25" && (
-          <div className="bg-gradient-to-r from-green-500/20 to-green-600/20 border border-green-500/30 rounded-2xl p-4 text-center">
-            <p className="text-green-800 font-semibold">
-              🎉 UPDATED with CORRECTED May 2025 Data from Your Database
-            </p>
-          </div>
-        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <SummaryCard
             title="A1: Main Bulk (L1)"
             value={currentData.A1.toLocaleString()}
             unit="m³"
             icon={Droplets}
-            trend={`For ${selectedMonth} - ${selectedMonth === "May-25" ? "CORRECTED from your database" : "Historical data"}`}
+            trend={`For ${selectedMonth} - Historical data`}
             trendColor={selectedMonth === "May-25" ? "text-green-600" : "text-blue-600"}
             iconBgColor={COLORS.info}
           />
@@ -1131,7 +1127,7 @@ const WaterLossAnalysis = () => {
             value={currentData.A2.toLocaleString()}
             unit="m³"
             icon={Droplets}
-            trend={`For ${selectedMonth} - ${selectedMonth === "May-25" ? "CORRECTED from your database" : "Historical data"}`}
+            trend={`For ${selectedMonth} - Historical data`}
             trendColor={selectedMonth === "May-25" ? "text-green-600" : "text-blue-600"}
             iconBgColor={COLORS.success}
           />
@@ -1140,7 +1136,7 @@ const WaterLossAnalysis = () => {
             value={currentData.A3.toLocaleString()}
             unit="m³"
             icon={Droplets}
-            trend={`For ${selectedMonth} - ${selectedMonth === "May-25" ? "CORRECTED from your database" : "Historical data"}`}
+            trend={`For ${selectedMonth} - Historical data`}
             trendColor={selectedMonth === "May-25" ? "text-green-600" : "text-blue-600"}
             iconBgColor={COLORS.warning}
           />
@@ -1185,15 +1181,55 @@ const WaterLossAnalysis = () => {
                 <Tooltip
                   contentStyle={{ backgroundColor: "white", border: `2px solid #e2e8f0`, borderRadius: "8px" }}
                 />
-                <Legend />
-                <Line type="monotone" dataKey="Loss1" stroke={COLORS.error} name="Loss 1 (m³)" strokeWidth={3} />
-                <Line type="monotone" dataKey="Loss2" stroke={COLORS.warning} name="Loss 2 (m³)" strokeWidth={3} />
+                <Legend onClick={(e) => {
+                  // When a legend item is clicked, update the filter state
+                  const dataKey = e.dataKey;
+                  const dataFilters = {...(activeFilters || {})}; 
+                  
+                  if (dataFilters[dataKey]) {
+                    delete dataFilters[dataKey]; // Toggle off
+                  } else {
+                    dataFilters[dataKey] = true; // Toggle on
+                  }
+                  
+                  // Only set filters if at least one is selected
+                  setActiveFilters(Object.keys(dataFilters).length ? dataFilters : null);
+                }} />
+                <Line 
+                  type="monotone" 
+                  dataKey="Loss1" 
+                  stroke={COLORS.error} 
+                  name="Loss 1 (m³)" 
+                  strokeWidth={3}
+                  onClick={(data) => {
+                    setSelectedMonth(data.month);
+                  }}
+                  className="cursor-pointer"
+                  opacity={activeFilters && !activeFilters['Loss1'] ? 0.3 : 1}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Loss2" 
+                  stroke={COLORS.warning} 
+                  name="Loss 2 (m³)" 
+                  strokeWidth={3}
+                  onClick={(data) => {
+                    setSelectedMonth(data.month);
+                  }}
+                  className="cursor-pointer"
+                  opacity={activeFilters && !activeFilters['Loss2'] ? 0.3 : 1}
+                />
                 <Line
                   type="monotone"
                   dataKey="TotalLoss"
                   stroke={COLORS.primary}
                   name="Total Loss (m³)"
                   strokeWidth={3}
+                  onClick={(data) => {
+                    setSelectedMonth(data.month);
+                  }}
+                  className="cursor-pointer"
+                  opacity={activeFilters && !activeFilters['TotalLoss'] ? 0.3 : 1}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -1207,252 +1243,54 @@ const WaterLossAnalysis = () => {
                 <Tooltip
                   contentStyle={{ backgroundColor: "white", border: `2px solid #e2e8f0`, borderRadius: "8px" }}
                 />
-                <Legend />
-                <Bar dataKey="A1" fill={COLORS.primary} name="A1 (Main Bulk)" />
-                <Bar dataKey="A2" fill={COLORS.success} name="A2 (Billed Bulk)" />
-                <Bar dataKey="A3" fill={COLORS.accent} name="A3 (Billed Indiv.)" />
+                <Legend onClick={(e) => {
+                  // When a legend item is clicked, update the filter state
+                  const dataKey = e.dataKey;
+                  const flowFilters = {...(activeFlowFilters || {})}; 
+                  
+                  if (flowFilters[dataKey]) {
+                    delete flowFilters[dataKey]; // Toggle off
+                  } else {
+                    flowFilters[dataKey] = true; // Toggle on
+                  }
+                  
+                  // Only set filters if at least one is selected
+                  setActiveFlowFilters(Object.keys(flowFilters).length ? flowFilters : null);
+                }} />
+                <Bar 
+                  dataKey="A1" 
+                  fill={COLORS.primary} 
+                  name="A1 (Main Bulk)"
+                  onClick={(data) => {
+                    setSelectedMonth(data.month);
+                  }}
+                  className="cursor-pointer" 
+                  opacity={activeFlowFilters && !activeFlowFilters['A1'] ? 0.3 : 1}
+                />
+                <Bar 
+                  dataKey="A2" 
+                  fill={COLORS.success} 
+                  name="A2 (Billed Bulk)"
+                  onClick={(data) => {
+                    setSelectedMonth(data.month);
+                  }}
+                  className="cursor-pointer"
+                  opacity={activeFlowFilters && !activeFlowFilters['A2'] ? 0.3 : 1}
+                />
+                <Bar 
+                  dataKey="A3" 
+                  fill={COLORS.accent} 
+                  name="A3 (Billed Indiv.)"
+                  onClick={(data) => {
+                    setSelectedMonth(data.month);
+                  }}
+                  className="cursor-pointer"
+                  opacity={activeFlowFilters && !activeFlowFilters['A3'] ? 0.3 : 1}
+                />
               </BarChart>
-            </ResponsiveContainer>
-          </ChartWrapper>
-        </div>
-      </div>
-    )
-  }
-
-  const AccordionItem = ({ zone, children, defaultOpen = false }) => {
-    const [isOpen, setIsOpen] = useState(defaultOpen)
-    return (
-      <div className="border border-slate-200 rounded-lg overflow-hidden transition-all duration-300">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex justify-between items-center p-4 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none"
-        >
-          <span className="font-semibold text-lg text-slate-800 text-left">{zone.name}</span>
-          <div className="flex items-center space-x-4">
-            <span className={`text-sm font-bold ${zone.lossPercent > 10 ? "text-red-600" : "text-orange-500"}`}>
-              Loss: {zone.loss.toLocaleString()} m³ ({zone.lossPercent.toFixed(1)}%)
-            </span>
-            {isOpen ? (
-              <ChevronUp className="w-6 h-6 text-slate-600" />
-            ) : (
-              <ChevronDown className="w-6 h-6 text-slate-600" />
-            )}
-          </div>
-        </button>
-        {isOpen && <div className="p-4 bg-white">{children}</div>}
-      </div>
-    )
-  }
-
-  const ZoneDetailsSection = () => {
-    const filteredZones =
-      selectedZone === "all"
-        ? processedData.zones
-        : processedData.zones.filter((zone) => zone.name.replace(/\s/g, "_") === selectedZone)
-
-    return (
-      <div className="space-y-6">
-        {/* Enhanced Three Gauge Charts Section */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h3 className="text-xl font-semibold text-slate-700 mb-4 flex items-center">
-            <Gauge className="mr-2" />
-            Zone Water Loss Analysis - {selectedMonth}
-          </h3>
-          <div className="grid grid-cols-1 gap-6">
-            {filteredZones.map((zone, index) => (
-              <ThreeGaugeSet
-                key={zone.zoneName}
-                zoneBulk={zone.bulk}
-                individualSum={zone.individualSum}
-                loss={zone.loss}
-                zoneName={zone.name}
-                metersCount={zone.individuals.length}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Individual Meter Details by Zone - ENHANCED */}
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-slate-800 flex items-center">
-            <Building className="mr-2" />
-            Individual Meter Details by Zone - {selectedMonth}
-          </h3>
-          {filteredZones.length === 0 ? (
-            <div className="bg-white p-8 rounded-lg shadow-sm text-center">
-              <p className="text-slate-500">No zones found for the selected filters.</p>
-            </div>
-          ) : (
-            filteredZones.map((zone, index) => (
-              <AccordionItem key={zone.zoneName} zone={zone} defaultOpen={filteredZones.length === 1 || selectedZone !== "all"}>
-                <SmartTable data={zone.individuals} totalBulk={zone.bulk} zoneName={zone.zoneName} />
-              </AccordionItem>
-            ))
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  const RADIAN = Math.PI / 180
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, color }) => {
-    if (percent < 0.02) return null // Don't render label for very small slices
-
-    // Logic for line labels on smaller slices
-    if (percent < 0.1) {
-      const radius = outerRadius + 25
-      const x = cx + radius * Math.cos(-midAngle * RADIAN)
-      const y = cy + radius * Math.sin(-midAngle * RADIAN)
-      const sin = Math.sin(-midAngle * RADIAN)
-      const cos = Math.cos(-midAngle * RADIAN)
-      const mx = cx + (outerRadius + 10) * cos
-      const my = cy + (outerRadius + 10) * sin
-      const ex = mx + (cos >= 0 ? 1 : -1) * 22
-      const ey = my
-      const textAnchor = cos >= 0 ? "start" : "end"
-
-      return (
-        <g>
-          <path d={`M${mx},${my}L${ex},${ey}`} stroke={color} fill="none" />
-          <circle cx={ex} cy={ey} r={2} fill={color} stroke="none" />
-          <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333" fontSize={12}>
-            {`${name} ${(percent * 100).toFixed(0)}%`}
-          </text>
-        </g>
-      )
-    }
-
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5
-    const x = cx + radius * Math.cos(-midAngle * RADIAN)
-    const y = cy + radius * Math.sin(-midAngle * RADIAN)
-
-    return (
-      <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight="bold">
-        {`${(percent * 100).toFixed(0)}%`}
-      </text>
-    )
-  }
-
-  const TypeDetailsSection = () => {
-    const totalConsumption = processedData.types.reduce((sum, t) => sum + t.consumption, 0)
-
-    return (
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-2">
-          <ChartWrapper title="Consumption by Type" subtitle={`Breakdown for ${selectedMonth}`}>
-            <div className="space-y-3">
-              {processedData.types.map((type) => (
-                <div key={type.type}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium" style={{ color: type.color }}>
-                      {type.name}
-                    </span>
-                    <span className="text-sm font-semibold text-slate-700">{type.consumption.toLocaleString()} m³</span>
-                  </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2.5">
-                    <div
-                      className="h-2.5 rounded-full"
-                      style={{
-                        width: `${totalConsumption > 0 ? (type.consumption / totalConsumption) * 100 : 0}%`,
-                        backgroundColor: type.color,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartWrapper>
-        </div>
-        <div className="lg:col-span-3">
-          <ChartWrapper title="Type Distribution" subtitle="Percentage breakdown by category">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={processedData.types}
-                  dataKey="consumption"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  labelLine={false}
-                  label={renderCustomizedLabel}
-                >
-                  {processedData.types.map((entry) => (
-                    <Cell key={`cell-${entry.type}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value.toLocaleString()} m³`} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartWrapper>
-        </div>
-      </div>
-    )
-  }
-
-  const LossDetailsSection = () => {
-    const currentData = processedData.overview.find((d) => d.month === selectedMonth)
-    return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPICard
-            title="Loss 1 %"
-            value={currentData.Loss1Percent.toFixed(1)}
-            unit="%"
-            color={COLORS.error}
-            icon={<AlertTriangle className="w-6 h-6" />}
-          />
-          <KPICard
-            title="Loss 2 %"
-            value={currentData.Loss2Percent.toFixed(1)}
-            unit="%"
-            color={COLORS.warning}
-            icon={<AlertTriangle className="w-6 h-6" />}
-          />
-          <KPICard
-            title="Total Loss %"
-            value={currentData.TotalLossPercent.toFixed(1)}
-            unit="%"
-            color={COLORS.error}
-            icon={<AlertTriangle className="w-6 h-6" />}
-          />
-          <KPICard
-            title="Monthly Loss Cost"
-            value={Math.round(currentData.TotalLoss * 1.32).toLocaleString()}
-            unit="OMR"
-            color={COLORS.warning}
-          />
-        </div>
-        <ChartWrapper title="Loss Percentage Trends" subtitle="System efficiency analysis over time">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={processedData.overview} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" angle={-45} textAnchor="end" height={60} fontSize={12} />
-              <YAxis unit="%" fontSize={12} />
-              <Tooltip formatter={(value, name) => [`${value.toFixed(2)}%`, name]} />
-              <Legend />
-              <Area
-                type="monotone"
-                dataKey="Loss1Percent"
-                stackId="1"
-                stroke={COLORS.error}
-                fill={COLORS.error}
-                fillOpacity={0.6}
-                name="Loss 1 %"
-              />
-              <Area
-                type="monotone"
-                dataKey="Loss2Percent"
-                stackId="1"
-                stroke={COLORS.warning}
-                fill={COLORS.warning}
-                fillOpacity={0.6}
-                name="Loss 2 %"
-              />
-            </AreaChart>
           </ResponsiveContainer>
         </ChartWrapper>
+        </div>
         <ChartWrapper title="Financial Impact of Losses by Zone" subtitle="Cost analysis by zone">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={processedData.zones}>
