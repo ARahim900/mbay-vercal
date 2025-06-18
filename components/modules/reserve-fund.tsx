@@ -42,11 +42,27 @@ import {
 import { SummaryCard } from "@/components/ui/summary-card"
 import { ChartWrapper } from "@/components/ui/chart-wrapper"
 import { StyledSelect } from "@/components/ui/styled-select"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { COLORS } from "@/lib/constants"
 
 interface ReserveFundModuleProps {
   isDarkMode?: boolean
 }
+
+// Custom Table Wrapper Component to handle overflow properly
+const TableWrapper = ({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) => (
+  <Card className="card-base">
+    <CardHeader>
+      <CardTitle>{title}</CardTitle>
+      {subtitle && <CardDescription>{subtitle}</CardDescription>}
+    </CardHeader>
+    <CardContent className="p-0">
+      <div className="overflow-x-auto max-w-full">
+        {children}
+      </div>
+    </CardContent>
+  </Card>
+)
 
 // Raw data from your component
 const rawData = `
@@ -804,106 +820,102 @@ ${chartData.sectorBreakdown.slice(0, 3).map(sector =>
           </div>
 
           {/* Top Contributors Table */}
-          <ChartWrapper title="Top Contributing Units" subtitle="Highest reserve fund contributors">
-            <div className="muscat-table-responsive">
-              <table className="muscat-table">
-                <thead className="bg-slate-50 dark:bg-slate-800">
-                  <tr>
-                    <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Rank</th>
-                    <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Unit No</th>
-                    <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Sector</th>
-                    <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Type</th>
-                    <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">BUA (m²)</th>
-                    <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Total Contribution (OMR)</th>
-                    <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Rate (OMR/m²)</th>
+          <TableWrapper title="Top Contributing Units" subtitle="Highest reserve fund contributors">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 dark:bg-slate-800">
+                <tr>
+                  <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Rank</th>
+                  <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Unit No</th>
+                  <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Sector</th>
+                  <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Type</th>
+                  <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">BUA (m²)</th>
+                  <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Total Contribution (OMR)</th>
+                  <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Rate (OMR/m²)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topContributors.map((unit, index) => (
+                  <tr key={index} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <td className="p-3">
+                      <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
+                        index < 3 ? 'bg-yellow-500' : 'bg-slate-400'
+                      }`}>
+                        {index + 1}
+                      </span>
+                    </td>
+                    <td className="p-3 font-medium text-slate-800 dark:text-slate-200">{unit.unitNo}</td>
+                    <td className="p-3 text-slate-600 dark:text-slate-400">{unit.sector}</td>
+                    <td className="p-3 text-slate-600 dark:text-slate-400">{unit.type}</td>
+                    <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{unit.bua.toLocaleString()}</td>
+                    <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{unit.totalContrib.toLocaleString()}</td>
+                    <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{unit.contributionRate.toFixed(2)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {topContributors.map((unit, index) => (
-                    <tr key={index} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
-                      <td className="p-3">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
-                          index < 3 ? 'bg-yellow-500' : 'bg-slate-400'
-                        }`}>
-                          {index + 1}
-                        </span>
-                      </td>
-                      <td className="p-3 font-medium text-slate-800 dark:text-slate-200">{unit.unitNo}</td>
-                      <td className="p-3 text-slate-600 dark:text-slate-400">{unit.sector}</td>
-                      <td className="p-3 text-slate-600 dark:text-slate-400">{unit.type}</td>
-                      <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{unit.bua.toLocaleString()}</td>
-                      <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{unit.totalContrib.toLocaleString()}</td>
-                      <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{unit.contributionRate.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </ChartWrapper>
+                ))}
+              </tbody>
+            </table>
+          </TableWrapper>
         </>
       )}
 
       {activeSubSection === "DetailedTable" && (
-        <ChartWrapper title="Complete Reserve Fund Schedule" subtitle="Detailed contributions table with search and sorting">
-          <div className="muscat-table-responsive">
-            <table className="muscat-table">
-              <thead className="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-100 dark:bg-slate-700">
+        <TableWrapper title="Complete Reserve Fund Schedule" subtitle="Detailed contributions table with search and sorting">
+          <table className="w-full text-sm">
+            <thead className="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-100 dark:bg-slate-700">
+              <tr>
+                <SortableHeader column="unitNo">Unit No</SortableHeader>
+                <SortableHeader column="sector">Sector</SortableHeader>
+                <SortableHeader column="type">Type</SortableHeader>
+                <SortableHeader column="unitType">Unit Type</SortableHeader>
+                <SortableHeader column="bua">BUA (sqm)</SortableHeader>
+                <SortableHeader column="zoneContrib">Zone Contrib. (OMR)</SortableHeader>
+                <SortableHeader column="masterContrib">Master Contrib. (OMR)</SortableHeader>
+                <SortableHeader column="totalContrib">Total 2025 Contrib. (OMR)</SortableHeader>
+                <th scope="col" className="px-6 py-3">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.length === 0 ? (
                 <tr>
-                  <SortableHeader column="unitNo">Unit No</SortableHeader>
-                  <SortableHeader column="sector">Sector</SortableHeader>
-                  <SortableHeader column="type">Type</SortableHeader>
-                  <SortableHeader column="unitType">Unit Type</SortableHeader>
-                  <SortableHeader column="bua">BUA (sqm)</SortableHeader>
-                  <SortableHeader column="zoneContrib">Zone Contrib. (OMR)</SortableHeader>
-                  <SortableHeader column="masterContrib">Master Contrib. (OMR)</SortableHeader>
-                  <SortableHeader column="totalContrib">Total 2025 Contrib. (OMR)</SortableHeader>
-                  <th scope="col" className="px-6 py-3">Notes</th>
+                  <td colSpan={9} className="text-center py-12 px-6">
+                    <div className="flex flex-col items-center">
+                      <Search className="h-12 w-12 text-slate-400 mb-4" />
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">No results found</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Your search and filter combination did not match any records. Try adjusting your criteria.</p>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredData.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="text-center py-12 px-6">
-                      <div className="flex flex-col items-center">
-                        <Search className="h-12 w-12 text-slate-400 mb-4" />
-                        <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">No results found</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Your search and filter combination did not match any records. Try adjusting your criteria.</p>
-                      </div>
+              ) : (
+                filteredData.map(item => (
+                  <tr key={item.id} className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">{item.unitNo}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.sector}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.type}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.unitType}</td>
+                    <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.bua)}</td>
+                    <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.zoneContrib)}</td>
+                    <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.masterContrib)}</td>
+                    <td className="px-6 py-4 text-right font-semibold" style={{ color: COLORS.info }}>{formatNumber(item.totalContrib)}</td>
+                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 max-w-xs truncate" title={item.notes}>
+                      {item.notes || "-"}
                     </td>
                   </tr>
-                ) : (
-                  filteredData.map(item => (
-                    <tr key={item.id} className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                      <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">{item.unitNo}</td>
-                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.sector}</td>
-                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.type}</td>
-                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{item.unitType}</td>
-                      <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.bua)}</td>
-                      <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.zoneContrib)}</td>
-                      <td className="px-6 py-4 text-right text-slate-800 dark:text-slate-200">{formatNumber(item.masterContrib)}</td>
-                      <td className="px-6 py-4 text-right font-semibold" style={{ color: COLORS.info }}>{formatNumber(item.totalContrib)}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 max-w-xs truncate" title={item.notes}>
-                        {item.notes || "-"}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-              {filteredData.length > 0 && (
-                <tfoot className="bg-slate-100 dark:bg-slate-700 font-semibold text-slate-800 dark:text-slate-200">
-                  <tr className="border-t-2 border-slate-300 dark:border-slate-600">
-                    <td colSpan={4} className="px-6 py-4 text-right font-bold text-lg">Totals</td>
-                    <td className="px-6 py-4 text-right">{formatNumber(statistics.totalBUA)}</td>
-                    <td className="px-6 py-4 text-right">{formatNumber(statistics.totalZoneContrib)}</td>
-                    <td className="px-6 py-4 text-right">{formatNumber(statistics.totalMasterContrib)}</td>
-                    <td className="px-6 py-4 text-right font-bold" style={{ color: COLORS.info }}>{formatNumber(statistics.totalContrib)}</td>
-                    <td className="px-6 py-4"></td>
-                  </tr>
-                </tfoot>
+                ))
               )}
-            </table>
-          </div>
-        </ChartWrapper>
+            </tbody>
+            {filteredData.length > 0 && (
+              <tfoot className="bg-slate-100 dark:bg-slate-700 font-semibold text-slate-800 dark:text-slate-200">
+                <tr className="border-t-2 border-slate-300 dark:border-slate-600">
+                  <td colSpan={4} className="px-6 py-4 text-right font-bold text-lg">Totals</td>
+                  <td className="px-6 py-4 text-right">{formatNumber(statistics.totalBUA)}</td>
+                  <td className="px-6 py-4 text-right">{formatNumber(statistics.totalZoneContrib)}</td>
+                  <td className="px-6 py-4 text-right">{formatNumber(statistics.totalMasterContrib)}</td>
+                  <td className="px-6 py-4 text-right font-bold" style={{ color: COLORS.info }}>{formatNumber(statistics.totalContrib)}</td>
+                  <td className="px-6 py-4"></td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </TableWrapper>
       )}
 
       {activeSubSection === "PropertyAnalysis" && (
@@ -938,36 +950,34 @@ ${chartData.sectorBreakdown.slice(0, 3).map(sector =>
           </div>
 
           {/* Property Details Table */}
-          <ChartWrapper title="Property Portfolio Analysis" subtitle="Detailed breakdown by unit type">
-            <div className="muscat-table-responsive">
-              <table className="muscat-table">
-                <thead className="bg-slate-50 dark:bg-slate-800">
-                  <tr>
-                    <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Property Type</th>
-                    <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Unit Count</th>
-                    <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Total Contribution (OMR)</th>
-                    <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Percentage of Fund</th>
-                    <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Avg per Unit (OMR)</th>
+          <TableWrapper title="Property Portfolio Analysis" subtitle="Detailed breakdown by unit type">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 dark:bg-slate-800">
+                <tr>
+                  <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Property Type</th>
+                  <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Unit Count</th>
+                  <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Total Contribution (OMR)</th>
+                  <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Percentage of Fund</th>
+                  <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Avg per Unit (OMR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chartData.typeBreakdown.map((type, index) => (
+                  <tr key={index} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <td className="p-3 font-medium text-slate-800 dark:text-slate-200">{type.type}</td>
+                    <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{type.units}</td>
+                    <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{type.totalContrib.toLocaleString()}</td>
+                    <td className="p-3 text-right">
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{type.percentage.toFixed(1)}%</span>
+                    </td>
+                    <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">
+                      {type.units > 0 ? (type.totalContrib / type.units).toFixed(0) : 'N/A'}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {chartData.typeBreakdown.map((type, index) => (
-                    <tr key={index} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
-                      <td className="p-3 font-medium text-slate-800 dark:text-slate-200">{type.type}</td>
-                      <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{type.units}</td>
-                      <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">{type.totalContrib.toLocaleString()}</td>
-                      <td className="p-3 text-right">
-                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{type.percentage.toFixed(1)}%</span>
-                      </td>
-                      <td className="p-3 text-right font-semibold text-slate-800 dark:text-slate-200">
-                        {type.units > 0 ? (type.totalContrib / type.units).toFixed(0) : 'N/A'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </ChartWrapper>
+                ))}
+              </tbody>
+            </table>
+          </TableWrapper>
         </div>
       )}
 
@@ -1018,43 +1028,41 @@ ${chartData.sectorBreakdown.slice(0, 3).map(sector =>
 
           {/* Units with Issues */}
           {statistics.unitsWithIssues > 0 && (
-            <ChartWrapper title="Units Requiring Attention" subtitle="Properties with missing or assumed data">
-              <div className="muscat-table-responsive">
-                <table className="muscat-table">
-                  <thead className="bg-slate-50 dark:bg-slate-800">
-                    <tr>
-                      <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Unit No</th>
-                      <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Sector</th>
-                      <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Type</th>
-                      <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">BUA (m²)</th>
-                      <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Contribution (OMR)</th>
-                      <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredData
-                      .filter(unit => unit.hasIssues)
-                      .slice(0, 20)
-                      .map((unit, index) => (
-                        <tr key={index} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
-                          <td className="p-3 font-medium text-slate-800 dark:text-slate-200">{unit.unitNo}</td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400">{unit.sector}</td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400">{unit.type}</td>
-                          <td className="p-3 text-right text-slate-600 dark:text-slate-400">
-                            {unit.bua === 0 ? <span className="text-red-600">Missing</span> : unit.bua.toLocaleString()}
-                          </td>
-                          <td className="p-3 text-right text-slate-600 dark:text-slate-400">
-                            {unit.totalContrib === 0 ? <span className="text-red-600">Missing</span> : unit.totalContrib.toLocaleString()}
-                          </td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400 max-w-xs truncate" title={unit.notes}>
-                            {unit.notes || "No notes"}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            </ChartWrapper>
+            <TableWrapper title="Units Requiring Attention" subtitle="Properties with missing or assumed data">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 dark:bg-slate-800">
+                  <tr>
+                    <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Unit No</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Sector</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Type</th>
+                    <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">BUA (m²)</th>
+                    <th className="text-right p-3 font-semibold text-slate-700 dark:text-slate-300">Contribution (OMR)</th>
+                    <th className="text-left p-3 font-semibold text-slate-700 dark:text-slate-300">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData
+                    .filter(unit => unit.hasIssues)
+                    .slice(0, 20)
+                    .map((unit, index) => (
+                      <tr key={index} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <td className="p-3 font-medium text-slate-800 dark:text-slate-200">{unit.unitNo}</td>
+                        <td className="p-3 text-slate-600 dark:text-slate-400">{unit.sector}</td>
+                        <td className="p-3 text-slate-600 dark:text-slate-400">{unit.type}</td>
+                        <td className="p-3 text-right text-slate-600 dark:text-slate-400">
+                          {unit.bua === 0 ? <span className="text-red-600">Missing</span> : unit.bua.toLocaleString()}
+                        </td>
+                        <td className="p-3 text-right text-slate-600 dark:text-slate-400">
+                          {unit.totalContrib === 0 ? <span className="text-red-600">Missing</span> : unit.totalContrib.toLocaleString()}
+                        </td>
+                        <td className="p-3 text-slate-600 dark:text-slate-400 max-w-xs truncate" title={unit.notes}>
+                          {unit.notes || "No notes"}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </TableWrapper>
           )}
         </div>
       )}
