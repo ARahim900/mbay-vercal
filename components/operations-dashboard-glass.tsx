@@ -8,9 +8,9 @@ import {
 } from 'lucide-react';
 import { ThemeProvider } from '@/components/theme-provider';
 import { GlassSidebar, GlassHeader } from '@/components/layout/glass-layout';
-import ElectricitySystemGlass from '@/components/sections/ElectricitySystemGlass';
-import WaterAnalysisModule from '@/components/sections/WaterAnalysisGlass';
-import STPPlantModule from '@/components/sections/STPPlantGlass';
+import ElectricitySystemGlass from '@/src/components/sections/ElectricitySystemGlass';
+import WaterAnalysisModule from '@/src/components/sections/WaterAnalysisGlass';
+import STPPlantModule from '@/src/components/sections/STPPlantGlass';
 import ContractorTrackerModule from '@/components/modules/contractor-tracker';
 
 // Define the main sections
