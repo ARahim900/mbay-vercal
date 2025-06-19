@@ -8,9 +8,9 @@ import {
 } from 'lucide-react';
 import { ThemeProvider } from '@/components/theme-provider';
 import { GlassSidebar, GlassHeader } from '@/components/layout/glass-layout';
-import ElectricitySystemGlass from '@/components/modules/electricity-system-glass';
-import WaterAnalysisModule from '@/components/modules/water-analysis';
-import STPPlantModule from '@/components/modules/stp-plant';
+import ElectricitySystemGlass from '@/src/components/sections/ElectricitySystemGlass';
+import WaterAnalysisModule from '@/src/components/sections/WaterAnalysisGlass';
+import STPPlantModule from '@/src/components/sections/STPPlantGlass';
 import ContractorTrackerModule from '@/components/modules/contractor-tracker';
 
 // Define the main sections
@@ -44,7 +44,7 @@ export default function OperationsDashboardGlass() {
       case 'ElectricitySystem':
         return <ElectricitySystemGlass />;
       case 'WaterAnalysis':
-        return <WaterAnalysisModule />;
+        return <WaterAnalysisModule isCollapsed={isCollapsed} />;
       case 'STPPlant':
         return <STPPlantModule />;
       case 'ContractorTracker':

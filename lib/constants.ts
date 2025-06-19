@@ -20,6 +20,7 @@ export const COLORS = {
 export const MAIN_SECTIONS = [
   { name: "Electricity System", icon: "Zap", sectionId: "ElectricitySystem" },
   { name: "Water Analysis", icon: "Droplets", sectionId: "WaterAnalysis" },
-  { name: "STP Plant", icon: "Combine", sectionId: "STPPlant" },
+  { name: "STP Plant", icon: "Factory", sectionId: "STPPlant" },
+  { name: "Reserve Fund", icon: "DollarSign", sectionId: "ReserveFund" },
   { name: "Contractor Tracker", icon: "UserCheck", sectionId: "ContractorTracker" },
 ]
