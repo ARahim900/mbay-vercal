@@ -47,6 +47,16 @@ import { StyledSelect } from "@/components/ui/styled-select"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { COLORS } from "@/lib/constants"
 
-interface ReserveFundModuleProps {
+interface STPPlantModuleProps {
   isDarkMode?: boolean
+}
+
+export function STPPlantModule({ isDarkMode = false }: STPPlantModuleProps) {
+  // Component implementation here
+  return (
+    <div>
+      <h2>STP Plant Module</h2>
+      <p>This module is under development</p>
+    </div>
+  )
 }
